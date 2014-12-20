@@ -1,6 +1,6 @@
 ﻿namespace Brain
 {
-    partial class Animation
+    partial class Simulation
     {
         /// <summary>
         /// Required designer variable.
@@ -48,11 +48,14 @@
             this.checkBoxLabel = new System.Windows.Forms.CheckBox();
             this.checkBoxState = new System.Windows.Forms.CheckBox();
             this.changeFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.groupBox = new System.Windows.Forms.GroupBox();
+            this.layerMenu = new System.Windows.Forms.GroupBox();
+            this.radioButtonQuery = new System.Windows.Forms.RadioButton();
             this.radioButtonManual = new System.Windows.Forms.RadioButton();
             this.radioButtonAnimation = new System.Windows.Forms.RadioButton();
-            this.radioButtonQuery = new System.Windows.Forms.RadioButton();
-            this.groupBox.SuspendLayout();
+            this.layerAnimation = new System.Windows.Forms.GroupBox();
+            this.layerChart = new System.Windows.Forms.GroupBox();
+            this.layerSequence = new System.Windows.Forms.GroupBox();
+            this.layerMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonSimulate
@@ -187,7 +190,7 @@
             this.buttonOpen.Name = "buttonOpen";
             this.buttonOpen.Size = new System.Drawing.Size(75, 23);
             this.buttonOpen.TabIndex = 14;
-            this.buttonOpen.Text = "Load";
+            this.buttonOpen.Text = "Open";
             this.buttonOpen.UseVisualStyleBackColor = true;
             this.buttonOpen.Visible = false;
             this.buttonOpen.Click += new System.EventHandler(this.buttonOpen_Click);
@@ -226,6 +229,7 @@
             // checkBoxLabel
             // 
             this.checkBoxLabel.AutoSize = true;
+            this.checkBoxLabel.BackColor = System.Drawing.SystemColors.Control;
             this.checkBoxLabel.Checked = true;
             this.checkBoxLabel.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxLabel.Enabled = false;
@@ -234,7 +238,7 @@
             this.checkBoxLabel.Size = new System.Drawing.Size(52, 17);
             this.checkBoxLabel.TabIndex = 17;
             this.checkBoxLabel.Text = "Label";
-            this.checkBoxLabel.UseVisualStyleBackColor = true;
+            this.checkBoxLabel.UseVisualStyleBackColor = false;
             this.checkBoxLabel.CheckedChanged += new System.EventHandler(this.checkBoxLabel_CheckedChanged);
             // 
             // checkBoxState
@@ -251,33 +255,44 @@
             this.checkBoxState.UseVisualStyleBackColor = true;
             this.checkBoxState.CheckedChanged += new System.EventHandler(this.checkBoxState_CheckedChanged);
             // 
-            // groupBox
+            // layerMenu
             // 
-            this.groupBox.Controls.Add(this.radioButtonQuery);
-            this.groupBox.Controls.Add(this.buttonLoad);
-            this.groupBox.Controls.Add(this.buttonReset);
-            this.groupBox.Controls.Add(this.buttonOpen);
-            this.groupBox.Controls.Add(this.buttonSimulate);
-            this.groupBox.Controls.Add(this.buttonBalance);
-            this.groupBox.Controls.Add(this.buttonSave);
-            this.groupBox.Controls.Add(this.radioButtonManual);
-            this.groupBox.Controls.Add(this.radioButtonAnimation);
-            this.groupBox.Controls.Add(this.buttonBack);
-            this.groupBox.Controls.Add(this.checkBoxLabel);
-            this.groupBox.Controls.Add(this.checkBoxState);
-            this.groupBox.Controls.Add(this.labelFrame);
-            this.groupBox.Controls.Add(this.buttonPaceDown);
-            this.groupBox.Controls.Add(this.buttonPaceUp);
-            this.groupBox.Controls.Add(this.buttonLengthUp);
-            this.groupBox.Controls.Add(this.labelPace);
-            this.groupBox.Controls.Add(this.buttonLengthDown);
-            this.groupBox.Controls.Add(this.buttonForth);
-            this.groupBox.Controls.Add(this.labelLength);
-            this.groupBox.Location = new System.Drawing.Point(872, 12);
-            this.groupBox.Name = "groupBox";
-            this.groupBox.Size = new System.Drawing.Size(100, 714);
-            this.groupBox.TabIndex = 19;
-            this.groupBox.TabStop = false;
+            this.layerMenu.Controls.Add(this.radioButtonQuery);
+            this.layerMenu.Controls.Add(this.buttonLoad);
+            this.layerMenu.Controls.Add(this.buttonReset);
+            this.layerMenu.Controls.Add(this.buttonOpen);
+            this.layerMenu.Controls.Add(this.buttonSimulate);
+            this.layerMenu.Controls.Add(this.buttonBalance);
+            this.layerMenu.Controls.Add(this.buttonSave);
+            this.layerMenu.Controls.Add(this.radioButtonManual);
+            this.layerMenu.Controls.Add(this.radioButtonAnimation);
+            this.layerMenu.Controls.Add(this.buttonBack);
+            this.layerMenu.Controls.Add(this.checkBoxLabel);
+            this.layerMenu.Controls.Add(this.checkBoxState);
+            this.layerMenu.Controls.Add(this.labelFrame);
+            this.layerMenu.Controls.Add(this.buttonPaceDown);
+            this.layerMenu.Controls.Add(this.buttonPaceUp);
+            this.layerMenu.Controls.Add(this.buttonLengthUp);
+            this.layerMenu.Controls.Add(this.labelPace);
+            this.layerMenu.Controls.Add(this.buttonLengthDown);
+            this.layerMenu.Controls.Add(this.buttonForth);
+            this.layerMenu.Controls.Add(this.labelLength);
+            this.layerMenu.Location = new System.Drawing.Point(872, 12);
+            this.layerMenu.Name = "layerMenu";
+            this.layerMenu.Size = new System.Drawing.Size(100, 714);
+            this.layerMenu.TabIndex = 19;
+            this.layerMenu.TabStop = false;
+            // 
+            // radioButtonQuery
+            // 
+            this.radioButtonQuery.AutoSize = true;
+            this.radioButtonQuery.Location = new System.Drawing.Point(17, 534);
+            this.radioButtonQuery.Name = "radioButtonQuery";
+            this.radioButtonQuery.Size = new System.Drawing.Size(53, 17);
+            this.radioButtonQuery.TabIndex = 21;
+            this.radioButtonQuery.Text = "Query";
+            this.radioButtonQuery.UseVisualStyleBackColor = true;
+            this.radioButtonQuery.CheckedChanged += new System.EventHandler(this.radioButtonQuery_CheckedChanged);
             // 
             // radioButtonManual
             // 
@@ -303,38 +318,55 @@
             this.radioButtonAnimation.UseVisualStyleBackColor = true;
             this.radioButtonAnimation.CheckedChanged += new System.EventHandler(this.radioButtonAnimation_CheckedChanged);
             // 
-            // radioButtonQuery
+            // layerAnimation
             // 
-            this.radioButtonQuery.AutoSize = true;
-            this.radioButtonQuery.Location = new System.Drawing.Point(17, 534);
-            this.radioButtonQuery.Name = "radioButtonQuery";
-            this.radioButtonQuery.Size = new System.Drawing.Size(53, 17);
-            this.radioButtonQuery.TabIndex = 21;
-            this.radioButtonQuery.Text = "Query";
-            this.radioButtonQuery.UseVisualStyleBackColor = true;
-            this.radioButtonQuery.CheckedChanged += new System.EventHandler(this.radioButtonQuery_CheckedChanged);
+            this.layerAnimation.Location = new System.Drawing.Point(40, 40);
+            this.layerAnimation.Margin = new System.Windows.Forms.Padding(0);
+            this.layerAnimation.Name = "layerAnimation";
+            this.layerAnimation.Size = new System.Drawing.Size(200, 200);
+            this.layerAnimation.TabIndex = 20;
+            this.layerAnimation.TabStop = false;
+            this.layerAnimation.Visible = false;
             // 
-            // Animation
+            // layerChart
+            // 
+            this.layerChart.BackColor = System.Drawing.SystemColors.Control;
+            this.layerChart.Location = new System.Drawing.Point(280, 40);
+            this.layerChart.Name = "layerChart";
+            this.layerChart.Size = new System.Drawing.Size(200, 200);
+            this.layerChart.TabIndex = 21;
+            this.layerChart.TabStop = false;
+            this.layerChart.Visible = false;
+            // 
+            // layerSequence
+            // 
+            this.layerSequence.BackColor = System.Drawing.SystemColors.Control;
+            this.layerSequence.Location = new System.Drawing.Point(520, 40);
+            this.layerSequence.Name = "layerSequence";
+            this.layerSequence.Size = new System.Drawing.Size(200, 200);
+            this.layerSequence.TabIndex = 22;
+            this.layerSequence.TabStop = false;
+            this.layerSequence.Visible = false;
+            // 
+            // Simulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(984, 761);
-            this.Controls.Add(this.groupBox);
+            this.Controls.Add(this.layerSequence);
+            this.Controls.Add(this.layerChart);
+            this.Controls.Add(this.layerAnimation);
+            this.Controls.Add(this.layerMenu);
             this.KeyPreview = true;
-            this.MinimumSize = new System.Drawing.Size(800, 600);
-            this.Name = "Animation";
+            this.MinimumSize = new System.Drawing.Size(1000, 800);
+            this.Name = "Simulation";
             this.Text = "Animation";
             this.ResizeEnd += new System.EventHandler(this.resizeEnd);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyDown);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
-            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
             this.Resize += new System.EventHandler(this.resize);
-            this.groupBox.ResumeLayout(false);
-            this.groupBox.PerformLayout();
+            this.layerMenu.ResumeLayout(false);
+            this.layerMenu.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -361,10 +393,13 @@
         private System.Windows.Forms.CheckBox checkBoxLabel;
         private System.Windows.Forms.CheckBox checkBoxState;
         private System.Windows.Forms.FolderBrowserDialog changeFolderDialog;
-        private System.Windows.Forms.GroupBox groupBox;
+        private System.Windows.Forms.GroupBox layerMenu;
         private System.Windows.Forms.RadioButton radioButtonManual;
         private System.Windows.Forms.RadioButton radioButtonAnimation;
         private System.Windows.Forms.RadioButton radioButtonQuery;
+        private System.Windows.Forms.GroupBox layerAnimation;
+        private System.Windows.Forms.GroupBox layerChart;
+        private System.Windows.Forms.GroupBox layerSequence;
     }
 }
 

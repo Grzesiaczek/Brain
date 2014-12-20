@@ -1,111 +1,103 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
 namespace Brain
 {
-    public partial class Animation : Form
+    class Animation : Layer
     {
-        enum Mode {Auto, Manual, Query}
+        Brain brain;
+        List<ReceptorData> receptors2;
 
-        BufferedGraphics buffer;
-        BufferedGraphicsContext context;
+        Mode mode;
+        ShiftedNeuron shift;  
 
-        System.Windows.Forms.Timer timer;
+        bool animation = false;
+        bool loaded = false;
 
-        Simulation simulation;
-        ShiftedNeuron shift;
+        int frame = 1;
+        int interval = 0;
+        int arrival = 0;
+
+        int count = 1;
+        int length = 250;
 
         List<AnimatedNeuron> neurons;
         List<AnimatedSynapse> synapses;
         List<AnimatedReceptor> receptors;
 
-        int length;
-        int pace = 0;
-        int frame = 0;
+        public event EventHandler animationStop;
+        public event EventHandler balanceFinished;
+        public event EventHandler neuronShifted;
+        public event EventHandler<FrameEventArgs> frameChanged;
 
-        int interval = 0;
-        int arrival = 0;
-        int count = 1;
-
-        bool animation = false;
-        bool loaded = false;
-        Mode mode;
-
-        public Animation()
+        public Animation(GroupBox groupBox) : base(groupBox)
         {
-            InitializeComponent();
-            Config.load();
-            initiate();
-            prepareAnimation();
-        }
+            brain = new Brain();
 
-        void initiate()
-        {
-            simulation = new Simulation();
             neurons = new List<AnimatedNeuron>();
             synapses = new List<AnimatedSynapse>();
             receptors = new List<AnimatedReceptor>();
 
-            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            initiateGraphics();
+            layer.Visible = true;
+            resize();
 
-            changePace(500);
-            mode = Mode.Auto;
-            Graphics g = buffer.Graphics;
-            
-            if (!simulation.start(250))
-            {
-                MessageBox.Show("Simulation not loaded", "Error");
-                simulation.load();
-            }
+            load();
+            start(250);
+            loadNeurons();
 
-            loadNeurons(g);
-            loaded = true;
+            layer.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
+            layer.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
+            layer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
+            layer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
+            layer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
 
-            timer = new System.Windows.Forms.Timer();
-            timer.Tick += new EventHandler(tick);
-            timer.Interval = 25;
             timer.Start();
         }
 
-        void initiateGraphics()
+        public void load()
         {
-            Graphics visible = CreateGraphics();
-            visible.FillRectangle(SystemBrushes.Control, visible.VisibleClipBounds);
+            DateTime date = DateTime.Now;
+            String name = date.ToString("yyyyMMdd-HHmmss");
 
-            int height = (int)visible.VisibleClipBounds.Height - 20;
-            int width = (int)visible.VisibleClipBounds.Width - 128;
+            StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
+            XmlDocument xml = new XmlDocument();
+            xml.Load(reader);
+            reader.Close();
 
-            context = BufferedGraphicsManager.Current;
-            context.MaximumBuffer = new Size(width + 1, height + 1);
+            XmlNode node = xml.ChildNodes.Item(1).ChildNodes.Item(1);
+            receptors2 = new List<ReceptorData>();
 
-            buffer = context.Allocate(CreateGraphics(), new Rectangle(10, 10, width, height));
-            buffer.Graphics.FillRectangle(Brushes.White, new Rectangle(10, 10, width, height));   
-            buffer.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            foreach (XmlNode xn in node.ChildNodes)
+                receptors2.Add(new ReceptorData(xn));
+
+            node = node.NextSibling;
+
+            foreach (XmlNode xn in node.ChildNodes)
+                brain.addSentence(xn.InnerText);
+
+            brain.addReceptors(receptors2);
+            loaded = true;
         }
 
         PointF randomPoint(Random random)
         {
-            float x = 40 + random.Next() % (buffer.Graphics.VisibleClipBounds.Width - 90);
-            float y = 40 + random.Next() % (buffer.Graphics.VisibleClipBounds.Height - 90);
+            float x = 40 + random.Next() % (buffer.Graphics.VisibleClipBounds.Width - 80);
+            float y = 40 + random.Next() % (buffer.Graphics.VisibleClipBounds.Height - 80);
             return new PointF(x, y);
         }
 
-        void loadNeurons(Graphics g)
+        void loadNeurons()
         {
             StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
             Random random = new Random(DateTime.Now.Millisecond);
+            Graphics g = buffer.Graphics;
 
             XmlDocument xml = new XmlDocument();
             xml.Load(reader);
@@ -113,24 +105,14 @@ namespace Brain
 
             XmlNode node = xml.ChildNodes.Item(1).FirstChild;
             int counter = 0;
-            
-            try
-            {
-                length = Int32.Parse(xml.ChildNodes.Item(1).Attributes[0].Value);
-                labelLength.Text = length.ToString();
-            }
-            catch(Exception)
-            {
-                length = 250;
-            }
 
-            foreach(XmlNode xn in node.ChildNodes)
+            foreach (XmlNode xn in node.ChildNodes)
             {
                 PointF position = randomPoint(random);
 
                 try
                 {
-                    if(xn.Attributes.Count != 0)
+                    if (xn.Attributes.Count != 0)
                     {
                         int x = Int32.Parse(xn.Attributes[0].Value);
                         int y = Int32.Parse(xn.Attributes[1].Value);
@@ -138,9 +120,9 @@ namespace Brain
                         position = new PointF(x, y);
                     }
                 }
-                catch(Exception) { }
+                catch (Exception) { }
 
-                Neuron n = simulation.getNeuron(xn.InnerText);
+                Neuron n = brain.getNeuron(xn.InnerText);
                 AnimatedNeuron an = new AnimatedNeuron(n, g, position);
                 neurons.Add(an);
 
@@ -175,19 +157,9 @@ namespace Brain
                         }
         }
 
-        void stop()
+        protected override void tick(object sender, EventArgs e)
         {
-            timer.Stop();
-            animation = false;
-            buttonLoad.Text = "Start";
-
-            buttonBalance.Enabled = true;
-            buttonOpen.Enabled = true;
-        }
-
-        void tick(object sender, EventArgs e)
-        {
-            if(frame == length)
+            if (frame == length)
             {
                 animation = false;
                 return;
@@ -199,7 +171,34 @@ namespace Brain
                 redraw();
         }
 
-        void redraw()
+        public bool start(int length)
+        {
+            if (!loaded)
+                return false;
+
+            brain.simulate(length);
+            return true;
+        }
+
+        public void start()
+        {
+            timer.Start();
+            animation = true;
+        }
+
+        public void stop()
+        {
+            timer.Stop();
+            animation = false;
+            animationStop(this, new EventArgs());
+        }
+
+        public bool started()
+        {
+            return animation;
+        }
+
+        public void redraw()
         {
             if (!loaded)
                 return;
@@ -210,7 +209,7 @@ namespace Brain
                 s.draw(frame);
 
             foreach (AnimatedSynapse s in synapses)
-                s.drawState(frame, false);
+                s.drawState(frame);
 
             foreach (AnimatedNeuron an in neurons)
                 an.draw(frame);
@@ -218,15 +217,15 @@ namespace Brain
             foreach (AnimatedReceptor ar in receptors)
                 ar.draw(frame);
 
-            buffer.Render(CreateGraphics());
+            buffer.Render(graphics);
         }
 
         void animate()
         {
             if (count++ == interval)
             {
+                frameChanged(this, new FrameEventArgs(frame));
                 frame++;
-                labelFrame.Text = frame.ToString();
                 count = 1;
             }
 
@@ -243,7 +242,7 @@ namespace Brain
                     s.draw(frame);
 
             foreach (AnimatedSynapse s in synapses)
-                s.drawState(frame, true);
+                s.drawState(frame);
 
             foreach (AnimatedNeuron an in neurons)
                 an.animate(frame, count, (double)count / interval);
@@ -251,105 +250,140 @@ namespace Brain
             foreach (AnimatedReceptor ar in receptors)
                 ar.draw(frame);
 
-            buffer.Render(CreateGraphics());
+            buffer.Render(graphics);
         }
 
-        void prepareAnimation()
+        public void changePace(int pace)
         {
-            loaded = true;
-            frame = 1;
-
-            buttonOpen.Enabled = true;
-            buttonSave.Enabled = true;
-            buttonBack.Enabled = true;
-            buttonForth.Enabled = true;
-            buttonPaceUp.Enabled = true;
-            buttonPaceDown.Enabled = true;
-            buttonSimulate.Enabled = true;
-            buttonBalance.Enabled = true;
-            buttonLoad.Enabled = false;
-
-            checkBoxLabel.Enabled = true;
-            checkBoxState.Enabled = true;
-        }
-
-        void changePace(int diff)
-        {
-            pace += diff;
             interval = pace / 25;
             arrival = (interval * 3) / 4;
         }
 
-        private void buttonSimulate_Click(object sender, EventArgs e)
+        public void balance()
         {
-            if (animation)
-            {
-                prepareAnimation();
-                stop();
-                return;
-            }
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.State = false;
 
-            buttonBalance.Enabled = false;
-            buttonOpen.Enabled = false;
-
-            animation = true;
-            buttonSimulate.Text = "Stop";
-            timer.Start();
+            GraphDrawing drawing = new GraphDrawing(neurons, synapses, receptors, 120);
+            drawing.balanceFinished += balanceFinished2;
+            drawing.drawing += (draw);
+            drawing.animate(buffer.Graphics);
         }
 
-        private void buttonLoad_Click(object sender, EventArgs e)
+        private void balanceFinished2(object sender, EventArgs e)
         {
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.State = true;
 
+            redraw();
+            balanceFinished(this, new EventArgs());
         }
 
-        private void buttonPaceUp_Click(object sender, EventArgs e)
+        private void draw(object sender, EventArgs e)
         {
-            if (pace < 2000)
-                changePace(100);
-
-            labelPace.Text = pace.ToString();
-        }
-
-        private void buttonPaceDown_Click(object sender, EventArgs e)
-        {
-            if (pace > 200)
-                changePace(-100);
-
-            labelPace.Text = pace.ToString();
-        }
-
-        private void buttonReset_Click(object sender, EventArgs e)
-        {
-            if (mode == Mode.Manual)
-                simulation.clear();
-
-            frame = 1;
-            labelFrame.Text = "1";
             redraw();
         }
 
-        private void buttonBack_Click(object sender, EventArgs e)
+        public void clear()
         {
-            if (mode == Mode.Manual && frame > 1)
-                simulation.undo();
+            frame = 1;
+            frameChanged(this, new FrameEventArgs(frame));
 
+            animation = false;
+            brain.clear();
+        }
+
+        public void tick()
+        {
+            brain.tick();
+        }
+
+        public void undo()
+        {
+            if (frame == 1)
+                return;
+
+            brain.undo();
+        }
+
+        public void back()
+        {
             if (frame > 1)
                 frame--;
 
-            labelFrame.Text = frame.ToString();
-            redraw();
+            frameChanged(this, new FrameEventArgs(frame));
         }
 
-        private void buttonForth_Click(object sender, EventArgs e)
+        public void forth()
         {
-            if (mode == Mode.Manual)
-                simulation.tick();
-
             if (frame < length)
                 frame++;
 
-            labelFrame.Text = frame.ToString();
+            frameChanged(this, new FrameEventArgs(frame));
+        }
+
+        public override void resize()
+        {
+            base.resize();
+
+            foreach (AnimatedNeuron n in neurons)
+                n.updateGraphics(buffer.Graphics);
+
+            foreach (AnimatedSynapse s in synapses)
+                s.updateGraphics(buffer.Graphics);
+
+            foreach (AnimatedReceptor r in receptors)
+                r.updateGraphics(buffer.Graphics);
+
+            if (loaded)
+                balance();
+        }
+
+        public void labelChanged(bool value)
+        {
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.Label = value;
+
             redraw();
+        }
+
+        public void stateChanged(bool value)
+        {
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.State = value;
+
+            redraw();
+        }
+
+        public Mode newQuery(Mode mode)
+        {
+            Query query = new Query();
+            DialogResult result = query.ShowDialog();
+
+            if (result == DialogResult.Cancel)
+                return mode;
+            
+            foreach (AnimatedReceptor r in receptors)
+                r.setInterval(1000);
+
+            AnimatedReceptor ar = receptors[query.Index];
+            ar.setInterval(query.Interval);
+
+            clear();
+            start(length);
+
+            setMode(Mode.Query);
+            return this.mode;
+        }
+
+        public List<Neuron> getNeurons()
+        {
+            List<Neuron> result = new List<Neuron>();
+
+            foreach (AnimatedNeuron n in neurons)
+                result.Add(n.getNeuron());
+
+            return result;
         }
 
         private void mouseClick(object sender, MouseEventArgs e)
@@ -360,13 +394,13 @@ namespace Brain
 
         private void mouseDown(object sender, MouseEventArgs e)
         {
-            foreach(AnimatedNeuron neuron in neurons)
+            foreach (AnimatedNeuron neuron in neurons)
             {
-                if(neuron.click(e.Location))
+                if (neuron.click(e.Location))
                 {
                     shift = new ShiftedNeuron(neuron, new PointF(e.X, e.Y), neurons);
                     neurons[neurons.IndexOf(neuron)] = shift;
-                    
+
                     break;
                 }
             }
@@ -388,280 +422,11 @@ namespace Brain
             if (shift == null)
                 return;
 
-            buttonBalance.Enabled = true;
-
-            shift.save(checkBoxLabel.Checked);
+            shift.save();
             shift = null;
+
+            neuronShifted(this, new EventArgs());
             redraw();
-        }
-
-        private void buttonLengthDown_Click(object sender, EventArgs e)
-        {
-            if (length > 50)
-                length -= 10;
-
-            labelLength.Text = length.ToString();
-        }
-
-        private void buttonLengthUp_Click(object sender, EventArgs e)
-        {
-            if (length < 500)
-                length += 10;
-
-            labelLength.Text = length.ToString();
-        }
-
-        private void buttonOpen_Click(object sender, EventArgs e)
-        {
-            openFile.FileName = "";
-            openFile.Filter = "Save Files (*.abs)|*.abs";
-            openFile.InitialDirectory = Config.SaveFolder();
-            openFile.ShowDialog();
-        }
-
-        private void buttonSave_Click(object sender, EventArgs e)
-        {
-            String name = "";
-            FileInfo[] info = new DirectoryInfo(Config.SaveFolder()).GetFiles();
-
-            if (info.Length == 0)
-                name = "save001";
-            else
-            {
-                String last = info.Last<FileInfo>().Name;
-                int number = Int32.Parse(last.Substring(4, 3));
-                name = "save" + (number + 1).ToString("D3");
-            }
-
-            saveFile.Filter = "Save Files (*.abs)|*.abs";
-            saveFile.InitialDirectory = Config.SaveFolder();
-            saveFile.FileName = name;
-            saveFile.ShowDialog();
-        }
-
-        private void openFile_FileOk(object sender, CancelEventArgs e)
-        {
-            String path = openFile.FileName;
-            BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open));
-
-            int count = reader.ReadInt32();
-            neurons = new List<AnimatedNeuron>(count);
-
-            for (int i = 0; i < count; i++)
-                neurons.Add(new AnimatedNeuron(reader, buffer.Graphics));
-
-            count = reader.ReadInt32();
-            synapses = new List<AnimatedSynapse>(count);
-
-            for (int i = 0; i < count; i++)
-                synapses.Add(new AnimatedSynapse(reader, neurons, buffer.Graphics));
-
-            reader.Close();
-            prepareAnimation();
-        }
-
-        private void saveFile_FileOk(object sender, CancelEventArgs e)
-        {
-            String path = saveFile.FileName;
-            BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate));
-            writer.Write(neurons.Count);
-
-            foreach (AnimatedNeuron n in neurons)
-                n.save(writer);
-
-            writer.Write(synapses.Count);
-
-            foreach (AnimatedSynapse s in synapses)
-                s.save(writer);
-
-            writer.Close();
-        }
-
-        private void buttonBalance_Click(object sender, EventArgs e)
-        {
-            balanceStart();
-        }
-
-        private void balanceStart()
-        {
-            buttonSimulate.Enabled = false;
-            buttonBalance.Enabled = false;
-
-            MinimumSize = Size;
-            MaximumSize = Size;
-
-            foreach (AnimatedNeuron neuron in neurons)
-                neuron.State = false;
-
-            GraphDrawing drawing = new GraphDrawing(neurons, synapses, receptors, 120);
-            drawing.balanceFinished += balanceFinished;
-            drawing.drawing += (this.draw);
-            drawing.animate(buffer.Graphics);
-        }
-
-        private void balanceFinished(object sender, EventArgs e)
-        {
-            if(mode != Mode.Manual)
-                buttonSimulate.Enabled = true;
-
-            buttonBalance.Enabled = false;
-
-            MinimumSize = new Size(800, 600);
-            MaximumSize = new Size(0, 0);
-
-            if (!checkBoxState.Checked)
-                return;
-
-            foreach (AnimatedNeuron neuron in neurons)
-                neuron.State = true;
-
-            redraw();
-        }
-
-        private void draw(object sender, EventArgs e)
-        {
-            redraw();
-        }
-
-        private void checkBoxLabel_CheckedChanged(object sender, EventArgs e)
-        {
-            foreach (AnimatedNeuron neuron in neurons)
-                neuron.Label = checkBoxLabel.Checked;
-
-            redraw();
-        }
-
-        private void checkBoxState_CheckedChanged(object sender, EventArgs e)
-        {
-            foreach (AnimatedNeuron neuron in neurons)
-                neuron.State = checkBoxState.Checked;
-
-            redraw();
-        }
-
-        private void changeFolder()
-        {
-            changeFolderDialog.SelectedPath = Config.Path;
-            DialogResult result = changeFolderDialog.ShowDialog();
-
-            if (result == DialogResult.OK)
-                Config.changePath(changeFolderDialog.SelectedPath);
-        }
-
-        private void loadSimulation()
-        {
-            openFile.FileName = "";
-            openFile.Filter = "Save Files (*.abs)|*.abs";
-            openFile.InitialDirectory = Config.SimulationFolder();
-            DialogResult result = openFile.ShowDialog();
-
-            if (result == DialogResult.OK)
-            {
-
-            }
-        }
-
-        private void keyDown(object sender, KeyEventArgs e)
-        {
-            switch(e.KeyCode)
-            {
-                case Keys.F1:
-                    changeFolder();
-                    break;
-                case Keys.F5:
-                    loadSimulation();
-                    break;
-                case Keys.F4:
-                    redraw();
-                    break;
-            }
-        }
-
-        private void resize()
-        {
-            initiateGraphics();
-
-            if(!loaded)
-                return;
-
-            foreach (AnimatedNeuron n in neurons)
-                n.setGraphics(buffer.Graphics);
-
-            foreach (AnimatedSynapse s in synapses)
-                s.setGraphics(buffer.Graphics);
-
-            foreach (AnimatedReceptor r in receptors)
-                r.setGraphics(buffer.Graphics);
-
-            balanceStart();
-        }
-
-        private void resize(object sender, EventArgs e)
-        {
-            groupBox.Left = Width - 128;
-
-            if (WindowState == FormWindowState.Maximized)
-                resize();
-        }
-
-        private void resizeEnd(object sender, EventArgs e)
-        {
-            resize();
-        }
-
-        private void radioButtonAnimation_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!radioButtonAnimation.Checked)
-                return;
-
-            mode = Mode.Auto;
-            buttonSimulate.Enabled = true;
-        }
-
-        private void radioButtonManual_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!radioButtonManual.Checked)
-                return;
-
-            mode = Mode.Manual;
-            buttonSimulate.Enabled = false;
-            animation = false;
-            
-            if (MessageBox.Show("Reset all data?", "Data Reset", MessageBoxButtons.YesNo) == DialogResult.No)
-                return;
-
-            simulation.clear();
-            labelFrame.Text = "1";
-            frame = 1;
-            redraw();
-        }
-
-        private void radioButtonQuery_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!radioButtonQuery.Checked)
-                return;
-
-            Mode old = mode;
-            mode = Mode.Query;
-
-            Query query = new Query();
-            DialogResult result = query.ShowDialog();
-
-            if(result == DialogResult.Cancel)
-            {
-                mode = old;
-                return;
-            }
-
-            foreach (AnimatedReceptor r in receptors)
-                r.setInterval(1000);
-
-            AnimatedReceptor ar = receptors[query.Index];
-            ar.setInterval(query.Interval);
-
-            simulation.clear();
-            simulation.start(length);
         }
     }
 }
-

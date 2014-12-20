@@ -91,20 +91,19 @@ namespace Brain
                 neuron.activate();
         }
 
-        public void save(bool label)
+        public void save()
         {
             if (collision)
             {
                 original.setSynapses(Input, Output);
                 neurons[index] = original;
-                original.Label = label;
             }
             else
             {
                 shifted.setPosition(Position);
                 shifted.setSynapses(Input, Output);
                 neurons[index] = shifted;
-                shifted.Label = label;
+                shifted.Label = original.Label;
             }
         }
     }

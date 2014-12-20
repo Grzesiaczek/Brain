@@ -93,9 +93,9 @@ namespace Brain
 
                     n1.repulse(n2.getPosition(), beta);
                 }
-
+                
                 foreach(DrawnReceptor r in receptors)
-                    n1.repulse(r.getPosition(), beta);
+                    n1.repulse(r.getPosition(), beta / 2);
 
                 foreach (AnimatedSynapse s in n1.getNeuron().Output)
                     n1.attract(s.Post, alpha + alpha * s.getWeight());
@@ -135,7 +135,7 @@ namespace Brain
         PointF shift;
         PointF position;
 
-        static float k = 200;
+        static float k = 120;
 
         public DrawnNeuron(AnimatedNeuron neuron)
         {
@@ -193,8 +193,7 @@ namespace Brain
 
         public void repulse(SizeF size, double factor)
         {
-            PointF force = new PointF(0, 0);
-            PointF sub = new PointF(size.Width - position.X, size.Height - position.Y);
+            PointF sub = new PointF(size.Width - position.X, size.Height - 10 - position.Y);
 
             shift.X += 4 * (float)(k * k * factor) * (1 / (position.X * position.X) - 1 / (sub.X * sub.X));
             shift.Y += 4 * (float)(k * k * factor) * (1 / (position.Y * position.Y) - 1 / (sub.Y * sub.Y));
@@ -229,7 +228,7 @@ namespace Brain
         PointF shift;
         PointF position;
 
-        static float k = 50;
+        static float k = 80;
         int wall;
 
         public DrawnReceptor(AnimatedReceptor ar)

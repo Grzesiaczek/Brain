@@ -17,7 +17,6 @@ namespace Brain
         AnimatedSynapse synapse;
 
         int wall;
-        int margin;
 
         public AnimatedReceptor(Receptor r, AnimatedNeuron n, int wall)
         {
@@ -29,28 +28,28 @@ namespace Brain
             switch(wall)
             {
                 case 0:
-                    circle = new Circle(new PointF(n.Position.X, 10), 16);
+                    circle = new Circle(new PointF(n.Position.X, 0), 16);
 
                     if (n.Position.Y > graphics.VisibleClipBounds.Height / 2)
                         n.setPosition(new PointF(n.Position.X, graphics.VisibleClipBounds.Height - n.Position.Y));
 
                     break;
                 case 1:
-                    circle = new Circle(new PointF(10, n.Position.Y), 16);
+                    circle = new Circle(new PointF(0, n.Position.Y), 16);
 
                     if (n.Position.X > graphics.VisibleClipBounds.Width / 2)
                         n.setPosition(new PointF(graphics.VisibleClipBounds.Width - n.Position.X, n.Position.Y));
 
                     break;
                 case 2:
-                    circle = new Circle(new PointF(graphics.VisibleClipBounds.Width + 9, n.Position.Y), 16);
+                    circle = new Circle(new PointF(graphics.VisibleClipBounds.Width - 1, n.Position.Y), 16);
 
                     if (n.Position.X < graphics.VisibleClipBounds.Width / 2)
                         n.setPosition(new PointF(graphics.VisibleClipBounds.Width - n.Position.X, n.Position.Y));
 
                     break;
                 case 3:
-                    circle = new Circle(new PointF(n.Position.X, graphics.VisibleClipBounds.Height + 9), 16);
+                    circle = new Circle(new PointF(n.Position.X, graphics.VisibleClipBounds.Height - 1), 16);
 
                     if (n.Position.Y < graphics.VisibleClipBounds.Height / 2)
                         n.setPosition(new PointF(n.Position.X, graphics.VisibleClipBounds.Height - n.Position.Y));
@@ -74,17 +73,25 @@ namespace Brain
             circle.update(pos);
         }
 
-        public void setGraphics(Graphics g)
+        public void updateGraphics(Graphics g)
         {
+            float fx = g.VisibleClipBounds.Width / graphics.VisibleClipBounds.Width;
+            float fy = g.VisibleClipBounds.Height / graphics.VisibleClipBounds.Height;
             graphics = g;
 
             switch(wall)
             {
+                case 0:
+                    circle.update(new PointF(fx * circle.Center.X, 0));
+                    break;
+                case 1:
+                    circle.update(new PointF(0, fx * circle.Center.Y));
+                    break;
                 case 2:
-                    circle.update(new PointF(graphics.VisibleClipBounds.Width + 9, circle.Center.Y));
+                    circle.update(new PointF(graphics.VisibleClipBounds.Width - 1, fx * circle.Center.Y));
                     break;
                 case 3:
-                    circle.update(new PointF(circle.Center.X, graphics.VisibleClipBounds.Height + 9));
+                    circle.update(new PointF(fx * circle.Center.X, graphics.VisibleClipBounds.Height - 1));
                     break;
             }
         }

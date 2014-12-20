@@ -16,7 +16,7 @@ namespace Brain
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Animation());
+            Application.Run(new Simulation());
         }
     }
 }

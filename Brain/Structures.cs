@@ -9,6 +9,8 @@ using System.Xml;
 
 namespace Brain
 {
+    enum Mode { Auto, Manual, Query }
+
     class NeuronData
     {
         bool active;
@@ -235,7 +237,6 @@ namespace Brain
         public void update(PointF center)
         {
             this.center = center;
-
             position = new PointF(center.X - radius, center.Y - radius);
             border = new PointF(position.X - 1, position.Y - 1);
         }
@@ -304,6 +305,34 @@ namespace Brain
             {
                 center = value;
             }
+        }
+    }
+
+    class FrameEventArgs : EventArgs
+    {
+        int frame;
+
+        public FrameEventArgs(int frame)
+        {
+            this.frame = frame;
+        }
+
+        public int Frame
+        {
+            get
+            {
+                return frame;
+            }
+        }
+    }
+
+    class ActivateEventArgs : EventArgs
+    {
+
+
+        public ActivateEventArgs()
+        {
+
         }
     }
 }

@@ -53,12 +53,15 @@ namespace Brain
                 foreach (Receptor r in receptors)
                     r.tick();
 
-                foreach (Synapse s in synapses)
-                    s.tick();
-
                 foreach (Neuron n in neurons)
                     n.tick();
+
+                foreach (Synapse s in synapses)
+                    s.tick();
             }
+
+            foreach (Neuron n in neurons)
+                n.tick();
         }
 
         public void tick()
@@ -140,84 +143,6 @@ namespace Brain
                 foreach (Synapse syn in fragment[i].Output)
                     syn.Weight = (2 * syn.Factor) / (((Neuron)syn.Pre).Count + syn.Factor);
             }
-        }
-
-        static void chart(Neuron n)
-        {
-            Application xlApp;
-            Workbook xlWorkBook;
-            Worksheet xlWorkSheet;
-            object mV = System.Reflection.Missing.Value;
-
-            xlApp = new Application();
-            xlWorkBook = xlApp.Workbooks.Add(mV);
-
-            xlWorkSheet = (Worksheet)xlWorkBook.Worksheets.get_Item(1);
-            xlWorkSheet.Name = n.Word;
-
-            for (int i = 0; i < n.Activity.Count; i++)
-                xlWorkSheet.Cells[i + 1, 1] = n.Activity[i];
-
-            Range chartRange;
-
-            ChartObjects xlCharts = (ChartObjects)xlWorkSheet.ChartObjects(Type.Missing);
-            ChartObject myChart = (ChartObject)xlCharts.Add(200, 120, 1200, 400);
-            Chart chartPage = myChart.Chart;
-
-            chartRange = xlWorkSheet.get_Range("A1", "A" + n.Activity.Count);
-            chartPage.SetSourceData(chartRange, mV);
-            chartPage.ChartType = XlChartType.xlLine;
-
-            //xlWorkBook.SaveAs("G:\\C#\\" + n.Word + ".xls", XlFileFormat.xlWorkbookNormal, mV, mV, mV, mV, XlSaveAsAccessMode.xlExclusive, mV, mV, mV, mV, mV);
-            xlApp.Visible = true;
-            xlWorkBook.Close(true, mV, mV);
-            xlApp.Quit();
-        }
-
-        static void chart(List<Neuron> neurons, String name)
-        {
-            Application xlApp;
-            Workbook xlWorkBook;
-            Worksheet xlWorkSheet;
-            object mV = System.Reflection.Missing.Value;
-
-            xlApp = new Application();
-            xlWorkBook = xlApp.Workbooks.Add(mV);
-
-            for (int i = 0; i < neurons.Count - 3; i++)
-                xlWorkBook.Worksheets.Add();
-
-            for (int k = 0; k < neurons.Count; )
-            {
-                Neuron n = neurons[k];
-                xlWorkSheet = (Worksheet)xlWorkBook.Worksheets.get_Item(++k);
-                xlWorkSheet.Name = n.Word;
-
-                for (int i = 0; i < n.Activity.Count; i++)
-                    xlWorkSheet.Cells[i + 1, 1] = n.Activity[i];
-
-                Range chartRange;
-
-                ChartObjects xlCharts = (ChartObjects)xlWorkSheet.ChartObjects(Type.Missing);
-                ChartObject myChart = (ChartObject)xlCharts.Add(80, 20, 20 * n.Activity.Count, 400);
-                Chart chartPage = myChart.Chart;
-
-                chartRange = xlWorkSheet.get_Range("A1", "A" + n.Activity.Count);
-                chartPage.SetSourceData(chartRange, mV);
-                chartPage.ChartType = XlChartType.xlLine;
-            }
-            /*
-            String file = name + ".xls";
-            xlWorkBook.SaveAs(file, XlFileFormat.xlWorkbookNormal, mV, mV, mV, mV, XlSaveAsAccessMode.xlExclusive, XlListConflict.xlListConflictDiscardAllConflicts, mV, mV, mV, mV);
-            xlWorkBook.Close(true, mV, mV);
-            xlApp.Quit();
-
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = "EXCEL.EXE";
-            startInfo.Arguments = file;
-            Process.Start(startInfo);
-
-            xlApp.Visible = true;*/
         }
 
         public Neuron getNeuron(String word)

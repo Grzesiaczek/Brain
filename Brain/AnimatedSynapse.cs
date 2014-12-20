@@ -39,7 +39,7 @@ namespace Brain
             pre.Output.Add(this);
             post.Input.Add(this);
 
-            initiate();
+            initialize();
         }
 
         public AnimatedSynapse(AnimatedReceptor pre, AnimatedNeuron post, Synapse synapse, Graphics g)
@@ -54,7 +54,7 @@ namespace Brain
             pre.Output = this;
             post.Input.Add(this);
 
-            initiate();
+            initialize();
         }
 
         public AnimatedSynapse(BinaryReader reader, List<AnimatedNeuron> neurons, Graphics g)
@@ -74,10 +74,10 @@ namespace Brain
             start = new PointF();
             end = new PointF();
 
-            initiate();
+            initialize();
         }
 
-        void initiate()
+        void initialize()
         {
             start = new PointF();
             end = new PointF();
@@ -104,7 +104,7 @@ namespace Brain
 
         public void recalculate()
         {
-            initiate();
+            initialize();
         }
 
         public void animate(int frame, float factor)
@@ -149,15 +149,12 @@ namespace Brain
             graphics.DrawLine(pen, start, end);
         }
 
-        public void drawState(int frame, bool animate)
+        public void drawState(int frame)
         {
             Brush brush = Brushes.LightYellow;
             Pen pen = new Pen(Brushes.DarkSlateGray, 2);
 
-            if (animate)
-                frame--;
-
-            if (synapse.Activity[frame])
+            if (synapse.Activity[frame - 1])
                 brush = Brushes.Red;
 
             control.draw(graphics, brush, pen);
@@ -176,8 +173,9 @@ namespace Brain
             //writer.Write(duplex);
         }
 
-        public void setGraphics(Graphics g)
+        public void updateGraphics(Graphics g)
         {
+            initialize();
             graphics = g;
         }
 

@@ -70,7 +70,7 @@ namespace Brain
 
         public void animate(int number, int frame, double factor)
         {
-            NeuronData data = neuron.Activity[number - 1];
+            NeuronData data = neuron.Activity[number];
             double delta = factor * data.Relaxation;
 
             if (factor > 0.75)
@@ -193,8 +193,12 @@ namespace Brain
             return graphics;
         }
 
-        public void setGraphics(Graphics g)
+        public void updateGraphics(Graphics g)
         {
+            float fx = g.VisibleClipBounds.Width / graphics.VisibleClipBounds.Width;
+            float fy = g.VisibleClipBounds.Height / graphics.VisibleClipBounds.Height;
+
+            setPosition(new PointF(Position.X * fx, Position.Y * fy));
             graphics = g;
         }
 
