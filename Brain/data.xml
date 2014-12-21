@@ -12,9 +12,8 @@
     <neuron>earth</neuron>
 	</neurons>
 	<receptors>
-    <receptor alpha='2' beta='6' value ='0.7'>saturn</receptor>
+    <receptor alpha='2' beta='6' value ='0.8'>saturn</receptor>
     <receptor alpha='1' beta='5' value ='0.8'>jupiter</receptor>
-    <receptor alpha='3' beta='5' value ='0.6'>earth</receptor>
 	</receptors>
 	<sentences>
 		<sentence>sun is yellow star</sentence>
@@ -23,6 +22,7 @@
 		<sentence>earth circulates around sun</sentence>
 		<sentence>jupiter is planet</sentence>
 		<sentence>jupiter is big</sentence>
+    <sentence>jupiter is big planet</sentence>
 		<sentence>jupiter is big planet</sentence>
 		<sentence>earth is planet</sentence>
 		<sentence>sun is star at center of solar system</sentence>

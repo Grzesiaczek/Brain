@@ -45,6 +45,16 @@ namespace Brain
             buffer.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         }
 
+        public void setMode(Mode mode)
+        {
+            this.mode = mode;
+        }
+
+        public virtual void resize()
+        {
+            changeSize();
+        }
+
         protected virtual void visibilityChanged(object sender, EventArgs e)
         {
             if (!layer.Visible)
@@ -53,39 +63,11 @@ namespace Brain
                 return;
             }
 
-            layer.Height = layer.Parent.Height - 58;
-            layer.Width = layer.Parent.Width - 148;
-
+            resize();
             timer.Start();
         }
 
-        public virtual void resize()
-        {
-            layer.Height = layer.Parent.Height - 58;
-            layer.Width = layer.Parent.Width - 148;
-
-            if (mode == Mode.Query)
-                layer.Height -= 60;
-
-            initializeGraphics();
-        }
-
-        public void setMode(Mode mode)
-        {
-            Mode old = this.mode;
-            this.mode = mode;
-
-            if(mode == Mode.Query)
-            {
-                layer.Location = new Point(10, 70);
-                resize();
-            }            
-            else if (old == Mode.Query)
-            {
-                layer.Location = new Point(10, 10);
-                resize();
-            }
-        }
+        protected abstract void changeSize();
 
         protected abstract void tick(object sender, EventArgs e);
     }

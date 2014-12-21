@@ -210,6 +210,14 @@ namespace Brain
             }
         }
 
+        public String Name
+        {
+            get
+            {
+                return neuron.Word;
+            }
+        }
+
         public float Radius
         {
             get

@@ -36,17 +36,22 @@ namespace Brain
 
         void initialize()
         {
+            Show();
+
             animation = new Animation(layerAnimation);
             chart = new Chart(layerChart);
             sequence = new Sequence(layerSequence);
 
+            layerSequence.Visible = true;
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             mode = Mode.Auto;
 
             animation.changePace(500);
+            animation.setSequence(sequence);
             animation.balanceFinished += new EventHandler(balanceFinished);
             animation.animationStop += new EventHandler(animationStop);
             animation.neuronShifted += new EventHandler(neuronShifted);
+            animation.dataCleared += new EventHandler(dataCleared);
             animation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
             
             chart.setNeurons(animation.getNeurons());
@@ -86,7 +91,8 @@ namespace Brain
 
         private void buttonLoad_Click(object sender, EventArgs e)
         {
-
+            animation.simulate(length);
+            buttonLoad.Enabled = false;
         }
 
         private void buttonPaceUp_Click(object sender, EventArgs e)
@@ -292,12 +298,14 @@ namespace Brain
                     if(layerAnimation.Visible)
                     {
                         layerAnimation.Visible = false;
+                        layerSequence.Visible = false;
                         layerChart.Visible = true;
                     }
                     else
                     {
                         layerChart.Visible = false;
-                        layerAnimation.Visible = true; 
+                        layerAnimation.Visible = true;
+                        layerSequence.Visible = false;
                     }
                     break;
             }
@@ -310,6 +318,7 @@ namespace Brain
             if (WindowState != state)
             {
                 animation.resize();
+                sequence.resize();
                 state = WindowState;
             }
         }
@@ -317,6 +326,7 @@ namespace Brain
         private void resizeEnd(object sender, EventArgs e)
         {
             animation.resize();
+            sequence.resize();
         }
 
         private void radioButtonAnimation_CheckedChanged(object sender, EventArgs e)
@@ -367,6 +377,11 @@ namespace Brain
         private void neuronShifted(object sender, EventArgs e)
         {
             buttonBalance.Enabled = true;
+        }
+
+        private void dataCleared(object sender, EventArgs e)
+        {
+            buttonLoad.Enabled = true;
         }
     }
 }

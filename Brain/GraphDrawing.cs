@@ -135,7 +135,7 @@ namespace Brain
         PointF shift;
         PointF position;
 
-        static float k = 120;
+        static float k = 200;
 
         public DrawnNeuron(AnimatedNeuron neuron)
         {

@@ -325,14 +325,4 @@ namespace Brain
             }
         }
     }
-
-    class ActivateEventArgs : EventArgs
-    {
-
-
-        public ActivateEventArgs()
-        {
-
-        }
-    }
 }

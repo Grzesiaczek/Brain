@@ -33,6 +33,13 @@ namespace Brain
             }
         }
 
+        protected override void changeSize()
+        {
+            layer.Height = layer.Parent.Height - 58;
+            layer.Width = layer.Parent.Width - 148;
+            initializeGraphics();
+        }
+
         protected override void tick(object sender, EventArgs e)
         {
             redraw();

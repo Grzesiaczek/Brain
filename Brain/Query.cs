@@ -24,7 +24,7 @@ namespace Brain
             temporalQuery.Items.Add("jupiter");
             temporalQuery.Items.Add("saturn");
             //temporalQuery.
-            temporalQuery.SelectedIndex = 1;
+            temporalQuery.SelectedIndex = 0;
         }
 
         private void buttonOK_Click(object sender, EventArgs e)

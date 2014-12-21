@@ -122,6 +122,14 @@ namespace Brain
             }
         }
 
+        public String Name
+        {
+            get
+            {
+                return neuron.getNeuron().Word;
+            }
+        }
+
         public PointF Position
         {
             get

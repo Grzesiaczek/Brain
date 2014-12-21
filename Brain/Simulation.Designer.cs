@@ -37,9 +37,6 @@
             this.labelFrame = new System.Windows.Forms.Label();
             this.buttonBack = new System.Windows.Forms.Button();
             this.buttonForth = new System.Windows.Forms.Button();
-            this.labelLength = new System.Windows.Forms.Label();
-            this.buttonLengthDown = new System.Windows.Forms.Button();
-            this.buttonLengthUp = new System.Windows.Forms.Button();
             this.buttonOpen = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.openFile = new System.Windows.Forms.OpenFileDialog();
@@ -49,6 +46,9 @@
             this.checkBoxState = new System.Windows.Forms.CheckBox();
             this.changeFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.layerMenu = new System.Windows.Forms.GroupBox();
+            this.buttonLengthUp = new System.Windows.Forms.Button();
+            this.buttonLengthDown = new System.Windows.Forms.Button();
+            this.labelLength = new System.Windows.Forms.Label();
             this.radioButtonQuery = new System.Windows.Forms.RadioButton();
             this.radioButtonManual = new System.Windows.Forms.RadioButton();
             this.radioButtonAnimation = new System.Windows.Forms.RadioButton();
@@ -60,7 +60,7 @@
             // 
             // buttonSimulate
             // 
-            this.buttonSimulate.Location = new System.Drawing.Point(13, 327);
+            this.buttonSimulate.Location = new System.Drawing.Point(14, 239);
             this.buttonSimulate.Name = "buttonSimulate";
             this.buttonSimulate.Size = new System.Drawing.Size(75, 23);
             this.buttonSimulate.TabIndex = 0;
@@ -81,7 +81,7 @@
             // buttonPaceDown
             // 
             this.buttonPaceDown.Enabled = false;
-            this.buttonPaceDown.Location = new System.Drawing.Point(13, 271);
+            this.buttonPaceDown.Location = new System.Drawing.Point(14, 183);
             this.buttonPaceDown.Name = "buttonPaceDown";
             this.buttonPaceDown.Size = new System.Drawing.Size(32, 24);
             this.buttonPaceDown.TabIndex = 2;
@@ -92,7 +92,7 @@
             // buttonPaceUp
             // 
             this.buttonPaceUp.Enabled = false;
-            this.buttonPaceUp.Location = new System.Drawing.Point(56, 271);
+            this.buttonPaceUp.Location = new System.Drawing.Point(57, 183);
             this.buttonPaceUp.Name = "buttonPaceUp";
             this.buttonPaceUp.Size = new System.Drawing.Size(32, 24);
             this.buttonPaceUp.TabIndex = 3;
@@ -114,7 +114,7 @@
             // labelPace
             // 
             this.labelPace.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.labelPace.Location = new System.Drawing.Point(13, 233);
+            this.labelPace.Location = new System.Drawing.Point(14, 145);
             this.labelPace.Name = "labelPace";
             this.labelPace.Size = new System.Drawing.Size(75, 20);
             this.labelPace.TabIndex = 6;
@@ -153,37 +153,6 @@
             this.buttonForth.UseVisualStyleBackColor = true;
             this.buttonForth.Click += new System.EventHandler(this.buttonForth_Click);
             // 
-            // labelLength
-            // 
-            this.labelLength.BackColor = System.Drawing.SystemColors.Control;
-            this.labelLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.labelLength.Location = new System.Drawing.Point(13, 152);
-            this.labelLength.Name = "labelLength";
-            this.labelLength.Size = new System.Drawing.Size(75, 20);
-            this.labelLength.TabIndex = 11;
-            this.labelLength.Text = "200";
-            this.labelLength.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // buttonLengthDown
-            // 
-            this.buttonLengthDown.Location = new System.Drawing.Point(13, 184);
-            this.buttonLengthDown.Name = "buttonLengthDown";
-            this.buttonLengthDown.Size = new System.Drawing.Size(32, 24);
-            this.buttonLengthDown.TabIndex = 12;
-            this.buttonLengthDown.Text = "-";
-            this.buttonLengthDown.UseVisualStyleBackColor = true;
-            this.buttonLengthDown.Click += new System.EventHandler(this.buttonLengthDown_Click);
-            // 
-            // buttonLengthUp
-            // 
-            this.buttonLengthUp.Location = new System.Drawing.Point(57, 184);
-            this.buttonLengthUp.Name = "buttonLengthUp";
-            this.buttonLengthUp.Size = new System.Drawing.Size(32, 24);
-            this.buttonLengthUp.TabIndex = 13;
-            this.buttonLengthUp.Text = "+";
-            this.buttonLengthUp.UseVisualStyleBackColor = true;
-            this.buttonLengthUp.Click += new System.EventHandler(this.buttonLengthUp_Click);
-            // 
             // buttonOpen
             // 
             this.buttonOpen.Location = new System.Drawing.Point(14, 654);
@@ -218,7 +187,7 @@
             // buttonBalance
             // 
             this.buttonBalance.Enabled = false;
-            this.buttonBalance.Location = new System.Drawing.Point(13, 372);
+            this.buttonBalance.Location = new System.Drawing.Point(14, 284);
             this.buttonBalance.Name = "buttonBalance";
             this.buttonBalance.Size = new System.Drawing.Size(75, 23);
             this.buttonBalance.TabIndex = 16;
@@ -257,6 +226,9 @@
             // 
             // layerMenu
             // 
+            this.layerMenu.Controls.Add(this.buttonLengthUp);
+            this.layerMenu.Controls.Add(this.buttonLengthDown);
+            this.layerMenu.Controls.Add(this.labelLength);
             this.layerMenu.Controls.Add(this.radioButtonQuery);
             this.layerMenu.Controls.Add(this.buttonLoad);
             this.layerMenu.Controls.Add(this.buttonReset);
@@ -272,16 +244,42 @@
             this.layerMenu.Controls.Add(this.labelFrame);
             this.layerMenu.Controls.Add(this.buttonPaceDown);
             this.layerMenu.Controls.Add(this.buttonPaceUp);
-            this.layerMenu.Controls.Add(this.buttonLengthUp);
             this.layerMenu.Controls.Add(this.labelPace);
-            this.layerMenu.Controls.Add(this.buttonLengthDown);
             this.layerMenu.Controls.Add(this.buttonForth);
-            this.layerMenu.Controls.Add(this.labelLength);
             this.layerMenu.Location = new System.Drawing.Point(872, 12);
             this.layerMenu.Name = "layerMenu";
             this.layerMenu.Size = new System.Drawing.Size(100, 714);
             this.layerMenu.TabIndex = 19;
             this.layerMenu.TabStop = false;
+            // 
+            // buttonLengthUp
+            // 
+            this.buttonLengthUp.Location = new System.Drawing.Point(57, 374);
+            this.buttonLengthUp.Name = "buttonLengthUp";
+            this.buttonLengthUp.Size = new System.Drawing.Size(32, 24);
+            this.buttonLengthUp.TabIndex = 24;
+            this.buttonLengthUp.Text = "+";
+            this.buttonLengthUp.UseVisualStyleBackColor = true;
+            // 
+            // buttonLengthDown
+            // 
+            this.buttonLengthDown.Location = new System.Drawing.Point(13, 374);
+            this.buttonLengthDown.Name = "buttonLengthDown";
+            this.buttonLengthDown.Size = new System.Drawing.Size(32, 24);
+            this.buttonLengthDown.TabIndex = 23;
+            this.buttonLengthDown.Text = "-";
+            this.buttonLengthDown.UseVisualStyleBackColor = true;
+            // 
+            // labelLength
+            // 
+            this.labelLength.BackColor = System.Drawing.SystemColors.Control;
+            this.labelLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.labelLength.Location = new System.Drawing.Point(13, 342);
+            this.labelLength.Name = "labelLength";
+            this.labelLength.Size = new System.Drawing.Size(75, 20);
+            this.labelLength.TabIndex = 22;
+            this.labelLength.Text = "250";
+            this.labelLength.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // radioButtonQuery
             // 
@@ -382,9 +380,6 @@
         private System.Windows.Forms.Label labelFrame;
         private System.Windows.Forms.Button buttonBack;
         private System.Windows.Forms.Button buttonForth;
-        private System.Windows.Forms.Label labelLength;
-        private System.Windows.Forms.Button buttonLengthDown;
-        private System.Windows.Forms.Button buttonLengthUp;
         private System.Windows.Forms.Button buttonOpen;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.OpenFileDialog openFile;
@@ -400,6 +395,9 @@
         private System.Windows.Forms.GroupBox layerAnimation;
         private System.Windows.Forms.GroupBox layerChart;
         private System.Windows.Forms.GroupBox layerSequence;
+        private System.Windows.Forms.Button buttonLengthUp;
+        private System.Windows.Forms.Button buttonLengthDown;
+        private System.Windows.Forms.Label labelLength;
     }
 }
 

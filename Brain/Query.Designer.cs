@@ -105,14 +105,14 @@
             this.temporalNumber.Size = new System.Drawing.Size(37, 21);
             this.temporalNumber.TabIndex = 5;
             this.temporalNumber.Value = new decimal(new int[] {
-            3,
+            2,
             0,
             0,
             0});
             // 
             // temporalQuery
             // 
-            this.temporalQuery.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.temporalQuery.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.temporalQuery.FormattingEnabled = true;
             this.temporalQuery.Location = new System.Drawing.Point(137, 180);
             this.temporalQuery.Name = "temporalQuery";

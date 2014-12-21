@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -15,17 +16,17 @@ namespace Brain
         Brain brain;
         List<ReceptorData> receptors2;
 
-        Mode mode;
-        ShiftedNeuron shift;  
+        ShiftedNeuron shift;
+        Sequence sequence;
 
         bool animation = false;
         bool loaded = false;
 
         int frame = 1;
-        int interval = 0;
+        int interval = 1;
         int arrival = 0;
 
-        int count = 1;
+        int count = 0;
         int length = 250;
 
         List<AnimatedNeuron> neurons;
@@ -35,6 +36,7 @@ namespace Brain
         public event EventHandler animationStop;
         public event EventHandler balanceFinished;
         public event EventHandler neuronShifted;
+        public event EventHandler dataCleared;
         public event EventHandler<FrameEventArgs> frameChanged;
 
         public Animation(GroupBox groupBox) : base(groupBox)
@@ -45,8 +47,8 @@ namespace Brain
             synapses = new List<AnimatedSynapse>();
             receptors = new List<AnimatedReceptor>();
 
+            layer.Location = new Point(10, 68);
             layer.Visible = true;
-            resize();
 
             load();
             start(250);
@@ -57,8 +59,13 @@ namespace Brain
             layer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
             layer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
             layer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
+        }
 
-            timer.Start();
+        public void setSequence(Sequence seq)
+        {
+            sequence = seq;
+            seq.setData(neurons, receptors);
+            frameChanged += new EventHandler<FrameEventArgs>(seq.frameChanged);
         }
 
         public void load()
@@ -97,7 +104,6 @@ namespace Brain
         {
             StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
             Random random = new Random(DateTime.Now.Millisecond);
-            Graphics g = buffer.Graphics;
 
             XmlDocument xml = new XmlDocument();
             xml.Load(reader);
@@ -105,6 +111,11 @@ namespace Brain
 
             XmlNode node = xml.ChildNodes.Item(1).FirstChild;
             int counter = 0;
+
+            while (buffer == null)
+                Thread.Sleep(100);
+
+            Graphics g = buffer.Graphics;
 
             foreach (XmlNode xn in node.ChildNodes)
             {
@@ -184,18 +195,25 @@ namespace Brain
         {
             timer.Start();
             animation = true;
+            sequence.animate(true);
         }
 
         public void stop()
         {
             timer.Stop();
             animation = false;
+            sequence.animate(false);
             animationStop(this, new EventArgs());
         }
 
         public bool started()
         {
             return animation;
+        }
+
+        public void simulate(int length)
+        {
+            brain.simulate(length);
         }
 
         public void redraw()
@@ -255,6 +273,7 @@ namespace Brain
 
         public void changePace(int pace)
         {
+            count = (int)(count * (float)pace / (interval * 25));
             interval = pace / 25;
             arrival = (interval * 3) / 4;
         }
@@ -290,6 +309,7 @@ namespace Brain
             frameChanged(this, new FrameEventArgs(frame));
 
             animation = false;
+            dataCleared(this, new EventArgs());
             brain.clear();
         }
 
@@ -334,9 +354,16 @@ namespace Brain
 
             foreach (AnimatedReceptor r in receptors)
                 r.updateGraphics(buffer.Graphics);
-
+            
             if (loaded)
                 balance();
+        }
+
+        protected override void changeSize()
+        {
+            layer.Height = layer.Parent.Height - 116;
+            layer.Width = layer.Parent.Width - 148;
+            initializeGraphics();
         }
 
         public void labelChanged(bool value)

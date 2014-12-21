@@ -21,6 +21,11 @@ namespace Brain
         {
             get;
         }
+
+        String Name
+        {
+            get;
+        }
     }
 
     interface Element
