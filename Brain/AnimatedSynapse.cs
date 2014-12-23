@@ -19,8 +19,11 @@ namespace Brain
         PointF start;
         PointF end;
 
-        Circle state;
-        Circle control;
+        Circle sState;
+        Circle sControl;
+
+        Circle dState;
+        Circle dControl;
 
         Graphics graphics;
 
@@ -98,8 +101,14 @@ namespace Brain
             dx = end.X - start.X;
             dy = end.Y - start.Y;
 
-            state = new Circle(new PointF(start.X + 0.8f * dx, start.Y + 0.8f * dy), 12);
-            control = new Circle(new PointF(state.Center.X - cos * 8, state.Center.Y - sin * 8), 12);
+            sState = new Circle(new PointF(start.X + 0.8f * dx, start.Y + 0.8f * dy), 12);
+            sControl = new Circle(new PointF(sState.Center.X - cos * 8, sState.Center.Y - sin * 8), 12);
+
+            if (duplex == null)
+                return;
+
+            dState = new Circle(new PointF(start.X + end.X - sState.Center.X, start.Y + end.Y - sState.Center.Y), 12);
+            dControl = new Circle(new PointF(start.X + end.X - sControl.Center.X, start.Y + end.Y - sControl.Center.Y), 12);
         }
 
         public void recalculate()
@@ -157,13 +166,22 @@ namespace Brain
             if (synapse.Activity[frame - 1])
                 brush = Brushes.Red;
 
-            control.draw(graphics, brush, pen);
-            state.draw(graphics, synapse.Weight, pen);
+            sControl.draw(graphics, brush, pen);
+            sState.draw(graphics, synapse.Weight, pen);
+
+            if (duplex == null)
+                return;
+
+            dControl.draw(graphics, brush, pen);
+            dState.draw(graphics, synapse.Weight, pen);
         }
 
         public void setDuplex(Synapse synapse)
         {
             duplex = synapse;
+
+            dState = new Circle(new PointF(start.X + end.X - sState.Center.X, start.Y + end.Y - sState.Center.Y), 12);
+            dControl = new Circle(new PointF(start.X + end.X - sControl.Center.X, start.Y + end.Y - sControl.Center.Y), 12);
         }
 
         public void save(BinaryWriter writer)

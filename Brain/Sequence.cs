@@ -15,26 +15,35 @@ namespace Brain
         List<SequenceNeuron> neurons;
         List<SequenceNeuron> sequence;
 
+        List<SequenceReceptor> receptors;
+
         int frame;
+        int interval;
+
         bool animation;
         bool disappear;
 
         public Sequence(GroupBox groupBox) : base(groupBox)
         {
-            //elements = new List<SequenceElement>();
             neurons = new List<SequenceNeuron>();
             sequence = new List<SequenceNeuron>();
+            receptors = new List<SequenceReceptor>();
         }
 
         public void setData(List<AnimatedNeuron> neurons, List<AnimatedReceptor> receptors)
         {
-            //foreach (AnimatedReceptor ar in receptors)
-                //elements.Add(new SequenceReceptor(ar));
+            foreach (AnimatedReceptor ar in receptors)
+                this.receptors.Add(new SequenceReceptor(ar));
 
             foreach (AnimatedNeuron an in neurons)
                 this.neurons.Add(new SequenceNeuron(an));
 
             disappear = false;
+        }
+
+        public void setInterval(int value)
+        {
+            interval = value;
         }
 
         public void tick(int frame)
@@ -58,15 +67,19 @@ namespace Brain
             {
                 if(count == 1)
                     sequence.Clear();
-                else
+                else if (animation)
                 {
                     foreach (SequenceNeuron sn in sequence)
-                        sn.disappear();
+                        sn.disappear(interval);
 
                     disappear = true;
                 }
-           }
-                
+                else
+                    sequence.Clear();
+            }
+
+            foreach (SequenceReceptor sr in receptors)
+                sr.tick(frame);
 
             foreach (SequenceNeuron sn in neurons)
             {
@@ -99,8 +112,8 @@ namespace Brain
 
         protected override void changeSize()
         {
-            layer.Height = 48;
-            layer.Width = layer.Parent.Width - 148;
+            layer.Height = 90;
+            layer.Width = layer.Parent.Width - 168;
             initializeGraphics();
         }
 
@@ -113,9 +126,9 @@ namespace Brain
 
             foreach (SequenceNeuron sn in sequence)
                 sn.draw(buffer.Graphics);
-            /*
+            
             foreach (SequenceReceptor sr in receptors)
-                sr.draw(buffer.Graphics);*/
+                sr.draw(buffer.Graphics);
 
             buffer.Render(graphics);
         }
@@ -138,8 +151,6 @@ namespace Brain
         }
     }
 
-    
-
     class SequenceNeuron : SequenceElement
     {
         AnimatedNeuron neuron;
@@ -147,7 +158,9 @@ namespace Brain
 
         List<bool> activity;
         bool fade = false;
+
         int frame = 1;
+        int interval = 20;
 
         public SequenceNeuron(AnimatedNeuron neuron) : base(neuron)
         {
@@ -163,20 +176,22 @@ namespace Brain
             if (fade)
                 brush = Brushes.LightSkyBlue;
 
-            if (frame++ == 20)
+            if (frame++ == interval)
             {
                 fade = false;
                 brush = Brushes.GreenYellow;
             } 
 
             x = 40 + 100 * count++;
+            y = 8;
             base.draw(g);
         }
 
-        public void disappear()
+        public void disappear(int value)
         {
             fade = true;
             frame = 1;
+            this.interval = value;
         }
 
         public bool tick(int frame)
@@ -209,18 +224,28 @@ namespace Brain
     {
         AnimatedReceptor receptor;
         static int count;
+        bool active;
 
         public SequenceReceptor(AnimatedReceptor receptor) : base(receptor)
         {
             this.receptor = receptor;
 
-            brush = Brushes.Orchid;
+            brush = Brushes.LightCyan;
             pen = Pens.Purple;
+        }
+
+        public void tick(int frame)
+        {
+            active = receptor.Activity[frame - 1];
         }
 
         public override void draw(Graphics g)
         {
-            x = 40 + 80 * count++;
+            if (!active)
+                return;
+
+            x = 40 + 100 * count++;
+            y = 50;
             base.draw(g);
         }
 
@@ -243,6 +268,7 @@ namespace Brain
 
         protected AnimatedElement element;
         protected int x;
+        protected int y;
 
         public SequenceElement(AnimatedElement element)
         {
@@ -256,8 +282,6 @@ namespace Brain
 
         public virtual void draw(Graphics g)
         {
-            int y = 8;
-
             Rectangle rect = new Rectangle(x, y, 80, 32);
             g.FillRectangle(brush, rect);
             g.DrawRectangle(pen, rect);

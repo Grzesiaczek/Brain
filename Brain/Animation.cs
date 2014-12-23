@@ -16,11 +16,13 @@ namespace Brain
         Brain brain;
         List<ReceptorData> receptors2;
 
+        GraphBalancing balancing;
         ShiftedNeuron shift;
         Sequence sequence;
 
         bool animation = false;
         bool loaded = false;
+        bool sequenceBar = true;
 
         int frame = 1;
         int interval = 1;
@@ -34,25 +36,26 @@ namespace Brain
         List<AnimatedReceptor> receptors;
 
         public event EventHandler animationStop;
+        public event EventHandler balanceStarted;
         public event EventHandler balanceFinished;
         public event EventHandler neuronShifted;
         public event EventHandler dataCleared;
+        public event EventHandler dataLoaded;
         public event EventHandler<FrameEventArgs> frameChanged;
 
         public Animation(GroupBox groupBox) : base(groupBox)
         {
             brain = new Brain();
 
+            balancing = GraphBalancing.getInstance();
+            balancing.balanceFinished += balanceEnded;
+
             neurons = new List<AnimatedNeuron>();
             synapses = new List<AnimatedSynapse>();
             receptors = new List<AnimatedReceptor>();
 
-            layer.Location = new Point(10, 68);
+            layer.Location = new Point(10, 110);
             layer.Visible = true;
-
-            load();
-            start(250);
-            loadNeurons();
 
             layer.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
             layer.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
@@ -65,6 +68,7 @@ namespace Brain
         {
             sequence = seq;
             seq.setData(neurons, receptors);
+            seq.setInterval(interval);
             frameChanged += new EventHandler<FrameEventArgs>(seq.frameChanged);
         }
 
@@ -90,6 +94,9 @@ namespace Brain
                 brain.addSentence(xn.InnerText);
 
             brain.addReceptors(receptors2);
+
+            start(250);
+            loadNeurons();
             loaded = true;
         }
 
@@ -170,11 +177,11 @@ namespace Brain
 
         protected override void tick(object sender, EventArgs e)
         {
-            if (frame == length)
+            if (frame == length && animation)
             {
+                animationStop(this, new EventArgs());
                 animation = false;
-                return;
-            }
+            }   
 
             if (animation)
                 animate();
@@ -184,23 +191,19 @@ namespace Brain
 
         public bool start(int length)
         {
-            if (!loaded)
-                return false;
-
             brain.simulate(length);
+            dataLoaded(this, new EventArgs());
             return true;
         }
 
         public void start()
         {
-            timer.Start();
             animation = true;
             sequence.animate(true);
         }
 
         public void stop()
         {
-            timer.Stop();
             animation = false;
             sequence.animate(false);
             animationStop(this, new EventArgs());
@@ -213,14 +216,14 @@ namespace Brain
 
         public void simulate(int length)
         {
+            this.length = length;
             brain.simulate(length);
+            loaded = true;
+            dataLoaded(this, new EventArgs());
         }
 
         public void redraw()
         {
-            if (!loaded)
-                return;
-
             buffer.Graphics.Clear(SystemColors.Control);
 
             foreach (AnimatedSynapse s in synapses)
@@ -240,6 +243,9 @@ namespace Brain
 
         void animate()
         {
+            if (!loaded)
+                return;
+
             if (count++ == interval)
             {
                 frameChanged(this, new FrameEventArgs(frame));
@@ -276,6 +282,9 @@ namespace Brain
             count = (int)(count * (float)pace / (interval * 25));
             interval = pace / 25;
             arrival = (interval * 3) / 4;
+
+            if(sequence != null)
+                sequence.setInterval(interval);
         }
 
         public void balance()
@@ -283,13 +292,16 @@ namespace Brain
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.State = false;
 
-            GraphDrawing drawing = new GraphDrawing(neurons, synapses, receptors, 120);
-            drawing.balanceFinished += balanceFinished2;
-            drawing.drawing += (draw);
-            drawing.animate(buffer.Graphics);
+            balancing.animate(neurons, synapses, receptors, buffer.Graphics, 80);
+            balanceStarted(this, new EventArgs());
         }
 
-        private void balanceFinished2(object sender, EventArgs e)
+        public void stopBalance()
+        {
+            balancing.stop();
+        }
+
+        private void balanceEnded(object sender, EventArgs e)
         {
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.State = true;
@@ -298,17 +310,14 @@ namespace Brain
             balanceFinished(this, new EventArgs());
         }
 
-        private void draw(object sender, EventArgs e)
-        {
-            redraw();
-        }
-
         public void clear()
         {
             frame = 1;
             frameChanged(this, new FrameEventArgs(frame));
 
             animation = false;
+            loaded = false;
+
             dataCleared(this, new EventArgs());
             brain.clear();
         }
@@ -361,9 +370,24 @@ namespace Brain
 
         protected override void changeSize()
         {
-            layer.Height = layer.Parent.Height - 116;
-            layer.Width = layer.Parent.Width - 148;
+            layer.Height = layer.Parent.Height - 58;
+            layer.Width = layer.Parent.Width - 168;
+
+            if (sequenceBar)
+                layer.Height -= 100;
+
             initializeGraphics();
+        }
+
+        public void relocate(bool seq)
+        {
+            sequenceBar = seq;
+            resize();
+
+            if (seq)
+                layer.Location = new Point(10, 110);
+            else
+                layer.Location = new Point(10, 10);
         }
 
         public void labelChanged(bool value)
@@ -398,6 +422,7 @@ namespace Brain
 
             clear();
             start(length);
+            loaded = true;
 
             setMode(Mode.Query);
             return this.mode;

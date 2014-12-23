@@ -25,6 +25,7 @@ namespace Brain
             graphics = n.getGraphics();
             this.wall = wall;
 
+            //0-góra, 1-lewo, 2-prawo, 3-dół
             switch(wall)
             {
                 case 0:
@@ -142,14 +143,6 @@ namespace Brain
             }
         }
 
-        public float Radius
-        {
-            get
-            {
-                return 16;
-            }
-        }
-
         public AnimatedSynapse Output
         {
             get
@@ -159,6 +152,14 @@ namespace Brain
             set
             {
                 synapse = value;
+            }
+        }
+
+        public float Radius
+        {
+            get
+            {
+                return 16;
             }
         }
     }

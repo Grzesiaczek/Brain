@@ -47,13 +47,16 @@ namespace Brain
             mode = Mode.Auto;
 
             animation.changePace(500);
-            animation.setSequence(sequence);
+            animation.balanceStarted += new EventHandler(balanceStarted);
             animation.balanceFinished += new EventHandler(balanceFinished);
             animation.animationStop += new EventHandler(animationStop);
             animation.neuronShifted += new EventHandler(neuronShifted);
             animation.dataCleared += new EventHandler(dataCleared);
+            animation.dataLoaded += new EventHandler(dataLoaded);
             animation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
             
+            animation.load();
+            animation.setSequence(sequence);
             chart.setNeurons(animation.getNeurons());
         }
 
@@ -61,16 +64,12 @@ namespace Brain
         {
             buttonOpen.Enabled = true;
             buttonSave.Enabled = true;
+
+            buttonPlay.Enabled = true;
+            buttonBalance.Enabled = true;
+
             buttonBack.Enabled = true;
             buttonForth.Enabled = true;
-            buttonPaceUp.Enabled = true;
-            buttonPaceDown.Enabled = true;
-            buttonSimulate.Enabled = true;
-            buttonBalance.Enabled = true;
-            buttonLoad.Enabled = false;
-
-            checkBoxLabel.Enabled = true;
-            checkBoxState.Enabled = true;
         }
 
         private void buttonSimulate_Click(object sender, EventArgs e)
@@ -84,15 +83,18 @@ namespace Brain
 
             buttonBalance.Enabled = false;
             buttonOpen.Enabled = false;
+            buttonSimulate.Enabled = true;
 
-            buttonSimulate.Text = "Stop";
+            buttonBack.Enabled = false;
+            buttonForth.Enabled = false;
+
+            buttonPlay.Text = "Stop";
             animation.start();
         }
 
         private void buttonLoad_Click(object sender, EventArgs e)
         {
             animation.simulate(length);
-            buttonLoad.Enabled = false;
         }
 
         private void buttonPaceUp_Click(object sender, EventArgs e)
@@ -120,10 +122,7 @@ namespace Brain
 
         private void buttonReset_Click(object sender, EventArgs e)
         {
-            if (mode == Mode.Manual)
-                animation.clear();
-
-            labelFrame.Text = "1";
+            animation.clear();
             animation.redraw();
         }
 
@@ -227,29 +226,21 @@ namespace Brain
 
         private void buttonBalance_Click(object sender, EventArgs e)
         {
-            balance();
+            animation.balance();
         }
 
-        private void balance()
+        private void balanceStarted(object sender, EventArgs e)
         {
-            buttonSimulate.Enabled = false;
-            buttonBalance.Enabled = false;
-
-            MinimumSize = Size;
-            MaximumSize = Size;
-
-            animation.balance();
+            layerMenu.Enabled = false;
         }
 
         private void balanceFinished(object sender, EventArgs e)
         {
             if(mode != Mode.Manual)
-                buttonSimulate.Enabled = true;
+                buttonPlay.Enabled = true;
 
             buttonBalance.Enabled = false;
-
-            MinimumSize = new Size(1000, 800);
-            MaximumSize = new Size(0, 0);
+            layerMenu.Enabled = true;
         }
 
         private void checkBoxLabel_CheckedChanged(object sender, EventArgs e)
@@ -308,12 +299,16 @@ namespace Brain
                         layerSequence.Visible = false;
                     }
                     break;
+                case Keys.F11:
+                    animation.stopBalance();
+                    layerMenu.Enabled = true;
+                    break;
             }
         }
 
         private void resize(object sender, EventArgs e)
         {
-            layerMenu.Left = Width - 128;
+            layerMenu.Left = Width - 148;
 
             if (WindowState != state)
             {
@@ -331,12 +326,14 @@ namespace Brain
 
         private void radioButtonAnimation_CheckedChanged(object sender, EventArgs e)
         {
-            if (!radioButtonAnimation.Checked)
+            if (!radioButtonAuto.Checked)
                 return;
 
             mode = Mode.Auto;
             animation.setMode(Mode.Auto);
-            buttonSimulate.Enabled = true;
+
+            buttonPlay.Enabled = true;
+            buttonQuery.Enabled = false;
         }
 
         private void radioButtonManual_CheckedChanged(object sender, EventArgs e)
@@ -346,15 +343,39 @@ namespace Brain
 
             mode = Mode.Manual;
             animation.setMode(Mode.Manual);
-            buttonSimulate.Enabled = false;
-            
+
+            buttonPlay.Enabled = false;
+            buttonQuery.Enabled = false;
+            /*
             if (MessageBox.Show("Reset all data?", "Data Reset", MessageBoxButtons.YesNo) == DialogResult.No)
-                return;
+                return;*/
 
             animation.clear();
         }
 
         private void radioButtonQuery_CheckedChanged(object sender, EventArgs e)
+        {
+            newQuery();
+
+            if (mode == Mode.Query)
+                buttonQuery.Enabled = true;
+            else
+            {
+                buttonQuery.Enabled = false;
+
+                if (mode == Mode.Auto)
+                    radioButtonAuto.Checked = true;
+                else
+                    radioButtonManual.Checked = true;
+            }
+        }
+
+        private void buttonQuery_Click(object sender, EventArgs e)
+        {
+            newQuery();
+        }
+
+        private void newQuery()
         {
             if (!radioButtonQuery.Checked)
                 return;
@@ -364,9 +385,10 @@ namespace Brain
 
         private void animationStop(object sender, EventArgs e)
         {
-            buttonLoad.Text = "Start";
+            buttonPlay.Text = "Play";
             buttonBalance.Enabled = true;
             buttonOpen.Enabled = true;
+            buttonSimulate.Enabled = true;
         }
 
         private void frameChanged(object sender, FrameEventArgs e)
@@ -381,7 +403,32 @@ namespace Brain
 
         private void dataCleared(object sender, EventArgs e)
         {
-            buttonLoad.Enabled = true;
+            buttonPlay.Text = "Play";
+            buttonPlay.Enabled = false;
+        }
+
+        private void dataLoaded(object sender, EventArgs e)
+        {
+            buttonPlay.Enabled = true;
+        }
+
+        private void checkBoxSequence_CheckedChanged(object sender, EventArgs e)
+        {
+            layerSequence.Visible = checkBoxSequence.Checked;
+            animation.relocate(checkBoxSequence.Checked);
+        }
+
+        private void trackBarPace_Scroll(object sender, EventArgs e)
+        {
+            pace = trackBarPace.Value * 100;
+            animation.changePace(pace);
+            labelPace.Text = pace.ToString();
+        }
+
+        private void trackBarLength_Scroll(object sender, EventArgs e)
+        {
+            length = trackBarLength.Value * 10;
+            labelLength.Text = length.ToString();
         }
     }
 }

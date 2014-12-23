@@ -53,6 +53,7 @@
     <Compile Include="AnimatedNeuron.cs" />
     <Compile Include="AnimatedReceptor.cs" />
     <Compile Include="AnimatedSynapse.cs" />
+    <Compile Include="Creation.cs" />
     <Compile Include="Sequence.cs" />
     <Compile Include="Simulation.cs">
       <SubType>Form</SubType>

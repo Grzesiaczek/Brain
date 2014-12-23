@@ -13,7 +13,7 @@
 	</neurons>
 	<receptors>
     <receptor alpha='2' beta='6' value ='0.8'>saturn</receptor>
-    <receptor alpha='1' beta='5' value ='0.8'>jupiter</receptor>
+    <receptor alpha='1' beta='4' value ='0.8'>jupiter</receptor>
 	</receptors>
 	<sentences>
 		<sentence>sun is yellow star</sentence>

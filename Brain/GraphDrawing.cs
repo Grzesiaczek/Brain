@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Brain
 {
-    class GraphDrawing
+    class GraphBalancing
     {
-        List<DrawnNeuron> neurons;
-        List<DrawnReceptor> receptors;
+        List<BalancedNeuron> neurons;
+        List<BalancedReceptor> receptors;
         List<AnimatedSynapse> synapses;
 
         System.Windows.Forms.Timer timer;
@@ -22,71 +22,81 @@ namespace Brain
         float step;
 
         int steps;
+        bool action;
 
-        public GraphDrawing(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors, int steps)
+        static GraphBalancing instance = new GraphBalancing();
+
+        private GraphBalancing()
         {
-            this.neurons = new List<DrawnNeuron>();
-            this.receptors = new List<DrawnReceptor>();
-
-            foreach (AnimatedNeuron neuron in neurons)
-                this.neurons.Add(new DrawnNeuron(neuron));
-
-            foreach (AnimatedReceptor receptor in receptors)
-                this.receptors.Add(new DrawnReceptor(receptor));
-
-            this.synapses = synapses;
-            this.steps = steps;
-
-            alpha = -0.2f;
-            beta = 2.0f;
-            step = 0.2f;
-        }
-
-        public void animate(Graphics g)
-        {
-            buffer = g;
-
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
             timer.Interval = 25;
+        }
+
+        public static GraphBalancing getInstance()
+        {
+            return instance;
+        }
+
+        public void animate(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors, Graphics g, int steps)
+        {
+            if (action)
+                timer.Stop();
+
+            this.neurons = new List<BalancedNeuron>();
+            this.receptors = new List<BalancedReceptor>();
+
+            foreach (AnimatedNeuron neuron in neurons)
+                this.neurons.Add(new BalancedNeuron(neuron));
+
+            foreach (AnimatedReceptor receptor in receptors)
+                this.receptors.Add(new BalancedReceptor(receptor));
+
+            this.synapses = synapses;
+            this.steps = steps;
+            buffer = g;
+
+            alpha = -0.2f;
+            beta = 2.0f;
+            step = 0.25f;
+
             timer.Start();
         }
 
         void tick(object sender, EventArgs e)
         {
             int length = steps;
-
+            /*
             if(delta < 0.5)
-                length = (int)(steps / Math.Max(0.1f, delta) / 2);
+                length = (int)(steps / Math.Max(0.1f, delta) / 2);*/
 
             for (int i = 0; i < length; i++)
                 calculate();
 
-            if (Math.Abs(delta) < 0.01)
+            if (Math.Abs(delta) < 0.05)
             {
                 timer.Stop();
+                action = false;
                 balanceFinished(this, new EventArgs());
             }
 
-            foreach(DrawnNeuron n in neurons)
+            foreach(BalancedNeuron n in neurons)
                 n.draw(1);
 
             foreach (AnimatedSynapse s in synapses)
                 s.recalculate();
-
-            drawing(this, new EventArgs());
         }
 
         void calculate()
         {
             delta = 0;
 
-            foreach (DrawnNeuron n1 in neurons)
+            foreach (BalancedNeuron n1 in neurons)
             {
                 n1.zero();
                 n1.repulse(buffer.VisibleClipBounds.Size, beta / (2 * neurons.Count));
 
-                foreach (DrawnNeuron n2 in neurons)
+                foreach (BalancedNeuron n2 in neurons)
                 {
                     if (n1 == n2)
                         continue;
@@ -94,7 +104,7 @@ namespace Brain
                     n1.repulse(n2.getPosition(), beta);
                 }
                 
-                foreach(DrawnReceptor r in receptors)
+                foreach(BalancedReceptor r in receptors)
                     n1.repulse(r.getPosition(), beta / 2);
 
                 foreach (AnimatedSynapse s in n1.getNeuron().Output)
@@ -104,12 +114,12 @@ namespace Brain
                     n1.attract(s.Pre, alpha + alpha * s.getWeight());
             }
 
-            foreach (DrawnReceptor r1 in receptors)
+            foreach (BalancedReceptor r1 in receptors)
             {
                 r1.zero();
                 r1.attract(alpha);
 
-                foreach (DrawnReceptor r2 in receptors)
+                foreach (BalancedReceptor r2 in receptors)
                 {
                     if (r1 == r2)
                         continue;
@@ -118,26 +128,31 @@ namespace Brain
                 }
             }
 
-            foreach (DrawnNeuron neuron in neurons)
+            foreach (BalancedNeuron neuron in neurons)
                 delta += neuron.update(step);
 
-            foreach (DrawnReceptor r in receptors)
+            foreach (BalancedReceptor r in receptors)
                 delta += r.update(step);
         }
 
-        public event EventHandler drawing;
+        public void stop()
+        {
+            timer.Stop();
+            action = false;
+        }
+
         public event EventHandler balanceFinished;
     }
 
-    class DrawnNeuron
+    class BalancedNeuron
     {
         AnimatedNeuron neuron;
         PointF shift;
         PointF position;
 
-        static float k = 200;
+        static float k = 250;
 
-        public DrawnNeuron(AnimatedNeuron neuron)
+        public BalancedNeuron(AnimatedNeuron neuron)
         {
             this.neuron = neuron;
             position = new PointF(neuron.Position.X, neuron.Position.Y);
@@ -222,7 +237,7 @@ namespace Brain
         }
     }
 
-    class DrawnReceptor
+    class BalancedReceptor
     {
         AnimatedReceptor receptor;
         PointF shift;
@@ -231,7 +246,7 @@ namespace Brain
         static float k = 80;
         int wall;
 
-        public DrawnReceptor(AnimatedReceptor ar)
+        public BalancedReceptor(AnimatedReceptor ar)
         {
             receptor = ar;
             wall = ar.getWall();
@@ -258,7 +273,7 @@ namespace Brain
             shift.Y += (float)(factor * delta.Y / k);
         }
 
-        public void repulse(DrawnReceptor r, double factor)
+        public void repulse(BalancedReceptor r, double factor)
         {
             PointF delta = diff(position, r.position);
 
