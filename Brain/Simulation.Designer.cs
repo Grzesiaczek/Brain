@@ -72,7 +72,7 @@
             this.buttonPlay.TabIndex = 10;
             this.buttonPlay.Text = "Play";
             this.buttonPlay.UseVisualStyleBackColor = true;
-            this.buttonPlay.Click += new System.EventHandler(this.buttonSimulate_Click);
+            this.buttonPlay.Click += new System.EventHandler(this.buttonPlay_Click);
             // 
             // buttonReset
             // 
@@ -121,7 +121,7 @@
             this.labelPace.Name = "labelPace";
             this.labelPace.Size = new System.Drawing.Size(48, 20);
             this.labelPace.TabIndex = 6;
-            this.labelPace.Text = "500";
+            this.labelPace.Text = "800";
             this.labelPace.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelFrame
@@ -294,7 +294,7 @@
             this.trackBarPace.TabIndex = 0;
             this.trackBarPace.TickFrequency = 100;
             this.trackBarPace.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarPace.Value = 5;
+            this.trackBarPace.Value = 8;
             this.trackBarPace.Scroll += new System.EventHandler(this.trackBarPace_Scroll);
             // 
             // checkBoxSequence

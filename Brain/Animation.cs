@@ -13,9 +13,6 @@ namespace Brain
 {
     class Animation : Layer
     {
-        Brain brain;
-        List<ReceptorData> receptors2;
-
         GraphBalancing balancing;
         ShiftedNeuron shift;
         Sequence sequence;
@@ -39,14 +36,11 @@ namespace Brain
         public event EventHandler balanceStarted;
         public event EventHandler balanceFinished;
         public event EventHandler neuronShifted;
-        public event EventHandler dataCleared;
-        public event EventHandler dataLoaded;
+        public event EventHandler queryAccepted;
         public event EventHandler<FrameEventArgs> frameChanged;
 
         public Animation(GroupBox groupBox) : base(groupBox)
         {
-            brain = new Brain();
-
             balancing = GraphBalancing.getInstance();
             balancing.balanceFinished += balanceEnded;
 
@@ -72,34 +66,6 @@ namespace Brain
             frameChanged += new EventHandler<FrameEventArgs>(seq.frameChanged);
         }
 
-        public void load()
-        {
-            DateTime date = DateTime.Now;
-            String name = date.ToString("yyyyMMdd-HHmmss");
-
-            StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
-            XmlDocument xml = new XmlDocument();
-            xml.Load(reader);
-            reader.Close();
-
-            XmlNode node = xml.ChildNodes.Item(1).ChildNodes.Item(1);
-            receptors2 = new List<ReceptorData>();
-
-            foreach (XmlNode xn in node.ChildNodes)
-                receptors2.Add(new ReceptorData(xn));
-
-            node = node.NextSibling;
-
-            foreach (XmlNode xn in node.ChildNodes)
-                brain.addSentence(xn.InnerText);
-
-            brain.addReceptors(receptors2);
-
-            start(250);
-            loadNeurons();
-            loaded = true;
-        }
-
         PointF randomPoint(Random random)
         {
             float x = 40 + random.Next() % (buffer.Graphics.VisibleClipBounds.Width - 80);
@@ -107,7 +73,7 @@ namespace Brain
             return new PointF(x, y);
         }
 
-        void loadNeurons()
+        public void loadNeurons(List<Neuron> list)
         {
             StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
             Random random = new Random(DateTime.Now.Millisecond);
@@ -140,7 +106,7 @@ namespace Brain
                 }
                 catch (Exception) { }
 
-                Neuron n = brain.getNeuron(xn.InnerText);
+                Neuron n = list.Find(k => k.Word == xn.InnerText);
                 AnimatedNeuron an = new AnimatedNeuron(n, g, position);
                 neurons.Add(an);
 
@@ -189,13 +155,6 @@ namespace Brain
                 redraw();
         }
 
-        public bool start(int length)
-        {
-            brain.simulate(length);
-            dataLoaded(this, new EventArgs());
-            return true;
-        }
-
         public void start()
         {
             animation = true;
@@ -212,14 +171,6 @@ namespace Brain
         public bool started()
         {
             return animation;
-        }
-
-        public void simulate(int length)
-        {
-            this.length = length;
-            brain.simulate(length);
-            loaded = true;
-            dataLoaded(this, new EventArgs());
         }
 
         public void redraw()
@@ -310,31 +261,6 @@ namespace Brain
             balanceFinished(this, new EventArgs());
         }
 
-        public void clear()
-        {
-            frame = 1;
-            frameChanged(this, new FrameEventArgs(frame));
-
-            animation = false;
-            loaded = false;
-
-            dataCleared(this, new EventArgs());
-            brain.clear();
-        }
-
-        public void tick()
-        {
-            brain.tick();
-        }
-
-        public void undo()
-        {
-            if (frame == 1)
-                return;
-
-            brain.undo();
-        }
-
         public void back()
         {
             if (frame > 1)
@@ -406,6 +332,17 @@ namespace Brain
             redraw();
         }
 
+        public void load(int value)
+        {
+            loaded = true;
+            length = value;
+        }
+
+        public void unload()
+        {
+            loaded = false;
+        }
+
         public Mode newQuery(Mode mode)
         {
             Query query = new Query();
@@ -420,8 +357,7 @@ namespace Brain
             AnimatedReceptor ar = receptors[query.Index];
             ar.setInterval(query.Interval);
 
-            clear();
-            start(length);
+            queryAccepted(this, new EventArgs());
             loaded = true;
 
             setMode(Mode.Query);

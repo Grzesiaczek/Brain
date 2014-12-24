@@ -16,12 +16,15 @@ namespace Brain
 {
     public partial class Simulation : Form
     {
+        Brain brain;
+        List<ReceptorData> receptors;
+
         Animation animation;
         Chart chart;
         Sequence sequence;
 
-        int length = 250;
-        int pace = 500;
+        int length;
+        int pace;
 
         Mode mode;
         FormWindowState state;
@@ -37,6 +40,7 @@ namespace Brain
         void initialize()
         {
             Show();
+            brain = new Brain();
 
             animation = new Animation(layerAnimation);
             chart = new Chart(layerChart);
@@ -46,18 +50,58 @@ namespace Brain
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             mode = Mode.Auto;
 
-            animation.changePace(500);
+            length = trackBarLength.Value * 10;
+            pace = trackBarPace.Value * 100;
+
+            animation.changePace(pace);
             animation.balanceStarted += new EventHandler(balanceStarted);
             animation.balanceFinished += new EventHandler(balanceFinished);
             animation.animationStop += new EventHandler(animationStop);
             animation.neuronShifted += new EventHandler(neuronShifted);
-            animation.dataCleared += new EventHandler(dataCleared);
-            animation.dataLoaded += new EventHandler(dataLoaded);
+            animation.queryAccepted += new EventHandler(queryAccepted);
             animation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
             
-            animation.load();
+            load();
             animation.setSequence(sequence);
             chart.setNeurons(animation.getNeurons());
+        }
+
+        public void load()
+        {
+            DateTime date = DateTime.Now;
+            String name = date.ToString("yyyyMMdd-HHmmss");
+
+            StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
+            XmlDocument xml = new XmlDocument();
+            xml.Load(reader);
+            reader.Close();
+
+            XmlNode node = xml.ChildNodes.Item(1).ChildNodes.Item(1);
+            receptors = new List<ReceptorData>();
+
+            foreach (XmlNode xn in node.ChildNodes)
+                receptors.Add(new ReceptorData(xn));
+
+            node = node.NextSibling;
+
+            foreach (XmlNode xn in node.ChildNodes)
+                brain.addSentence(xn.InnerText);
+
+            brain.addReceptors(receptors);
+            animation.loadNeurons(brain.Neurons);
+            simulate();
+        }
+
+        void simulate()
+        {
+            brain.simulate(length);
+            animation.load(length);
+        }
+
+        void clear()
+        {
+            animation.unload();
+            brain.clear();
         }
 
         void prepareAnimation()
@@ -72,7 +116,7 @@ namespace Brain
             buttonForth.Enabled = true;
         }
 
-        private void buttonSimulate_Click(object sender, EventArgs e)
+        private void buttonPlay_Click(object sender, EventArgs e)
         {
             if (animation.started())
             {
@@ -94,7 +138,7 @@ namespace Brain
 
         private void buttonLoad_Click(object sender, EventArgs e)
         {
-            animation.simulate(length);
+            simulate();
         }
 
         private void buttonPaceUp_Click(object sender, EventArgs e)
@@ -122,14 +166,15 @@ namespace Brain
 
         private void buttonReset_Click(object sender, EventArgs e)
         {
-            animation.clear();
+            brain.clear();
+            animation.unload();
             animation.redraw();
         }
 
         private void buttonBack_Click(object sender, EventArgs e)
         {
             if (mode == Mode.Manual)
-                animation.undo();
+                brain.undo();
 
             animation.back();
         }
@@ -137,7 +182,7 @@ namespace Brain
         private void buttonForth_Click(object sender, EventArgs e)
         {
             if (mode == Mode.Manual)
-                animation.tick();
+                brain.tick();
 
             animation.forth();
         }
@@ -350,7 +395,7 @@ namespace Brain
             if (MessageBox.Show("Reset all data?", "Data Reset", MessageBoxButtons.YesNo) == DialogResult.No)
                 return;*/
 
-            animation.clear();
+            clear();
         }
 
         private void radioButtonQuery_CheckedChanged(object sender, EventArgs e)
@@ -401,15 +446,10 @@ namespace Brain
             buttonBalance.Enabled = true;
         }
 
-        private void dataCleared(object sender, EventArgs e)
+        public void queryAccepted(object sender, EventArgs e)
         {
-            buttonPlay.Text = "Play";
-            buttonPlay.Enabled = false;
-        }
-
-        private void dataLoaded(object sender, EventArgs e)
-        {
-            buttonPlay.Enabled = true;
+            clear();
+            simulate();
         }
 
         private void checkBoxSequence_CheckedChanged(object sender, EventArgs e)

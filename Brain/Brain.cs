@@ -145,11 +145,6 @@ namespace Brain
             }
         }
 
-        public Neuron getNeuron(String word)
-        {
-            return neurons.Find(k => k.Word == word);
-        }
-
         public void load(String path)
         {
             StreamReader reader = new StreamReader(path);
@@ -182,6 +177,14 @@ namespace Brain
             {
                 String line = "" + s.Factor + ';' + ';' + s.Weight;
                 writer.WriteLine(line);
+            }
+        }
+
+        public List<Neuron> Neurons
+        {
+            get
+            {
+                return neurons;
             }
         }
     }
