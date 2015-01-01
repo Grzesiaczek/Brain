@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace Brain
 {
-    enum Mode { Auto, Manual, Query }
+    enum Mode { Auto, Creation, Manual, Query }
 
     class NeuronData
     {
@@ -204,110 +204,6 @@ namespace Brain
         }
     }
 
-    class Circle
-    {
-        PointF center;
-        PointF position;
-        PointF border;
-
-        float radius;
-        float diameter;
-
-        public Circle(PointF center, float radius)
-        {
-            this.center = center;
-            this.radius = radius;
-
-            position = new PointF(center.X - radius, center.Y - radius);
-            border = new PointF(position.X - 1, position.Y - 1);
-            diameter = 2 * radius;
-        }
-
-        public bool click(PointF pos)
-        {
-            double x = pos.X - center.X;
-            double y = pos.Y - center.Y;
-                
-            if(Math.Sqrt(x*x + y*y) < radius)
-                return true;
-
-            return false;
-        }
-
-        public void update(PointF center)
-        {
-            this.center = center;
-            position = new PointF(center.X - radius, center.Y - radius);
-            border = new PointF(position.X - 1, position.Y - 1);
-        }
-
-        public void draw(Graphics g, double value, Pen pen, String val)
-        {
-            draw(g, value, pen);
-            drawState(g, val);
-        }
-
-        public void draw(Graphics g, Brush brush, Pen pen, String val)
-        {
-            draw(g, brush, pen);
-            drawState(g, val);
-        }
-
-        public void draw(Graphics g, double value, Pen pen)
-        {
-            Brush inner = Brushes.LightYellow;
-            Brush outer = Brushes.LightGreen;
-
-            if (value < 0)
-            {
-                value = -value;
-                inner = Brushes.LightSkyBlue;
-                outer = Brushes.LightYellow;
-            }
-
-            g.FillEllipse(outer, position.X, position.Y, diameter, diameter);
-            g.DrawEllipse(pen, border.X, border.Y, diameter + 2, diameter + 2);
-
-            float r = radius * (1 - (float)value);
-            float d = 2 * r; 
-            float x = center.X - r;
-            float y = center.Y - r;
-
-            g.FillEllipse(inner, x, y, d, d);
-        }
-
-        void drawState(Graphics g, String val)
-        {
-            PointF position = new PointF((float)(center.X + 0.6),center.Y + 1);
-
-            if (val[0] == '-')
-                position.X -= 1.2f;
-
-            StringFormat format = new StringFormat();
-            format.LineAlignment = StringAlignment.Center;
-            format.Alignment = StringAlignment.Center;
-            g.DrawString(val, new Font("Arial", Config.Diameter / 4 + 3, FontStyle.Bold), Brushes.DarkSlateGray, position, format);
-        }
-
-        public void draw(Graphics g, Brush brush, Pen pen)
-        {
-            g.FillEllipse(brush, position.X, position.Y, diameter, diameter);
-            g.DrawEllipse(pen, border.X, border.Y, diameter + 2, diameter + 2);
-        }
-
-        public PointF Center
-        {
-            get
-            {
-                return center;
-            }
-            set
-            {
-                center = value;
-            }
-        }
-    }
-
     class FrameEventArgs : EventArgs
     {
         int frame;
@@ -323,6 +219,55 @@ namespace Brain
             {
                 return frame;
             }
+        }
+    }
+
+    class CreationData
+    {
+        Synapse synapse;
+        float start;
+        float finish;
+
+        public CreationData(Synapse synapse, float start, float finish)
+        {
+            this.synapse = synapse;
+            this.start = start;
+            this.finish = finish;
+        }
+
+        public Synapse getSynapse()
+        {
+            return synapse;
+        }
+
+        public float step(int interval)
+        {
+            if (interval == 0)
+                return 0;
+
+            return (finish - start) / interval;
+        }
+
+        public void draw(Graphics g, int line)
+        {
+            Pen pen = new Pen(Brushes.DarkSlateGray, 2);
+            float y = 50 + 36 * line;
+
+            Circle left = new Circle(new PointF(64, y), 12);
+            Circle right = new Circle(new PointF(100, y), 12);
+
+            left.draw(g, start, pen);
+            right.draw(g, finish, pen);
+
+            String begin = ((int)(start * 100)).ToString();
+            String end = ((int)(finish * 100)).ToString();
+
+            StringFormat format = new StringFormat();
+            format.Alignment = StringAlignment.Center;
+            format.LineAlignment = StringAlignment.Center;
+
+            g.DrawString(begin, new Font("Times New Roman", 12, FontStyle.Bold), Brushes.DarkSlateBlue, 36, y, format);
+            g.DrawString(end, new Font("Times New Roman", 12, FontStyle.Bold), Brushes.DarkSlateBlue, 128, y, format);
         }
     }
 }

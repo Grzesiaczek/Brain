@@ -50,10 +50,19 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnimatedNeuron.cs" />
-    <Compile Include="AnimatedReceptor.cs" />
-    <Compile Include="AnimatedSynapse.cs" />
-    <Compile Include="Creation.cs" />
+    <Compile Include="Animation\AnimatedNeuron.cs" />
+    <Compile Include="Animation\AnimatedReceptor.cs" />
+    <Compile Include="Animation\AnimatedSynapse.cs" />
+    <Compile Include="Balancing\BalancedNeuron.cs" />
+    <Compile Include="Balancing\BalancedReceptor.cs" />
+    <Compile Include="Circle.cs" />
+    <Compile Include="Creation\CreationHistory.cs" />
+    <Compile Include="Creation\CreatedElement.cs" />
+    <Compile Include="Creation\CreatedNeuron.cs" />
+    <Compile Include="Creation\CreatedSynapse.cs" />
+    <Compile Include="Creation\Creation.cs" />
+    <Compile Include="Layers\MainLayer.cs" />
+    <Compile Include="Sentence.cs" />
     <Compile Include="Sequence.cs" />
     <Compile Include="Simulation.cs">
       <SubType>Form</SubType>
@@ -61,12 +70,12 @@
     <Compile Include="Simulation.Designer.cs">
       <DependentUpon>Simulation.cs</DependentUpon>
     </Compile>
-    <Compile Include="Brain.cs" />
+    <Compile Include="Brain\Brain.cs" />
     <Compile Include="Chart.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="GraphDrawing.cs" />
+    <Compile Include="Balancing\GraphBalancing.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="Layer.cs" />
+    <Compile Include="Layers\Layer.cs" />
     <Compile Include="Query.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,13 +83,15 @@
       <DependentUpon>Query.cs</DependentUpon>
     </Compile>
     <Compile Include="ShiftedNeuron.cs" />
-    <Compile Include="Neuron.cs" />
+    <Compile Include="Brain\Neuron.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Receptor.cs" />
-    <Compile Include="Animation.cs" />
+    <Compile Include="Brain\Receptor.cs" />
+    <Compile Include="Animation\Animation.cs" />
     <Compile Include="Structures.cs" />
-    <Compile Include="Synapse.cs" />
+    <Compile Include="Brain\Synapse.cs" />
+    <Compile Include="SynapseState.cs" />
+    <Compile Include="Layers\TopLayer.cs" />
     <EmbeddedResource Include="Simulation.resx">
       <DependentUpon>Simulation.cs</DependentUpon>
     </EmbeddedResource>
@@ -144,6 +155,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

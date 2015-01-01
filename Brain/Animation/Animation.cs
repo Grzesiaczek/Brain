@@ -11,11 +11,14 @@ using System.Xml;
 
 namespace Brain
 {
-    class Animation : Layer
+    class Animation : MainLayer, Controller
     {
         GraphBalancing balancing;
-        ShiftedNeuron shift;
         Sequence sequence;
+
+        List<AnimatedNeuron> neurons;
+        List<AnimatedSynapse> synapses;
+        List<AnimatedReceptor> receptors;
 
         bool animation = false;
         bool loaded = false;
@@ -28,14 +31,9 @@ namespace Brain
         int count = 0;
         int length = 250;
 
-        List<AnimatedNeuron> neurons;
-        List<AnimatedSynapse> synapses;
-        List<AnimatedReceptor> receptors;
-
         public event EventHandler animationStop;
         public event EventHandler balanceStarted;
         public event EventHandler balanceFinished;
-        public event EventHandler neuronShifted;
         public event EventHandler queryAccepted;
         public event EventHandler<FrameEventArgs> frameChanged;
 
@@ -47,23 +45,6 @@ namespace Brain
             neurons = new List<AnimatedNeuron>();
             synapses = new List<AnimatedSynapse>();
             receptors = new List<AnimatedReceptor>();
-
-            layer.Location = new Point(10, 110);
-            layer.Visible = true;
-
-            layer.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            layer.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            layer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
-            layer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
-            layer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
-        }
-
-        public void setSequence(Sequence seq)
-        {
-            sequence = seq;
-            seq.setData(neurons, receptors);
-            seq.setInterval(interval);
-            frameChanged += new EventHandler<FrameEventArgs>(seq.frameChanged);
         }
 
         PointF randomPoint(Random random)
@@ -77,6 +58,7 @@ namespace Brain
         {
             StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
             Random random = new Random(DateTime.Now.Millisecond);
+            resize();
 
             XmlDocument xml = new XmlDocument();
             xml.Load(reader);
@@ -85,8 +67,8 @@ namespace Brain
             XmlNode node = xml.ChildNodes.Item(1).FirstChild;
             int counter = 0;
 
-            while (buffer == null)
-                Thread.Sleep(100);
+            if (buffer == null)
+                initializeGraphics();
 
             Graphics g = buffer.Graphics;
 
@@ -141,6 +123,30 @@ namespace Brain
                         }
         }
 
+        public void setSequence(Sequence seq)
+        {
+            sequence = seq;
+            seq.setData(neurons, receptors);
+            seq.setInterval(interval);
+            frameChanged += new EventHandler<FrameEventArgs>(seq.frameChanged);
+        }
+
+        public void create()
+        {
+            foreach (AnimatedNeuron an in neurons)
+                an.create();
+
+            foreach (AnimatedSynapse s in synapses)
+                s.create();
+        }
+
+        public void create(Creation creation)
+        {
+            changeSize();
+            balancing.balance(neurons, synapses, receptors, buffer.Graphics);
+            creation.load(neurons, synapses);
+        }
+
         protected override void tick(object sender, EventArgs e)
         {
             if (frame == length && animation)
@@ -173,26 +179,7 @@ namespace Brain
             return animation;
         }
 
-        public void redraw()
-        {
-            buffer.Graphics.Clear(SystemColors.Control);
-
-            foreach (AnimatedSynapse s in synapses)
-                s.draw(frame);
-
-            foreach (AnimatedSynapse s in synapses)
-                s.drawState(frame);
-
-            foreach (AnimatedNeuron an in neurons)
-                an.draw(frame);
-
-            foreach (AnimatedReceptor ar in receptors)
-                ar.draw(frame);
-
-            buffer.Render(graphics);
-        }
-
-        void animate()
+        protected override void animate()
         {
             if (!loaded)
                 return;
@@ -214,13 +201,32 @@ namespace Brain
                     s.animate(frame, ((float)number * 4) / interval);
             }
             else foreach (AnimatedSynapse s in synapses)
-                    s.draw(frame);
+                    s.draw();
 
             foreach (AnimatedSynapse s in synapses)
                 s.drawState(frame);
 
             foreach (AnimatedNeuron an in neurons)
                 an.animate(frame, count, (double)count / interval);
+
+            foreach (AnimatedReceptor ar in receptors)
+                ar.draw(frame);
+
+            buffer.Render(graphics);
+        }
+
+        protected override void redraw()
+        {
+            buffer.Graphics.Clear(SystemColors.Control);
+
+            foreach (AnimatedSynapse s in synapses)
+                s.draw();
+
+            foreach (AnimatedSynapse s in synapses)
+                s.drawState(frame);
+
+            foreach (AnimatedNeuron an in neurons)
+                an.draw(frame);
 
             foreach (AnimatedReceptor ar in receptors)
                 ar.draw(frame);
@@ -243,7 +249,11 @@ namespace Brain
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.State = false;
 
-            balancing.animate(neurons, synapses, receptors, buffer.Graphics, 80);
+            if(layer.Visible)
+                balancing.animate(neurons, synapses, receptors, buffer.Graphics, 80);
+            else
+                balancing.animate(neurons, synapses, receptors, buffer.Graphics, 120);
+
             balanceStarted(this, new EventArgs());
         }
 
@@ -374,46 +384,17 @@ namespace Brain
             return result;
         }
 
-        private void mouseClick(object sender, MouseEventArgs e)
-        {
-            if (shift != null && mode == Mode.Manual)
-                shift.activate();
-        }
-
-        private void mouseDown(object sender, MouseEventArgs e)
+        protected override void mouseDown(object sender, MouseEventArgs e)
         {
             foreach (AnimatedNeuron neuron in neurons)
             {
                 if (neuron.click(e.Location))
                 {
                     shift = new ShiftedNeuron(neuron, new PointF(e.X, e.Y), neurons);
-                    neurons[neurons.IndexOf(neuron)] = shift;
-
                     break;
                 }
             }
 
-            redraw();
-        }
-
-        private void mouseMove(object sender, MouseEventArgs e)
-        {
-            if (shift == null)
-                return;
-
-            shift.move(e.X, e.Y);
-            redraw();
-        }
-
-        private void mouseUp(object sender, MouseEventArgs e)
-        {
-            if (shift == null)
-                return;
-
-            shift.save();
-            shift = null;
-
-            neuronShifted(this, new EventArgs());
             redraw();
         }
     }

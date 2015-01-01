@@ -76,25 +76,30 @@ namespace Brain
 
         public void updateGraphics(Graphics g)
         {
-            float fx = g.VisibleClipBounds.Width / graphics.VisibleClipBounds.Width;
-            float fy = g.VisibleClipBounds.Height / graphics.VisibleClipBounds.Height;
-            graphics = g;
-
-            switch(wall)
+            try
             {
-                case 0:
-                    circle.update(new PointF(fx * circle.Center.X, 0));
-                    break;
-                case 1:
-                    circle.update(new PointF(0, fx * circle.Center.Y));
-                    break;
-                case 2:
-                    circle.update(new PointF(graphics.VisibleClipBounds.Width - 1, fx * circle.Center.Y));
-                    break;
-                case 3:
-                    circle.update(new PointF(fx * circle.Center.X, graphics.VisibleClipBounds.Height - 1));
-                    break;
+                float fx = g.VisibleClipBounds.Width / graphics.VisibleClipBounds.Width;
+                float fy = g.VisibleClipBounds.Height / graphics.VisibleClipBounds.Height;
+
+                switch (wall)
+                {
+                    case 0:
+                        circle.update(new PointF(fx * circle.Center.X, 0));
+                        break;
+                    case 1:
+                        circle.update(new PointF(0, fx * circle.Center.Y));
+                        break;
+                    case 2:
+                        circle.update(new PointF(graphics.VisibleClipBounds.Width - 1, fx * circle.Center.Y));
+                        break;
+                    case 3:
+                        circle.update(new PointF(fx * circle.Center.X, graphics.VisibleClipBounds.Height - 1));
+                        break;
+                }
             }
+            catch (Exception) { }
+
+            graphics = g;
         }
 
         public int getWall()

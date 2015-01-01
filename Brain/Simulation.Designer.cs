@@ -46,6 +46,7 @@
             this.checkBoxState = new System.Windows.Forms.CheckBox();
             this.changeFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.layerMenu = new System.Windows.Forms.GroupBox();
+            this.radioButtonCreation = new System.Windows.Forms.RadioButton();
             this.trackBarLength = new System.Windows.Forms.TrackBar();
             this.buttonQuery = new System.Windows.Forms.Button();
             this.trackBarPace = new System.Windows.Forms.TrackBar();
@@ -59,6 +60,8 @@
             this.layerAnimation = new System.Windows.Forms.GroupBox();
             this.layerChart = new System.Windows.Forms.GroupBox();
             this.layerSequence = new System.Windows.Forms.GroupBox();
+            this.layerCreation = new System.Windows.Forms.GroupBox();
+            this.layerSentence = new System.Windows.Forms.GroupBox();
             this.layerMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLength)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarPace)).BeginInit();
@@ -106,13 +109,13 @@
             // 
             // buttonSimulate
             // 
-            this.buttonSimulate.Location = new System.Drawing.Point(22, 443);
+            this.buttonSimulate.Location = new System.Drawing.Point(22, 435);
             this.buttonSimulate.Name = "buttonSimulate";
             this.buttonSimulate.Size = new System.Drawing.Size(80, 23);
             this.buttonSimulate.TabIndex = 5;
             this.buttonSimulate.Text = "Simulate";
             this.buttonSimulate.UseVisualStyleBackColor = true;
-            this.buttonSimulate.Click += new System.EventHandler(this.buttonLoad_Click);
+            this.buttonSimulate.Click += new System.EventHandler(this.buttonSimulate_Click);
             // 
             // labelPace
             // 
@@ -204,7 +207,7 @@
             this.checkBoxLabel.BackColor = System.Drawing.SystemColors.Control;
             this.checkBoxLabel.Checked = true;
             this.checkBoxLabel.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLabel.Location = new System.Drawing.Point(26, 658);
+            this.checkBoxLabel.Location = new System.Drawing.Point(24, 671);
             this.checkBoxLabel.Name = "checkBoxLabel";
             this.checkBoxLabel.Size = new System.Drawing.Size(52, 17);
             this.checkBoxLabel.TabIndex = 17;
@@ -217,7 +220,7 @@
             this.checkBoxState.AutoSize = true;
             this.checkBoxState.Checked = true;
             this.checkBoxState.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxState.Location = new System.Drawing.Point(26, 690);
+            this.checkBoxState.Location = new System.Drawing.Point(24, 703);
             this.checkBoxState.Name = "checkBoxState";
             this.checkBoxState.Size = new System.Drawing.Size(51, 17);
             this.checkBoxState.TabIndex = 18;
@@ -227,6 +230,7 @@
             // 
             // layerMenu
             // 
+            this.layerMenu.Controls.Add(this.radioButtonCreation);
             this.layerMenu.Controls.Add(this.trackBarLength);
             this.layerMenu.Controls.Add(this.buttonQuery);
             this.layerMenu.Controls.Add(this.trackBarPace);
@@ -255,10 +259,23 @@
             this.layerMenu.TabIndex = 19;
             this.layerMenu.TabStop = false;
             // 
+            // radioButtonCreation
+            // 
+            this.radioButtonCreation.AutoSize = true;
+            this.radioButtonCreation.Checked = true;
+            this.radioButtonCreation.Location = new System.Drawing.Point(26, 480);
+            this.radioButtonCreation.Name = "radioButtonCreation";
+            this.radioButtonCreation.Size = new System.Drawing.Size(64, 17);
+            this.radioButtonCreation.TabIndex = 26;
+            this.radioButtonCreation.TabStop = true;
+            this.radioButtonCreation.Text = "Creation";
+            this.radioButtonCreation.UseVisualStyleBackColor = true;
+            this.radioButtonCreation.CheckedChanged += new System.EventHandler(this.radioButtonCreation_CheckedChanged);
+            // 
             // trackBarLength
             // 
             this.trackBarLength.AutoSize = false;
-            this.trackBarLength.Location = new System.Drawing.Point(10, 410);
+            this.trackBarLength.Location = new System.Drawing.Point(10, 402);
             this.trackBarLength.Maximum = 50;
             this.trackBarLength.Minimum = 5;
             this.trackBarLength.Name = "trackBarLength";
@@ -273,7 +290,7 @@
             // buttonQuery
             // 
             this.buttonQuery.Enabled = false;
-            this.buttonQuery.Location = new System.Drawing.Point(20, 600);
+            this.buttonQuery.Location = new System.Drawing.Point(18, 613);
             this.buttonQuery.Name = "buttonQuery";
             this.buttonQuery.Size = new System.Drawing.Size(80, 23);
             this.buttonQuery.TabIndex = 25;
@@ -312,7 +329,7 @@
             // 
             // buttonLengthUp
             // 
-            this.buttonLengthUp.Location = new System.Drawing.Point(84, 373);
+            this.buttonLengthUp.Location = new System.Drawing.Point(84, 365);
             this.buttonLengthUp.Name = "buttonLengthUp";
             this.buttonLengthUp.Size = new System.Drawing.Size(20, 24);
             this.buttonLengthUp.TabIndex = 24;
@@ -322,7 +339,7 @@
             // 
             // buttonLengthDown
             // 
-            this.buttonLengthDown.Location = new System.Drawing.Point(16, 373);
+            this.buttonLengthDown.Location = new System.Drawing.Point(16, 365);
             this.buttonLengthDown.Name = "buttonLengthDown";
             this.buttonLengthDown.Size = new System.Drawing.Size(20, 24);
             this.buttonLengthDown.TabIndex = 23;
@@ -334,7 +351,7 @@
             // 
             this.labelLength.BackColor = System.Drawing.SystemColors.Control;
             this.labelLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.labelLength.Location = new System.Drawing.Point(36, 374);
+            this.labelLength.Location = new System.Drawing.Point(36, 366);
             this.labelLength.Name = "labelLength";
             this.labelLength.Size = new System.Drawing.Size(48, 20);
             this.labelLength.TabIndex = 22;
@@ -344,7 +361,7 @@
             // radioButtonQuery
             // 
             this.radioButtonQuery.AutoSize = true;
-            this.radioButtonQuery.Location = new System.Drawing.Point(28, 563);
+            this.radioButtonQuery.Location = new System.Drawing.Point(26, 576);
             this.radioButtonQuery.Name = "radioButtonQuery";
             this.radioButtonQuery.Size = new System.Drawing.Size(53, 17);
             this.radioButtonQuery.TabIndex = 21;
@@ -355,7 +372,7 @@
             // radioButtonManual
             // 
             this.radioButtonManual.AutoSize = true;
-            this.radioButtonManual.Location = new System.Drawing.Point(28, 531);
+            this.radioButtonManual.Location = new System.Drawing.Point(26, 544);
             this.radioButtonManual.Name = "radioButtonManual";
             this.radioButtonManual.Size = new System.Drawing.Size(60, 17);
             this.radioButtonManual.TabIndex = 20;
@@ -366,12 +383,10 @@
             // radioButtonAuto
             // 
             this.radioButtonAuto.AutoSize = true;
-            this.radioButtonAuto.Checked = true;
-            this.radioButtonAuto.Location = new System.Drawing.Point(28, 499);
+            this.radioButtonAuto.Location = new System.Drawing.Point(26, 512);
             this.radioButtonAuto.Name = "radioButtonAuto";
             this.radioButtonAuto.Size = new System.Drawing.Size(47, 17);
             this.radioButtonAuto.TabIndex = 19;
-            this.radioButtonAuto.TabStop = true;
             this.radioButtonAuto.Text = "Auto";
             this.radioButtonAuto.UseVisualStyleBackColor = true;
             this.radioButtonAuto.CheckedChanged += new System.EventHandler(this.radioButtonAnimation_CheckedChanged);
@@ -406,12 +421,34 @@
             this.layerSequence.TabStop = false;
             this.layerSequence.Visible = false;
             // 
+            // layerCreation
+            // 
+            this.layerCreation.BackColor = System.Drawing.SystemColors.Control;
+            this.layerCreation.Location = new System.Drawing.Point(40, 280);
+            this.layerCreation.Name = "layerCreation";
+            this.layerCreation.Size = new System.Drawing.Size(200, 200);
+            this.layerCreation.TabIndex = 23;
+            this.layerCreation.TabStop = false;
+            this.layerCreation.Visible = false;
+            // 
+            // layerSentence
+            // 
+            this.layerSentence.BackColor = System.Drawing.SystemColors.Control;
+            this.layerSentence.Location = new System.Drawing.Point(520, 280);
+            this.layerSentence.Name = "layerSentence";
+            this.layerSentence.Size = new System.Drawing.Size(200, 200);
+            this.layerSentence.TabIndex = 23;
+            this.layerSentence.TabStop = false;
+            this.layerSentence.Visible = false;
+            // 
             // Simulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(984, 761);
+            this.Controls.Add(this.layerSentence);
+            this.Controls.Add(this.layerCreation);
             this.Controls.Add(this.layerSequence);
             this.Controls.Add(this.layerChart);
             this.Controls.Add(this.layerAnimation);
@@ -467,6 +504,9 @@
         private System.Windows.Forms.CheckBox checkBoxSequence;
         private System.Windows.Forms.TrackBar trackBarPace;
         private System.Windows.Forms.TrackBar trackBarLength;
+        private System.Windows.Forms.GroupBox layerCreation;
+        private System.Windows.Forms.RadioButton radioButtonCreation;
+        private System.Windows.Forms.GroupBox layerSentence;
     }
 }
 

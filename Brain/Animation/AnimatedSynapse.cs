@@ -13,17 +13,11 @@ namespace Brain
         AnimatedElement pre;
         AnimatedElement post;
 
-        Synapse synapse;
-        Synapse duplex;
-
         PointF start;
         PointF end;
 
-        Circle sState;
-        Circle sControl;
-
-        Circle dState;
-        Circle dControl;
+        SynapseState synapse;
+        SynapseState duplex;
 
         Graphics graphics;
 
@@ -34,7 +28,7 @@ namespace Brain
         {
             this.pre = pre;
             this.post = post;
-            this.synapse = synapse;
+            this.synapse = new SynapseState(synapse);
 
             graphics = g;
             duplex = null;
@@ -49,7 +43,7 @@ namespace Brain
         {
             this.pre = pre;
             this.post = post;
-            this.synapse = synapse;
+            this.synapse = new SynapseState(synapse);
 
             graphics = g;
             duplex = null;
@@ -101,14 +95,16 @@ namespace Brain
             dx = end.X - start.X;
             dy = end.Y - start.Y;
 
-            sState = new Circle(new PointF(start.X + 0.8f * dx, start.Y + 0.8f * dy), 12);
-            sControl = new Circle(new PointF(sState.Center.X - cos * 8, sState.Center.Y - sin * 8), 12);
+            Circle state = new Circle(new PointF(start.X + 0.8f * dx, start.Y + 0.8f * dy), 12);
+            Circle control = new Circle(new PointF(state.Center.X - cos * 8, state.Center.Y - sin * 8), 12);
+            synapse.load(state, control);
 
             if (duplex == null)
                 return;
 
-            dState = new Circle(new PointF(start.X + end.X - sState.Center.X, start.Y + end.Y - sState.Center.Y), 12);
-            dControl = new Circle(new PointF(start.X + end.X - sControl.Center.X, start.Y + end.Y - sControl.Center.Y), 12);
+            state = new Circle(new PointF(start.X + end.X - synapse.State.X, start.Y + end.Y - synapse.State.Y), 12);
+            control = new Circle(new PointF(start.X + end.X - synapse.Control.X, start.Y + end.Y - synapse.Control.Y), 12);
+            duplex.load(state, control);
         }
 
         public void recalculate()
@@ -118,7 +114,7 @@ namespace Brain
 
         public void animate(int frame, float factor)
         {
-            draw(frame);
+            draw();
 
             int length = 16;
             float x = length * cos;
@@ -149,7 +145,7 @@ namespace Brain
             }
         }
 
-        public void draw(int frame)
+        public void draw()
         {
             Pen pen = new Pen(Brushes.Gray, 3);
             graphics.DrawLine(pen, start, end);
@@ -158,30 +154,75 @@ namespace Brain
             graphics.DrawLine(pen, start, end);
         }
 
+        public void draw(Graphics g)
+        {
+            Pen pen = new Pen(Brushes.Gray, 3);
+            g.DrawLine(pen, start, end);
+
+            pen = new Pen(Brushes.DarkBlue, 1);
+            g.DrawLine(pen, start, end);
+        }
+
+        public void draw(Graphics g, float factor)
+        {
+            float x = start.X + factor * (end.X - start.X);
+            float y = start.Y + factor * (end.Y - start.Y);
+            PointF finish = new PointF(x, y);
+
+            Pen pen = new Pen(Brushes.Gray, 3);
+            g.DrawLine(pen, start, finish);
+
+            pen = new Pen(Brushes.DarkBlue, 1);
+            g.DrawLine(pen, start, finish);
+        }
+
+        public void drawState(Graphics g)
+        {
+            synapse.draw(g);
+
+            if (duplex != null && duplex.Weight > 0)
+                duplex.draw(g);
+        }
+
         public void drawState(int frame)
         {
-            Brush brush = Brushes.LightYellow;
-            Pen pen = new Pen(Brushes.DarkSlateGray, 2);
+            synapse.draw(graphics, frame);
 
-            if (synapse.Activity[frame - 1])
-                brush = Brushes.Red;
+            if (duplex != null)
+                duplex.draw(graphics, frame);
+        }
 
-            sControl.draw(graphics, brush, pen);
-            sState.draw(graphics, synapse.Weight, pen);
+        public void addHistory(CreationData data, bool duplex)
+        {
+            if (duplex)
+                this.duplex.History.Add(data);
+            else
+                synapse.History.Add(data);
+        }
 
-            if (duplex == null)
-                return;
+        public void create()
+        {
+            synapse.create();
 
-            dControl.draw(graphics, brush, pen);
-            dState.draw(graphics, synapse.Weight, pen);
+            if (duplex != null)
+                duplex.create();
+        }
+
+        public void zero()
+        {
+            synapse.Weight = 0;
+
+            if (duplex != null)
+                duplex.Weight = 0;
         }
 
         public void setDuplex(Synapse synapse)
         {
-            duplex = synapse;
+            duplex = new SynapseState(synapse);
 
-            dState = new Circle(new PointF(start.X + end.X - sState.Center.X, start.Y + end.Y - sState.Center.Y), 12);
-            dControl = new Circle(new PointF(start.X + end.X - sControl.Center.X, start.Y + end.Y - sControl.Center.Y), 12);
+            Circle state = new Circle(new PointF(start.X + end.X - this.synapse.State.X, start.Y + end.Y - this.synapse.State.Y), 12);
+            Circle control = new Circle(new PointF(start.X + end.X - this.synapse.Control.X, start.Y + end.Y - this.synapse.Control.Y), 12);
+            duplex.load(state, control);
         }
 
         public void save(BinaryWriter writer)
@@ -195,6 +236,14 @@ namespace Brain
         {
             initialize();
             graphics = g;
+        }
+
+        public bool active(Point location, bool duplex)
+        {
+            if (duplex)
+                return this.duplex.active(location);
+
+            return synapse.active(location);
         }
 
         public AnimatedElement Pre
@@ -219,6 +268,35 @@ namespace Brain
             {
                 post = value;
             }
+        }
+
+        public bool Duplex
+        {
+            get
+            {
+                if (duplex == null)
+                    return false;
+
+                return true;
+            }
+        }
+
+        public SynapseState getState(bool duplex)
+        {
+            if (duplex)
+                return this.duplex;
+
+            return synapse;
+        }
+
+        public Synapse getSynapse()
+        {
+            return synapse.getSynapse();
+        }
+
+        public Synapse getDuplex()
+        {
+            return duplex.getSynapse();
         }
 
         public float getWeight()

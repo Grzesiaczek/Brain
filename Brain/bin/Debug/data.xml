@@ -1,53 +1,34 @@
 <?xml version='1.0'?>
 <data length='250'>
 	<neurons>
-		<!--<neuron x='100' y='100'>mercury</neuron>
-    <neuron x='300' y='100'>earth</neuron>
-    <neuron x='500' y='100'>jupiter</neuron>
-    <neuron x='100' y='300'>is</neuron>
-    <neuron x='300' y='300'>planet</neuron>
-    <neuron x='500' y='300'>saturn</neuron>
-    <neuron x='200' y='450'>big</neuron>
-    <neuron x='400' y='450'>small</neuron>-->
-    <neuron>mercury</neuron>
-    <neuron>earth</neuron>
     <neuron>jupiter</neuron>
     <neuron>is</neuron>
     <neuron>planet</neuron>
     <neuron>saturn</neuron>
     <neuron>big</neuron>
+    <neuron>bigger</neuron>
     <neuron>small</neuron>
-    <neuron>sun</neuron>
-    <neuron>shiny</neuron>
-    <neuron>star</neuron>
+    <neuron>smaller</neuron>
+    <neuron>mercury</neuron>
+    <neuron>earth</neuron>
     <neuron>than</neuron>
 	</neurons>
 	<receptors>
-    <receptor>saturn</receptor>
-    <receptor>jupiter</receptor>
-    <receptor>earth</receptor>
+    <receptor alpha='2' beta='6' value ='0.8'>saturn</receptor>
+    <receptor alpha='1' beta='4' value ='0.8'>jupiter</receptor>
 	</receptors>
 	<sentences>
-		<sentence>sun is yellow star</sentence>
-		<sentence>sun is star</sentence>
-		<sentence>sun is shiny star</sentence>
-		<sentence>earth circulates around sun</sentence>
 		<sentence>jupiter is planet</sentence>
 		<sentence>jupiter is big</sentence>
 		<sentence>jupiter is big planet</sentence>
-		<sentence>earth is planet</sentence>
-		<sentence>sun is star at center of solar system</sentence>
-		<sentence>earth is 3rd planet of solar system</sentence>
-		<sentence>jupiter is bigger than earth</sentence>
-		<sentence>saturn is also big</sentence>
+    <sentence>jupiter is bigger than earth</sentence>
+		<sentence>saturn is big planet</sentence>
 		<sentence>saturn is planet</sentence>
-		<sentence>saturn is much bigger than earth</sentence>
+    <sentence>saturn is smaller than jupiter</sentence>
+		<sentence>saturn is bigger than earth</sentence>
 		<sentence>mercury is small planet</sentence>
 		<sentence>mercury is smaller than earth</sentence>
+    <sentence>earth is planet</sentence>
 		<sentence>earth is bigger than mercury</sentence>
-		<sentence>mars is called red planet</sentence>
-		<sentence>jupiter is great planet</sentence>
-		<sentence>our planet is full of life</sentence>
-		<sentence>earth is full of life</sentence>
 	</sentences>
 </data>

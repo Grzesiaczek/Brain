@@ -1,4 +1,3 @@
-c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Debug\Brain.exe.config
 c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.csprojResolveAssemblyReference.cache
 c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Properties.Resources.resources
 c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.csproj.GenerateResource.Cache
@@ -7,6 +6,7 @@ c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Debug\Br
 c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.csproj.ResolveComReference.cache
 c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.exe
 c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.pdb
-c:\users\grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Animation.resources
 C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Debug\config.xml
 C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Debug\data.xml
+C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Simulation.resources
+C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Query.resources

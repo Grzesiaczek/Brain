@@ -36,4 +36,14 @@ namespace Brain
             set;
         }
     }
+
+    interface Controller
+    {
+        void start();
+        void stop();
+        void back();
+        void forth();
+        bool started();
+        void changePace(int pace);
+    }
 }

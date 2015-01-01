@@ -17,10 +17,12 @@ namespace Brain
     public partial class Simulation : Form
     {
         Brain brain;
+        List<CreationData> data;
         List<ReceptorData> receptors;
 
         Animation animation;
         Chart chart;
+        Creation creation;
         Sequence sequence;
 
         int length;
@@ -28,6 +30,7 @@ namespace Brain
 
         Mode mode;
         FormWindowState state;
+        Controller controller;
 
         public Simulation()
         {
@@ -35,20 +38,22 @@ namespace Brain
             Config.load();
             initialize();
             prepareAnimation();
+            layerCreation.Visible = true;
         }
 
         void initialize()
         {
-            Show();
             brain = new Brain();
+            data = new List<CreationData>();
 
             animation = new Animation(layerAnimation);
             chart = new Chart(layerChart);
+            creation = new Creation(layerCreation, data);
             sequence = new Sequence(layerSequence);
 
-            layerSequence.Visible = true;
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            mode = Mode.Auto;
+            mode = Mode.Creation;
+            controller = creation;
 
             length = trackBarLength.Value * 10;
             pace = trackBarPace.Value * 100;
@@ -60,10 +65,13 @@ namespace Brain
             animation.neuronShifted += new EventHandler(neuronShifted);
             animation.queryAccepted += new EventHandler(queryAccepted);
             animation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
+
+            creation.animationStop += new EventHandler(animationStop);
+            creation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
             
             load();
+            simulate();
             animation.setSequence(sequence);
-            chart.setNeurons(animation.getNeurons());
         }
 
         public void load()
@@ -85,11 +93,13 @@ namespace Brain
             node = node.NextSibling;
 
             foreach (XmlNode xn in node.ChildNodes)
-                brain.addSentence(xn.InnerText);
+                brain.addSentence(xn.InnerText, data);
 
             brain.addReceptors(receptors);
+
             animation.loadNeurons(brain.Neurons);
-            simulate();
+            animation.create(creation);
+            chart.setNeurons(animation.getNeurons());
         }
 
         void simulate()
@@ -118,10 +128,10 @@ namespace Brain
 
         private void buttonPlay_Click(object sender, EventArgs e)
         {
-            if (animation.started())
+            if (controller.started())
             {
                 prepareAnimation();
-                animation.stop();
+                controller.stop();
                 return;
             }
 
@@ -131,12 +141,13 @@ namespace Brain
 
             buttonBack.Enabled = false;
             buttonForth.Enabled = false;
-
             buttonPlay.Text = "Stop";
-            animation.start();
+
+            controller.changePace(pace);
+            controller.start();
         }
 
-        private void buttonLoad_Click(object sender, EventArgs e)
+        private void buttonSimulate_Click(object sender, EventArgs e)
         {
             simulate();
         }
@@ -146,8 +157,7 @@ namespace Brain
             if (pace < 2000)
             {
                 pace += 100;
-                animation.changePace(pace);
-                
+                controller.changePace(pace);
             }
 
             labelPace.Text = pace.ToString();
@@ -158,7 +168,7 @@ namespace Brain
             if (pace > 200)
             {
                 pace -= 100;
-                animation.changePace(pace);
+                controller.changePace(pace);
             }
 
             labelPace.Text = pace.ToString();
@@ -168,7 +178,6 @@ namespace Brain
         {
             brain.clear();
             animation.unload();
-            animation.redraw();
         }
 
         private void buttonBack_Click(object sender, EventArgs e)
@@ -176,7 +185,7 @@ namespace Brain
             if (mode == Mode.Manual)
                 brain.undo();
 
-            animation.back();
+            controller.back();
         }
 
         private void buttonForth_Click(object sender, EventArgs e)
@@ -184,7 +193,7 @@ namespace Brain
             if (mode == Mode.Manual)
                 brain.tick();
 
-            animation.forth();
+            controller.forth();
         }
 
         private void buttonLengthDown_Click(object sender, EventArgs e)
@@ -348,6 +357,23 @@ namespace Brain
                     animation.stopBalance();
                     layerMenu.Enabled = true;
                     break;
+                case Keys.Left:
+
+                    break;
+                case Keys.Right:
+
+                    break;
+
+                case Keys.Add:
+
+                    break;
+
+                case Keys.Subtract:
+
+                    break;
+                case Keys.Space:
+
+                    break;
             }
         }
 
@@ -359,6 +385,7 @@ namespace Brain
             {
                 animation.resize();
                 sequence.resize();
+                creation.resize();
                 state = WindowState;
             }
         }
@@ -367,6 +394,31 @@ namespace Brain
         {
             animation.resize();
             sequence.resize();
+            creation.resize();
+        }
+
+        private void radioButtonCreation_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!radioButtonCreation.Checked)
+            {
+                animation.create();
+
+                buttonBack.Enabled = true;
+
+                layerAnimation.Visible = true;
+                layerSequence.Visible = true;
+                layerCreation.Visible = false;
+                return;
+            }
+
+            mode = Mode.Creation;
+
+            layerCreation.Visible = true;
+            layerAnimation.Visible = false;
+
+            buttonPlay.Enabled = true;
+            buttonQuery.Enabled = false;
+            buttonBack.Enabled = false;
         }
 
         private void radioButtonAnimation_CheckedChanged(object sender, EventArgs e)

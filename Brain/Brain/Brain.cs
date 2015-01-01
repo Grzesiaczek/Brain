@@ -105,7 +105,12 @@ namespace Brain
             addSentence(sentence.Split(' '));
         }
 
-        public void addSentence(String[] words)
+        public void addSentence(String sentence, List<CreationData> data)
+        {
+            addSentence(sentence.Split(' '), data);
+        }
+
+        public void addSentence(String[] words, List<CreationData> data = null)
         {
             List<Neuron> fragment = new List<Neuron>();
 
@@ -140,43 +145,14 @@ namespace Brain
                     synapse.Factor += 1 / (float)(j - i);
                 }
 
-                foreach (Synapse syn in fragment[i].Output)
-                    syn.Weight = (2 * syn.Factor) / (((Neuron)syn.Pre).Count + syn.Factor);
-            }
-        }
+                foreach (Synapse s in fragment[i].Output)
+                {
+                    float weight = s.Weight;
+                    s.Weight = (2 * s.Factor) / (((Neuron)s.Pre).Count + s.Factor);
 
-        public void load(String path)
-        {
-            StreamReader reader = new StreamReader(path);
-            reader.ReadLine();
-        }
-
-        public void save(String path)
-        {
-            int id = 0;
-            
-            FileStream file = new FileStream(path, FileMode.Create);
-            file.Close();
-            StreamWriter writer = new StreamWriter(path);
-         
-            writer.WriteLine(alpha);
-            writer.WriteLine(beta);
-            writer.WriteLine(neurons.Count);
-
-            foreach (Neuron n in neurons)
-            {
-                String line = "" + n.Word + ';' + n.Treshold + ';' + n.Value;
-                writer.WriteLine(line);
-                n.ID = id++;
-            }
-                
-
-            writer.WriteLine(synapses.Count);
-
-            foreach (Synapse s in synapses)
-            {
-                String line = "" + s.Factor + ';' + ';' + s.Weight;
-                writer.WriteLine(line);
+                    if (data != null)
+                        data.Add(new CreationData(s, weight, s.Weight));
+                }
             }
         }
 

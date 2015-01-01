@@ -8,13 +8,10 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    class Sequence : Layer
+    class Sequence : TopLayer
     {
-        //List<SequenceElement> elements;
-
         List<SequenceNeuron> neurons;
         List<SequenceNeuron> sequence;
-
         List<SequenceReceptor> receptors;
 
         int frame;

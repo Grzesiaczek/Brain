@@ -10,18 +10,23 @@ namespace Brain
 {
     class AnimatedNeuron : AnimatedElement
     {
-        protected Graphics graphics;
-        protected Neuron neuron;
+        Graphics graphics;
+        Neuron neuron;
 
         Circle circle;
+        SizeF size;
 
         List<AnimatedSynapse> input;
         List<AnimatedSynapse> output;
 
         int id;
         bool active = false;
+        bool collision = false;
+        bool shifted = false;
+
         bool label = true;
         bool state = true;
+
         int frame = 0;
         static int count = 0;
 
@@ -31,6 +36,7 @@ namespace Brain
         {
             neuron = n;
             graphics = g;
+            size = new SizeF(g.VisibleClipBounds.Width, g.VisibleClipBounds.Height);
 
             id = ++count;
             createCircle(pos);
@@ -63,6 +69,65 @@ namespace Brain
             circle.update(pos);
         }
 
+        public void setRadius(float radius)
+        {
+            circle.Radius = radius;
+        }
+
+        public void checkCollision(List<AnimatedNeuron> neurons)
+        {
+            collision = false;
+
+            foreach (AnimatedNeuron an in neurons)
+            {
+                if (an == this)
+                    continue;
+
+                double dx = Position.X - an.Position.X;
+                double dy = Position.Y - an.Position.Y;
+
+                if (Math.Sqrt(dx * dx + dy * dy) < Config.Diameter)
+                {
+                    collision = true;
+                    break;
+                }
+            }
+
+            if (Position.X < Config.Radius || Position.X > size.Width - Config.Radius)
+                collision = true;
+
+            if (Position.Y < Config.Radius || Position.Y > size.Height - Config.Radius)
+                collision = true;
+        }
+
+        public void activate(bool shifted)
+        {
+            if (shifted)
+                this.shifted = true;
+            else
+                neuron.activate();
+        }
+
+        public void save(PointF original)
+        {
+            if(collision)
+            {
+                setPosition(new PointF(original.X, original.Y));
+                recalculate();
+            }
+
+            shifted = false;
+        }
+
+        public void recalculate()
+        {
+            foreach (AnimatedSynapse s in input)
+                s.recalculate();
+
+            foreach (AnimatedSynapse s in output)
+                s.recalculate();
+        }
+
         public void createCircle(PointF pos)
         {
             circle = new Circle(pos, Config.Radius);
@@ -80,30 +145,32 @@ namespace Brain
             }
 
             active = true;
-            draw(1, data.Initial + delta);
+            draw(data.Initial + delta);
         }
 
-        public virtual void draw(int number)
+        public void draw(Graphics g)
         {
-            try
-            {
-                draw(1, neuron.Activity[number - 1].Value);
-            }
-            catch (Exception) { }
+            circle.draw(g);
+
+            if (Radius == Config.Radius)
+                drawLabel(g);
         }
 
-        protected void draw(int mode, double value)
+        public void draw(int number)
+        {
+            draw(neuron.Activity[number - 1].Value);
+        }
+
+        void draw(double value)
         {
             Pen pen = new Pen(Brushes.Purple, 3);
 
-            switch (mode)
+            if (shifted)
             {
-                case 2:
-                    pen = new Pen(Brushes.Green, 3);
-                    break;
-                case 3:
+                if(collision)
                     pen = new Pen(Brushes.IndianRed, 3);
-                    break;
+                else
+                    pen = new Pen(Brushes.Green, 3);
             }
 
             if (value >= 1)
@@ -135,10 +202,10 @@ namespace Brain
             }
 
             if (label)
-                drawLabel();
+                drawLabel(graphics);
         }
 
-        void drawLabel()
+        void drawLabel(Graphics graphics)
         {
             int width = neuron.Word.Length * 8 + 5;
             float x = circle.Center.X - width / 2;
@@ -163,6 +230,11 @@ namespace Brain
         public bool click(PointF pos)
         {
             return circle.click(pos);
+        }
+
+        public void create()
+        {
+            circle.Radius = Config.Radius;
         }
 
         public void setSynapses(List<AnimatedSynapse> input, List<AnimatedSynapse> output)
@@ -195,10 +267,11 @@ namespace Brain
 
         public void updateGraphics(Graphics g)
         {
-            float fx = g.VisibleClipBounds.Width / graphics.VisibleClipBounds.Width;
-            float fy = g.VisibleClipBounds.Height / graphics.VisibleClipBounds.Height;
+            float fx = g.VisibleClipBounds.Width / size.Width;
+            float fy = g.VisibleClipBounds.Height / size.Height;
 
             setPosition(new PointF(Position.X * fx, Position.Y * fy));
+            size = new SizeF(g.VisibleClipBounds.Width, g.VisibleClipBounds.Height);
             graphics = g;
         }
 
@@ -222,7 +295,7 @@ namespace Brain
         {
             get
             {
-                return Config.Radius;
+                return circle.Radius;
             }
         }
 

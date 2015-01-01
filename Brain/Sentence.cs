@@ -8,23 +8,29 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    class Creation : Layer
+    class Sentence : TopLayer
     {
-        public Creation(GroupBox groupBox) : base(groupBox)
+        List<String> tak;
+
+        public Sentence(GroupBox groupBox) : base(groupBox)
         {
+
         }
 
         protected override void changeSize()
         {
-            layer.Height = layer.Parent.Height - 58;
+            layer.Height = 90;
             layer.Width = layer.Parent.Width - 168;
-
             initializeGraphics();
         }
 
         protected override void tick(object sender, EventArgs e)
         {
+            buffer.Graphics.Clear(Color.FromArgb(255, 225, 225, 225));
 
+           
+
+            buffer.Render(graphics);
         }
     }
 }
