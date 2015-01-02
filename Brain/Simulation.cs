@@ -17,16 +17,16 @@ namespace Brain
     public partial class Simulation : Form
     {
         Brain brain;
-        List<CreationData> data;
+        List<CreationFrame> frames;
         List<ReceptorData> receptors;
-
-        Animation animation;
-        Chart chart;
-        Creation creation;
-        Sequence sequence;
 
         int length;
         int pace;
+
+        Animation animation;
+        Creation creation;
+        Chart chart;
+        Sequence sequence;
 
         Mode mode;
         FormWindowState state;
@@ -34,22 +34,17 @@ namespace Brain
 
         public Simulation()
         {
-            InitializeComponent();
+            InitializeComponent();/*
             Config.load();
             initialize();
             prepareAnimation();
-            layerCreation.Visible = true;
+            creation.Visible = true;*/
         }
 
         void initialize()
         {
             brain = new Brain();
-            data = new List<CreationData>();
-
-            animation = new Animation(layerAnimation);
-            chart = new Chart(layerChart);
-            creation = new Creation(layerCreation, data);
-            sequence = new Sequence(layerSequence);
+            frames = new List<CreationFrame>();
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             mode = Mode.Creation;
@@ -62,11 +57,11 @@ namespace Brain
             animation.balanceStarted += new EventHandler(balanceStarted);
             animation.balanceFinished += new EventHandler(balanceFinished);
             animation.animationStop += new EventHandler(animationStop);
-            animation.neuronShifted += new EventHandler(neuronShifted);
             animation.queryAccepted += new EventHandler(queryAccepted);
             animation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
 
             creation.animationStop += new EventHandler(animationStop);
+            creation.creationFinished += new EventHandler(creationFinished);
             creation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
             
             load();
@@ -93,7 +88,7 @@ namespace Brain
             node = node.NextSibling;
 
             foreach (XmlNode xn in node.ChildNodes)
-                brain.addSentence(xn.InnerText, data);
+                brain.addSentence(xn.InnerText, frames);
 
             brain.addReceptors(receptors);
 
@@ -340,17 +335,17 @@ namespace Brain
                     loadSimulation();
                     break;
                 case Keys.F4:
-                    if(layerAnimation.Visible)
+                    if(animation.Visible)
                     {
-                        layerAnimation.Visible = false;
-                        layerSequence.Visible = false;
-                        layerChart.Visible = true;
+                        animation.Visible = false;
+                        sequence.Visible = false;
+                        chart.Visible = true;
                     }
                     else
                     {
-                        layerChart.Visible = false;
-                        layerAnimation.Visible = true;
-                        layerSequence.Visible = false;
+                        chart.Visible = false;
+                        animation.Visible = true;
+                        sequence.Visible = false;
                     }
                     break;
                 case Keys.F11:
@@ -384,7 +379,7 @@ namespace Brain
             if (WindowState != state)
             {
                 animation.resize();
-                sequence.resize();
+                //sequence.resize();
                 creation.resize();
                 state = WindowState;
             }
@@ -393,7 +388,7 @@ namespace Brain
         private void resizeEnd(object sender, EventArgs e)
         {
             animation.resize();
-            sequence.resize();
+            //sequence.resize();
             creation.resize();
         }
 
@@ -404,17 +399,18 @@ namespace Brain
                 animation.create();
 
                 buttonBack.Enabled = true;
+                buttonForth.Enabled = true;
 
-                layerAnimation.Visible = true;
-                layerSequence.Visible = true;
-                layerCreation.Visible = false;
+                animation.Visible = true;
+                sequence.Visible = true;
+                creation.Visible = false;
                 return;
             }
 
             mode = Mode.Creation;
 
-            layerCreation.Visible = true;
-            layerAnimation.Visible = false;
+            creation.Visible = true;
+            animation.Visible = false;
 
             buttonPlay.Enabled = true;
             buttonQuery.Enabled = false;
@@ -493,20 +489,20 @@ namespace Brain
             labelFrame.Text = e.Frame.ToString();
         }
 
-        private void neuronShifted(object sender, EventArgs e)
-        {
-            buttonBalance.Enabled = true;
-        }
-
         public void queryAccepted(object sender, EventArgs e)
         {
             clear();
             simulate();
         }
 
+        public void creationFinished(object sender, EventArgs e)
+        {
+            buttonForth.Enabled = false;
+        }
+
         private void checkBoxSequence_CheckedChanged(object sender, EventArgs e)
         {
-            layerSequence.Visible = checkBoxSequence.Checked;
+            sequence.Visible = checkBoxSequence.Checked;
             animation.relocate(checkBoxSequence.Checked);
         }
 

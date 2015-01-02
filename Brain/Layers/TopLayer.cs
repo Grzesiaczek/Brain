@@ -7,8 +7,20 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class TopLayer : Layer
+    class TopLayer : Layer
     {
-        public TopLayer(GroupBox groupBox) : base(groupBox) { }
+        public TopLayer()
+        { 
+
+        }
+        /*
+        protected override void changeSize()
+        {
+
+        }
+
+        protected override void tick(object sender, EventArgs e)
+        {
+        }*/
     }
 }

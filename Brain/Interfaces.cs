@@ -35,6 +35,11 @@ namespace Brain
             get;
             set;
         }
+
+        String Name
+        {
+            get;
+        }
     }
 
     interface Controller

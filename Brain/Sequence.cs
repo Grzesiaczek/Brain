@@ -20,7 +20,7 @@ namespace Brain
         bool animation;
         bool disappear;
 
-        public Sequence(GroupBox groupBox) : base(groupBox)
+        public Sequence()
         {
             neurons = new List<SequenceNeuron>();
             sequence = new List<SequenceNeuron>();
@@ -106,11 +106,11 @@ namespace Brain
         {
             animation = value;
         }
-
+        /*
         protected override void changeSize()
         {
-            layer.Height = 90;
-            layer.Width = layer.Parent.Width - 168;
+            Height = 90;
+            Width = Parent.Width - 168;
             initializeGraphics();
         }
 
@@ -128,7 +128,7 @@ namespace Brain
                 sr.draw(buffer.Graphics);
 
             buffer.Render(graphics);
-        }
+        }*/
 
         public void frameChanged(object sender, FrameEventArgs e)
         {

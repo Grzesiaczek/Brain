@@ -9,8 +9,9 @@ namespace Brain
 {
     class AnimatedReceptor : AnimatedElement
     {
-        Circle circle;
         Graphics graphics;
+
+        Circle circle;
         Receptor receptor;
 
         AnimatedNeuron neuron;
@@ -22,7 +23,7 @@ namespace Brain
         {
             receptor = r;
             neuron = n;
-            graphics = n.getGraphics();
+            graphics = n.Graphics;
             this.wall = wall;
 
             //0-góra, 1-lewo, 2-prawo, 3-dół
@@ -132,7 +133,7 @@ namespace Brain
         {
             get
             {
-                return neuron.getNeuron().Word;
+                return neuron.Neuron.Word;
             }
         }
 

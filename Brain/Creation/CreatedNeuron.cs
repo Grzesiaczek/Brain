@@ -7,47 +7,55 @@ using System.Threading.Tasks;
 
 namespace Brain
 {
-    class CreatedNeuron : CreatedElement
+    class CreatedNeuron
     {
         AnimatedNeuron neuron;
+        static Graphics graphics;
 
-        public override event EventHandler finish;
+        bool created;
 
-        public CreatedNeuron(AnimatedNeuron neuron, Graphics g)
+        public CreatedNeuron(AnimatedNeuron neuron)
         {
             this.neuron = neuron;
             neuron.setRadius(0);
             created = false;
-            frame = 0;
         }
 
-        public override void create()
+        public void create()
         {
             created = true;
             neuron.setRadius(Config.Radius);
         }
 
-        public override void draw()
+        public void draw()
         {
             neuron.draw(graphics);
         }
 
-        public override void tick()
+        public void draw(float factor)
         {
-            if (++frame == interval)
-            {
-                created = true;
-                neuron.setRadius(Config.Radius);
-                finish(this, new EventArgs());
-                return;
-            }
-
-            neuron.setRadius((float)(frame * Config.Radius) / interval);
+            neuron.setRadius(factor * Config.Radius);
+            neuron.draw(graphics);
         }
 
-        public AnimatedNeuron getNeuron()
+        public static Graphics Graphics
         {
-            return neuron;
+            set
+            {
+                graphics = value;
+            }
+        }
+
+        public bool Created
+        {
+            get
+            {
+                return created;
+            }
+            set
+            {
+                created = value;
+            }
         }
     }
 }

@@ -225,27 +225,18 @@ namespace Brain
     class CreationData
     {
         Synapse synapse;
+        int frame;
+
         float start;
         float finish;
+        float step;
 
-        public CreationData(Synapse synapse, float start, float finish)
+        public CreationData(Synapse synapse, int frame, float start, float finish)
         {
             this.synapse = synapse;
+            this.frame = frame;
             this.start = start;
             this.finish = finish;
-        }
-
-        public Synapse getSynapse()
-        {
-            return synapse;
-        }
-
-        public float step(int interval)
-        {
-            if (interval == 0)
-                return 0;
-
-            return (finish - start) / interval;
         }
 
         public void draw(Graphics g, int line)
@@ -259,15 +250,57 @@ namespace Brain
             left.draw(g, start, pen);
             right.draw(g, finish, pen);
 
-            String begin = ((int)(start * 100)).ToString();
-            String end = ((int)(finish * 100)).ToString();
+            int change = (int)((finish - start) * 100);
+            Brush brush = Brushes.Red;
+            y += 2;
+
+            if (change > 0)
+                brush = Brushes.Green;
+            else
+                change = -change;
 
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;
 
-            g.DrawString(begin, new Font("Times New Roman", 12, FontStyle.Bold), Brushes.DarkSlateBlue, 36, y, format);
-            g.DrawString(end, new Font("Times New Roman", 12, FontStyle.Bold), Brushes.DarkSlateBlue, 128, y, format);
+            g.DrawString(frame.ToString(), new Font("Calibri", 14, FontStyle.Bold), Brushes.DarkSlateGray, 28, y, format);
+            g.DrawString(change.ToString(), new Font("Arial", 12, FontStyle.Bold), brush, 136, y, format);
+        }
+
+        public Synapse Synapse
+        {
+            get
+            {
+                return synapse;
+            }
+        }
+
+        public float Step
+        {
+            get
+            {
+                return step;
+            }
+            set
+            {
+                step = value;
+            }
+        }
+
+        public float Start
+        {
+            get
+            {
+                return start;
+            }
+        }
+
+        public float Weight
+        {
+            get
+            {
+                return finish;
+            }
         }
     }
 }

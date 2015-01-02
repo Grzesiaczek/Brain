@@ -57,11 +57,6 @@
             this.radioButtonQuery = new System.Windows.Forms.RadioButton();
             this.radioButtonManual = new System.Windows.Forms.RadioButton();
             this.radioButtonAuto = new System.Windows.Forms.RadioButton();
-            this.layerAnimation = new System.Windows.Forms.GroupBox();
-            this.layerChart = new System.Windows.Forms.GroupBox();
-            this.layerSequence = new System.Windows.Forms.GroupBox();
-            this.layerCreation = new System.Windows.Forms.GroupBox();
-            this.layerSentence = new System.Windows.Forms.GroupBox();
             this.layerMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLength)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarPace)).BeginInit();
@@ -258,6 +253,7 @@
             this.layerMenu.Size = new System.Drawing.Size(120, 737);
             this.layerMenu.TabIndex = 19;
             this.layerMenu.TabStop = false;
+            this.layerMenu.Text = "s";
             // 
             // radioButtonCreation
             // 
@@ -391,67 +387,12 @@
             this.radioButtonAuto.UseVisualStyleBackColor = true;
             this.radioButtonAuto.CheckedChanged += new System.EventHandler(this.radioButtonAnimation_CheckedChanged);
             // 
-            // layerAnimation
-            // 
-            this.layerAnimation.Location = new System.Drawing.Point(40, 40);
-            this.layerAnimation.Margin = new System.Windows.Forms.Padding(0);
-            this.layerAnimation.Name = "layerAnimation";
-            this.layerAnimation.Size = new System.Drawing.Size(200, 200);
-            this.layerAnimation.TabIndex = 20;
-            this.layerAnimation.TabStop = false;
-            this.layerAnimation.Visible = false;
-            // 
-            // layerChart
-            // 
-            this.layerChart.BackColor = System.Drawing.SystemColors.Control;
-            this.layerChart.Location = new System.Drawing.Point(280, 40);
-            this.layerChart.Name = "layerChart";
-            this.layerChart.Size = new System.Drawing.Size(200, 200);
-            this.layerChart.TabIndex = 21;
-            this.layerChart.TabStop = false;
-            this.layerChart.Visible = false;
-            // 
-            // layerSequence
-            // 
-            this.layerSequence.BackColor = System.Drawing.SystemColors.Control;
-            this.layerSequence.Location = new System.Drawing.Point(520, 40);
-            this.layerSequence.Name = "layerSequence";
-            this.layerSequence.Size = new System.Drawing.Size(200, 200);
-            this.layerSequence.TabIndex = 22;
-            this.layerSequence.TabStop = false;
-            this.layerSequence.Visible = false;
-            // 
-            // layerCreation
-            // 
-            this.layerCreation.BackColor = System.Drawing.SystemColors.Control;
-            this.layerCreation.Location = new System.Drawing.Point(40, 280);
-            this.layerCreation.Name = "layerCreation";
-            this.layerCreation.Size = new System.Drawing.Size(200, 200);
-            this.layerCreation.TabIndex = 23;
-            this.layerCreation.TabStop = false;
-            this.layerCreation.Visible = false;
-            // 
-            // layerSentence
-            // 
-            this.layerSentence.BackColor = System.Drawing.SystemColors.Control;
-            this.layerSentence.Location = new System.Drawing.Point(520, 280);
-            this.layerSentence.Name = "layerSentence";
-            this.layerSentence.Size = new System.Drawing.Size(200, 200);
-            this.layerSentence.TabIndex = 23;
-            this.layerSentence.TabStop = false;
-            this.layerSentence.Visible = false;
-            // 
             // Simulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(984, 761);
-            this.Controls.Add(this.layerSentence);
-            this.Controls.Add(this.layerCreation);
-            this.Controls.Add(this.layerSequence);
-            this.Controls.Add(this.layerChart);
-            this.Controls.Add(this.layerAnimation);
             this.Controls.Add(this.layerMenu);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.buttonOpen);
@@ -494,9 +435,6 @@
         private System.Windows.Forms.RadioButton radioButtonManual;
         private System.Windows.Forms.RadioButton radioButtonAuto;
         private System.Windows.Forms.RadioButton radioButtonQuery;
-        private System.Windows.Forms.GroupBox layerAnimation;
-        private System.Windows.Forms.GroupBox layerChart;
-        private System.Windows.Forms.GroupBox layerSequence;
         private System.Windows.Forms.Button buttonLengthUp;
         private System.Windows.Forms.Button buttonLengthDown;
         private System.Windows.Forms.Label labelLength;
@@ -504,9 +442,7 @@
         private System.Windows.Forms.CheckBox checkBoxSequence;
         private System.Windows.Forms.TrackBar trackBarPace;
         private System.Windows.Forms.TrackBar trackBarLength;
-        private System.Windows.Forms.GroupBox layerCreation;
         private System.Windows.Forms.RadioButton radioButtonCreation;
-        private System.Windows.Forms.GroupBox layerSentence;
     }
 }
 

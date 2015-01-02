@@ -8,19 +8,19 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class MainLayer : Layer
+    class MainLayer : Layer
     {
         protected ShiftedNeuron shift;
 
-        public MainLayer(GroupBox groupBox) : base(groupBox) 
+        public MainLayer()
         {
-            layer.Location = new Point(10, 110);
+            Location = new Point(10, 110);
 
-            layer.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            layer.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            layer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
-            layer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
-            layer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
+            MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
+            MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
+            MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
+            MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
+            MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
         }
 
         private void mouseClick(object sender, MouseEventArgs e)
@@ -29,7 +29,7 @@ namespace Brain
                 shift.activate();
         }
 
-        protected abstract void mouseDown(object sender, MouseEventArgs e);
+        protected virtual void mouseDown(object sender, MouseEventArgs e) { }
 
         protected virtual void mouseMove(object sender, MouseEventArgs e)
         {
@@ -37,7 +37,6 @@ namespace Brain
                 return;
 
             shift.move(e.X, e.Y);
-            redraw();
         }
 
         private void mouseUp(object sender, MouseEventArgs e)
@@ -49,12 +48,18 @@ namespace Brain
             shift = null;
 
             //neuronShifted(this, new EventArgs());
-            redraw();
         }
 
-        protected abstract void animate();
-        protected abstract void redraw();
-
         public event EventHandler neuronShifted;
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // MainLayer
+            // 
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.ResumeLayout(false);
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -8,9 +10,8 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class Layer
+    partial class Layer : Control
     {
-        protected GroupBox layer;
         protected Graphics graphics;
         protected System.Windows.Forms.Timer timer;
 
@@ -18,30 +19,32 @@ namespace Brain
         protected BufferedGraphics buffer;
         BufferedGraphicsContext context;
 
-        public Layer(GroupBox groupBox)
+        public Layer()
         {
+            InitializeComponent();
+            /*
+            #if DEBUG
+            #else 
             mode = Mode.Auto;
-            layer = groupBox;
-            layer.VisibleChanged += new EventHandler(visibilityChanged);
-            layer.Location = new Point(10, 10);
-
+            Visible = false;
+            
+            Location = new Point(10, 10);
+            VisibleChanged += new EventHandler(visibilityChanged);
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
             timer.Interval = 25;
+#endif*/
         }
 
         protected void initializeGraphics()
         {
-            graphics = layer.CreateGraphics();
+            graphics = CreateGraphics();
             graphics.FillRectangle(SystemBrushes.Control, graphics.VisibleClipBounds);
 
-            int height = (int)graphics.VisibleClipBounds.Height;
-            int width = (int)graphics.VisibleClipBounds.Width;
-
             context = BufferedGraphicsManager.Current;
-            context.MaximumBuffer = new Size(width + 1, height + 1);
+            context.MaximumBuffer = new Size(Width + 1, Height + 1);
 
-            buffer = context.Allocate(graphics, new Rectangle(0, 0, width, height));
+            buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
             buffer.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         }
 
@@ -54,10 +57,10 @@ namespace Brain
         {
             changeSize();
         }
-
+        /*
         protected virtual void visibilityChanged(object sender, EventArgs e)
         {
-            if (!layer.Visible)
+            if (!Visible)
             {
                 timer.Stop();
                 return;
@@ -65,10 +68,15 @@ namespace Brain
 
             resize();
             timer.Start();
+        }*/
+
+        protected virtual void changeSize() { }
+
+        protected virtual void tick(object sender, EventArgs e) { }
+
+        protected override void OnPaint(PaintEventArgs pe)
+        {
+            base.OnPaint(pe);
         }
-
-        protected abstract void changeSize();
-
-        protected abstract void tick(object sender, EventArgs e);
     }
 }

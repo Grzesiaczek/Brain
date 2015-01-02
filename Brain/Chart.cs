@@ -12,7 +12,7 @@ namespace Brain
     {
         List<ChartedNeuron> neurons;
 
-        public Chart(GroupBox groupBox) : base(groupBox)
+        public Chart()
         {
             neurons = new List<ChartedNeuron>();
             initializeGraphics();
@@ -35,8 +35,8 @@ namespace Brain
 
         protected override void changeSize()
         {
-            layer.Height = layer.Parent.Height - 58;
-            layer.Width = layer.Parent.Width - 168;
+            Height = Parent.Height - 58;
+            Width = Parent.Width - 168;
             initializeGraphics();
         }
 
@@ -53,11 +53,6 @@ namespace Brain
                 n.draw(buffer.Graphics);
 
             buffer.Render(graphics);
-        }
-
-        public GroupBox getLayer()
-        {
-            return layer;
         }
     }
 
@@ -77,7 +72,7 @@ namespace Brain
             checkBox.Text = neuron.Word;
             checkBox.CheckedChanged += new EventHandler(changeVisibility);
 
-            parent.getLayer().Controls.Add(checkBox);
+            parent.Controls.Add(checkBox);
         }
 
         public void draw(Graphics g)

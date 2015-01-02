@@ -192,12 +192,18 @@ namespace Brain
                 duplex.draw(graphics, frame);
         }
 
-        public void addHistory(CreationData data, bool duplex)
+        public void create(CreationData data)
         {
-            if (duplex)
-                this.duplex.History.Add(data);
-            else
+            if (data.Synapse == synapse.Synapse)
+            {
                 synapse.History.Add(data);
+                synapse.Weight = data.Weight;
+            }
+            else
+            {
+                duplex.History.Add(data);
+                duplex.Weight = data.Weight;
+            } 
         }
 
         public void create()
@@ -270,15 +276,12 @@ namespace Brain
             }
         }
 
-        public bool Duplex
+        public bool isDuplex()
         {
-            get
-            {
-                if (duplex == null)
-                    return false;
+            if (duplex == null)
+                return false;
 
-                return true;
-            }
+            return true;
         }
 
         public SynapseState getState(bool duplex)
@@ -289,14 +292,20 @@ namespace Brain
             return synapse;
         }
 
-        public Synapse getSynapse()
+        public Synapse Synapse
         {
-            return synapse.getSynapse();
+            get
+            {
+                return synapse.Synapse;
+            }
         }
 
-        public Synapse getDuplex()
+        public Synapse Duplex
         {
-            return duplex.getSynapse();
+            get
+            {
+                return duplex.Synapse;
+            }
         }
 
         public float getWeight()

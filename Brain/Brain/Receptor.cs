@@ -114,5 +114,13 @@ namespace Brain
                 synapse = value;
             }
         }
+
+        public String Name
+        {
+            get
+            {
+                return synapse.Post.Name;
+            }
+        }
     }
 }

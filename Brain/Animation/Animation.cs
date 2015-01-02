@@ -37,7 +37,7 @@ namespace Brain
         public event EventHandler queryAccepted;
         public event EventHandler<FrameEventArgs> frameChanged;
 
-        public Animation(GroupBox groupBox) : base(groupBox)
+        public Animation()
         {
             balancing = GraphBalancing.getInstance();
             balancing.balanceFinished += balanceEnded;
@@ -102,9 +102,9 @@ namespace Brain
             }
 
             foreach (AnimatedNeuron start in neurons)
-                foreach (Synapse s in start.getNeuron().Output)
+                foreach (Synapse s in start.Neuron.Output)
                     foreach (AnimatedNeuron n in neurons)
-                        if (n.getNeuron() == s.Post)
+                        if (n.Neuron == s.Post)
                         {
                             bool single = true;
 
@@ -179,7 +179,7 @@ namespace Brain
             return animation;
         }
 
-        protected override void animate()
+        void animate()
         {
             if (!loaded)
                 return;
@@ -215,7 +215,7 @@ namespace Brain
             buffer.Render(graphics);
         }
 
-        protected override void redraw()
+        void redraw()
         {
             buffer.Graphics.Clear(SystemColors.Control);
 
@@ -249,7 +249,7 @@ namespace Brain
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.State = false;
 
-            if(layer.Visible)
+            if(Visible)
                 balancing.animate(neurons, synapses, receptors, buffer.Graphics, 80);
             else
                 balancing.animate(neurons, synapses, receptors, buffer.Graphics, 120);
@@ -306,11 +306,11 @@ namespace Brain
 
         protected override void changeSize()
         {
-            layer.Height = layer.Parent.Height - 58;
-            layer.Width = layer.Parent.Width - 168;
+            Height = Parent.Height - 58;
+            Width = Parent.Width - 168;
 
             if (sequenceBar)
-                layer.Height -= 100;
+                Height -= 100;
 
             initializeGraphics();
         }
@@ -321,9 +321,9 @@ namespace Brain
             resize();
 
             if (seq)
-                layer.Location = new Point(10, 110);
+                Location = new Point(10, 110);
             else
-                layer.Location = new Point(10, 10);
+                Location = new Point(10, 10);
         }
 
         public void labelChanged(bool value)
@@ -379,7 +379,7 @@ namespace Brain
             List<Neuron> result = new List<Neuron>();
 
             foreach (AnimatedNeuron n in neurons)
-                result.Add(n.getNeuron());
+                result.Add(n.Neuron);
 
             return result;
         }

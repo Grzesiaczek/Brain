@@ -12,15 +12,15 @@ namespace Brain
     {
         List<String> tak;
 
-        public Sentence(GroupBox groupBox) : base(groupBox)
-        {
+        public Sentence()
+        { 
 
         }
-
+        /*
         protected override void changeSize()
         {
-            layer.Height = 90;
-            layer.Width = layer.Parent.Width - 168;
+            Height = 90;
+            Width = Parent.Width - 168;
             initializeGraphics();
         }
 
@@ -31,6 +31,16 @@ namespace Brain
            
 
             buffer.Render(graphics);
+        }*/
+    }
+
+    class LearnedNeuron
+    {
+        Neuron neuron;
+
+        public LearnedNeuron(Neuron neuron)
+        {
+            this.neuron = neuron;
         }
     }
 }

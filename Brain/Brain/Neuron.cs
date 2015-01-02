@@ -239,18 +239,6 @@ namespace Brain
             }
         }
 
-        public int ID
-        {
-            get
-            {
-                return id;
-            }
-            set
-            {
-                id = value;
-            }
-        }
-
         public int Length
         {
             get
@@ -263,27 +251,11 @@ namespace Brain
             }
         }
 
-        public double Treshold
+        public String Name
         {
             get
             {
-                return treshold;
-            }
-            set
-            {
-                treshold = value;
-            }
-        }
-
-        public double Value
-        {
-            get
-            {
-                return value;
-            }
-            set
-            {
-                this.value = value;
+                return word;
             }
         }
     }

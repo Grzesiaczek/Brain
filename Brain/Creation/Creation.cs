@@ -12,47 +12,39 @@ namespace Brain
 {
     class Creation : MainLayer, Controller
     {
+        Dictionary<Neuron, CreatedNeuron> mapNeurons;
         Dictionary<Synapse, CreatedSynapse> mapSynapses;
         Dictionary<SynapseState, CreationHistory> mapHistory;
 
-        List<CreatedNeuron> neurons;
-        List<CreatedSynapse> synapses;
-        List<CreationData> data;
-
+        List<CreationFrame> frames;
         List<AnimatedNeuron> animated;
         List<Synapse> duplex;
 
-        List<CreatedNeuron> createdNeurons;
-        List<CreatedSynapse> createdSynapses;
-
-        CreatedElement element;
-        CreatedSynapse synapse;
+        List<CreatedNeuron> neurons;
+        List<CreatedSynapse> synapses;
 
         SynapseState active;
         Sentence sentence;
+        CreationFrame frame;
 
         int time;
         int count;
-        int frame;
-        int interval;
 
         bool animation;
 
-        public Creation(GroupBox groupBox, List<CreationData> data) : base(groupBox)
+        public Creation(List<CreationFrame> data)
         {
+            mapNeurons = new Dictionary<Neuron, CreatedNeuron>();
+            mapSynapses = new Dictionary<Synapse, CreatedSynapse>();
+            mapHistory = new Dictionary<SynapseState, CreationHistory>();
+
             neurons = new List<CreatedNeuron>();
             synapses = new List<CreatedSynapse>();
 
-            createdNeurons = new List<CreatedNeuron>();
-            createdSynapses = new List<CreatedSynapse>();
+            CreationFrame.setDictionary(mapNeurons, mapSynapses);
 
-            mapSynapses = new Dictionary<Synapse, CreatedSynapse>();
-            mapHistory = new Dictionary<SynapseState, CreationHistory>();
             duplex = new List<Synapse>();
-
-            this.data = data;
-
-            frame = 0;
+            frames = data;
             count = 0;
         }
 
@@ -61,56 +53,39 @@ namespace Brain
             animated = neurons;
 
             foreach (AnimatedNeuron an in neurons)
-            {
-                CreatedNeuron neuron = new CreatedNeuron(an, null);
-                neuron.finish += new EventHandler(finish);
-                this.neurons.Add(neuron);
-            }
+                mapNeurons.Add(an.Neuron, new CreatedNeuron(an));
 
             foreach (AnimatedSynapse s in synapses)
             {
                 if (s.Pre is AnimatedReceptor)
                     continue;
 
-                CreatedSynapse synapse = new CreatedSynapse(s, null);
-                synapse.Pre = this.neurons.Find(k => k.getNeuron() == s.Pre);
-                synapse.Post = this.neurons.Find(k => k.getNeuron() == s.Post);
-                synapse.finish += new EventHandler(finish);
+                CreatedSynapse cs = new CreatedSynapse(s);
+                mapSynapses.Add(s.Synapse, cs);
 
-                s.zero();
-                mapSynapses.Add(s.getSynapse(), synapse);
-                this.synapses.Add(synapse);
-
-                if (s.Duplex)
-                {
-                    mapSynapses.Add(s.getDuplex(), synapse);
-                    duplex.Add(s.getDuplex());
-                }
-
-                if (data[0].getSynapse() == s.getSynapse())
-                {
-                    this.synapse = synapse;
-                    element = synapse;
-                    next();
-                }
+                if (s.isDuplex())
+                    mapSynapses.Add(s.Duplex, cs);
             }
+
+            frame = frames[count];
+            frame.step();
+
+            foreach (CreationFrame cf in frames)
+                cf.finish += new EventHandler(finish);
         }
 
         public override void resize()
         {
             base.resize();
 
-            foreach (CreatedNeuron n in neurons)
-                n.updateGraphics(buffer.Graphics);
-
-            foreach (CreatedSynapse s in synapses)
-                s.updateGraphics(buffer.Graphics);
+            CreatedNeuron.Graphics = buffer.Graphics;
+            CreatedSynapse.Graphics = buffer.Graphics;
         }
 
         protected override void changeSize()
         {
-            layer.Height = layer.Parent.Height - 158;
-            layer.Width = layer.Parent.Width - 168;
+            Height = Parent.Height - 158;
+            Width = Parent.Width - 168;
             initializeGraphics();
         }
 
@@ -122,14 +97,13 @@ namespace Brain
                     mapHistory[active].show();
                 else
                 {
-                    GroupBox history = new GroupBox();
-                    layer.Controls.Add(history);
+                    CreationHistory history = new CreationHistory(this, active);
 
                     int x = (int)(active.State.X);
                     int y = (int)(active.State.Y);
 
                     history.Location = new Point(x, y);
-                    mapHistory.Add(active, new CreationHistory(history, active));
+                    mapHistory.Add(active, history);
                 }
             }
 
@@ -139,61 +113,38 @@ namespace Brain
                 redraw();
         }
 
-        protected override void animate()
+        void animate()
         {
             Graphics g = buffer.Graphics;
             g.Clear(SystemColors.Control);
 
-            if (element == null)
-            {
-                foreach (CreatedSynapse synapse in createdSynapses)
-                    synapse.draw();
-
-                foreach (CreatedSynapse synapse in createdSynapses)
-                    synapse.drawState();
-
-                foreach (CreatedNeuron neuron in createdNeurons)
-                    neuron.draw();
-
-                buffer.Render(graphics);
-                return;
-            }
-
-            element.tick();
-
-            foreach (CreatedSynapse synapse in createdSynapses)
+            foreach (CreatedSynapse synapse in synapses)
                 synapse.draw();
 
-            if (element is CreatedSynapse)
-                element.draw();
-
-            foreach (CreatedSynapse synapse in createdSynapses)
+            foreach (CreatedSynapse synapse in synapses)
                 synapse.drawState();
 
-            if (element is CreatedSynapse)
-                this.synapse.drawState();
-
-            foreach (CreatedNeuron neuron in createdNeurons)
+            foreach (CreatedNeuron neuron in neurons)
                 neuron.draw();
 
-            if (element is CreatedNeuron)
-                element.draw();
+            if (frame != null)
+                frame.tick();
 
             buffer.Render(graphics);
         }
 
-        protected override void redraw()
+        void redraw()
         {
             Graphics g = buffer.Graphics;
             g.Clear(SystemColors.Control);
 
-            foreach (CreatedSynapse synapse in createdSynapses)
+            foreach (CreatedSynapse synapse in synapses)
                 synapse.draw();
 
-            foreach (CreatedSynapse synapse in createdSynapses)
+            foreach (CreatedSynapse synapse in synapses)
                 synapse.drawState();
 
-            foreach (CreatedNeuron neuron in createdNeurons)
+            foreach (CreatedNeuron neuron in neurons)
                 neuron.draw();
 
             buffer.Render(graphics);
@@ -201,18 +152,7 @@ namespace Brain
 
         public void changePace(int pace)
         {
-            interval = pace / 25;
-
-            if (element != null)
-                element.setInterval(interval);
-
-            if (synapse != null)
-            {
-                if (synapse.Duplex)
-                    synapse.Step = synapse.DuplexWeight / interval;
-                else
-                    synapse.Step = synapse.SynapseWeight / interval;
-            }
+            CreationFrame.setInterval(pace / 25);
         }
 
         public void start()
@@ -233,14 +173,7 @@ namespace Brain
 
         public void forth()
         {
-            element.create();
-
-            if (count == data.Count)
-            {
-                element = null;
-                return;
-            }
-
+            frame.create(neurons, synapses);
             next();
         }
 
@@ -251,60 +184,26 @@ namespace Brain
 
         void next()
         {
-            frameChanged(this, new FrameEventArgs(++frame));
-
-            if (element is CreatedNeuron)
+            if (++count == frames.Count)
             {
-                createdNeurons.Add((CreatedNeuron)element);
+                creationFinished(this, null);
+                return;
             }
 
-                CreationData cd = data[count];
-                Synapse s = cd.getSynapse();
-                synapse = mapSynapses[s];
-
-                if (!synapse.Pre.Created)
-                    element = synapse.Pre;
-                else if (!synapse.Post.Created)
-                    element = synapse.Post;
-                else
-                {
-                    if (duplex.Contains(s))
-                    {
-                        synapse.addHistory(cd, true);
-                        synapse.Duplex = true;
-                    }
-                    else
-                    {
-                        synapse.addHistory(cd, false);
-                        synapse.Duplex = false;
-                    }
-
-                    if (!createdSynapses.Contains(synapse))
-                        createdSynapses.Add(synapse);
-
-                    if (animation)
-                        synapse.Step = cd.step(interval);
-                    else
-                        synapse.Step = cd.step(1);
-
-                    element = synapse;
-                    count++;
-                }
-
-            if (animation)
-                element.setInterval(interval);
+            frameChanged(this, new FrameEventArgs(count));
+            frame = frames[count];
+            frame.step();
         }        
 
         void finish(object sender, EventArgs e)
         {
-            if (count == data.Count)
-            {
-                animation = false;
-                element = null;
-                return;
-            }
-
-            next();
+            if (sender is CreatedNeuron)
+                neurons.Add((CreatedNeuron)sender);
+            else if (sender is List<Synapse>)
+                foreach (Synapse s in (List<Synapse>)sender)
+                    synapses.Add(mapSynapses[s]);
+            else
+                next();
         }
 
         protected override void mouseMove(object sender, MouseEventArgs e)
@@ -330,7 +229,7 @@ namespace Brain
 
             foreach(CreatedSynapse synapse in synapses)
             {
-                AnimatedSynapse s = synapse.getSynapse();
+                AnimatedSynapse s = synapse.Synapse;
 
                 if(s.active(e.Location, false))
                 {
@@ -338,7 +237,7 @@ namespace Brain
                     return;
                 }
 
-                if(s.Duplex && s.active(e.Location, true))
+                if(s.isDuplex() && s.active(e.Location, true))
                 {
                     active = s.getState(true);
                     return;
@@ -361,6 +260,7 @@ namespace Brain
         }
 
         public event EventHandler animationStop;
+        public event EventHandler creationFinished;
         public event EventHandler<FrameEventArgs> frameChanged;
     }
 }

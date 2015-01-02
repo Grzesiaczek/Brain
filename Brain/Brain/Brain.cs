@@ -105,14 +105,15 @@ namespace Brain
             addSentence(sentence.Split(' '));
         }
 
-        public void addSentence(String sentence, List<CreationData> data)
+        public void addSentence(String sentence, List<CreationFrame> data)
         {
             addSentence(sentence.Split(' '), data);
         }
 
-        public void addSentence(String[] words, List<CreationData> data = null)
+        public void addSentence(String[] words, List<CreationFrame> data = null)
         {
             List<Neuron> fragment = new List<Neuron>();
+            List<CreationFrame> frames = new List<CreationFrame>();
 
             foreach (String word in words)
             {
@@ -126,6 +127,7 @@ namespace Brain
 
                 neuron.Count++;
                 fragment.Add(neuron);
+                frames.Add(new CreationFrame(neuron));
             }
 
             for (int i = 0; i < fragment.Count; i++)
@@ -140,20 +142,27 @@ namespace Brain
                         synapses.Add(synapse);
                         fragment[i].Output.Add(synapse);
                         fragment[j].Input.Add(synapse);
+                        frames[j].add(synapse);
                     }
 
                     synapse.Factor += 1 / (float)(j - i);
                 }
 
-                foreach (Synapse s in fragment[i].Output)
+                foreach (Synapse s in fragment[i].Input)
                 {
                     float weight = s.Weight;
-                    s.Weight = (2 * s.Factor) / (((Neuron)s.Pre).Count + s.Factor);
+                    s.Weight = (2 * s.Factor) / (fragment[i].Count + s.Factor);
 
-                    if (data != null)
-                        data.Add(new CreationData(s, weight, s.Weight));
+                    if (weight != s.Weight)
+                        frames[i].add(new CreationData(s, data.Count + i, weight, s.Weight));
                 }
             }
+
+            if (data == null)
+                return;
+
+            foreach (CreationFrame frame in frames)
+                data.Add(frame);
         }
 
         public List<Neuron> Neurons

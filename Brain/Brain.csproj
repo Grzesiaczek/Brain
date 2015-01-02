@@ -36,6 +36,8 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -56,14 +58,30 @@
     <Compile Include="Balancing\BalancedNeuron.cs" />
     <Compile Include="Balancing\BalancedReceptor.cs" />
     <Compile Include="Circle.cs" />
-    <Compile Include="Creation\CreationHistory.cs" />
-    <Compile Include="Creation\CreatedElement.cs" />
+    <Compile Include="Creation\CreationFrame.cs" />
+    <Compile Include="Creation\CreationHistory.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Creation\CreatedNeuron.cs" />
     <Compile Include="Creation\CreatedSynapse.cs" />
-    <Compile Include="Creation\Creation.cs" />
-    <Compile Include="Layers\MainLayer.cs" />
-    <Compile Include="Sentence.cs" />
-    <Compile Include="Sequence.cs" />
+    <Compile Include="Creation\Creation.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Layers\Layer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Layers\Layer.Designer.cs">
+      <DependentUpon>Layer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Layers\MainLayer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Sentence.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Sequence.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Simulation.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -71,11 +89,12 @@
       <DependentUpon>Simulation.cs</DependentUpon>
     </Compile>
     <Compile Include="Brain\Brain.cs" />
-    <Compile Include="Chart.cs" />
+    <Compile Include="Chart.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="Balancing\GraphBalancing.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="Layers\Layer.cs" />
     <Compile Include="Query.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,11 +106,21 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Brain\Receptor.cs" />
-    <Compile Include="Animation\Animation.cs" />
+    <Compile Include="Animation\Animation.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Structures.cs" />
     <Compile Include="Brain\Synapse.cs" />
     <Compile Include="SynapseState.cs" />
-    <Compile Include="Layers\TopLayer.cs" />
+    <Compile Include="Layers\TopLayer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="Layers\Layer.resx">
+      <DependentUpon>Layer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Layers\MainLayer.resx">
+      <DependentUpon>MainLayer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Simulation.resx">
       <DependentUpon>Simulation.cs</DependentUpon>
     </EmbeddedResource>

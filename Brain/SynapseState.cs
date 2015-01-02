@@ -78,9 +78,12 @@ namespace Brain
             activated = false;
         }
 
-        public Synapse getSynapse()
+        public Synapse Synapse
         {
-            return synapse;
+            get
+            {
+                return synapse;
+            }
         }
 
         public List<bool> Activity

@@ -255,16 +255,6 @@ namespace Brain
             }
         }
 
-        public Neuron getNeuron()
-        {
-            return neuron;
-        }
-
-        public Graphics getGraphics()
-        {
-            return graphics;
-        }
-
         public void updateGraphics(Graphics g)
         {
             float fx = g.VisibleClipBounds.Width / size.Width;
@@ -273,6 +263,22 @@ namespace Brain
             setPosition(new PointF(Position.X * fx, Position.Y * fy));
             size = new SizeF(g.VisibleClipBounds.Width, g.VisibleClipBounds.Height);
             graphics = g;
+        }
+
+        public Neuron Neuron
+        {
+            get
+            {
+                return neuron;
+            }
+        }
+
+        public Graphics Graphics
+        {
+            get
+            {
+                return graphics;
+            }
         }
 
         public List<NeuronData> Activity
