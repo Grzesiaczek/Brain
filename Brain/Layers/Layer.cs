@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    partial class Layer : Control
+    abstract class Layer : Control
     {
         protected Graphics graphics;
         protected System.Windows.Forms.Timer timer;
@@ -19,24 +19,22 @@ namespace Brain
         protected BufferedGraphics buffer;
         BufferedGraphicsContext context;
 
-        public Layer()
+        public Layer(Control parent)
         {
-            InitializeComponent();
-            /*
-            #if DEBUG
-            #else 
+            if(parent != null)
+                parent.Controls.Add(this);
+
             mode = Mode.Auto;
             Visible = false;
-            
             Location = new Point(10, 10);
             VisibleChanged += new EventHandler(visibilityChanged);
+
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
             timer.Interval = 25;
-#endif*/
         }
 
-        protected void initializeGraphics()
+        protected virtual void initializeGraphics()
         {
             graphics = CreateGraphics();
             graphics.FillRectangle(SystemBrushes.Control, graphics.VisibleClipBounds);
@@ -52,12 +50,7 @@ namespace Brain
         {
             this.mode = mode;
         }
-
-        public virtual void resize()
-        {
-            changeSize();
-        }
-        /*
+        
         protected virtual void visibilityChanged(object sender, EventArgs e)
         {
             if (!Visible)
@@ -68,15 +61,10 @@ namespace Brain
 
             resize();
             timer.Start();
-        }*/
-
-        protected virtual void changeSize() { }
-
-        protected virtual void tick(object sender, EventArgs e) { }
-
-        protected override void OnPaint(PaintEventArgs pe)
-        {
-            base.OnPaint(pe);
         }
+
+        public abstract void resize();
+
+        protected abstract void tick(object sender, EventArgs e);
     }
 }

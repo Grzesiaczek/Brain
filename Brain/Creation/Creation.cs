@@ -24,7 +24,6 @@ namespace Brain
         List<CreatedSynapse> synapses;
 
         SynapseState active;
-        Sentence sentence;
         CreationFrame frame;
 
         int time;
@@ -32,7 +31,7 @@ namespace Brain
 
         bool animation;
 
-        public Creation(List<CreationFrame> data)
+        public Creation(Control parent, List<CreationFrame> data) : base(parent)
         {
             mapNeurons = new Dictionary<Neuron, CreatedNeuron>();
             mapSynapses = new Dictionary<Synapse, CreatedSynapse>();
@@ -42,8 +41,8 @@ namespace Brain
             synapses = new List<CreatedSynapse>();
 
             CreationFrame.setDictionary(mapNeurons, mapSynapses);
-
             duplex = new List<Synapse>();
+
             frames = data;
             count = 0;
         }
@@ -82,13 +81,6 @@ namespace Brain
             CreatedSynapse.Graphics = buffer.Graphics;
         }
 
-        protected override void changeSize()
-        {
-            Height = Parent.Height - 158;
-            Width = Parent.Width - 168;
-            initializeGraphics();
-        }
-
         protected override void tick(object sender, EventArgs e)
         {
             if (active != null && ++time == 12)
@@ -98,11 +90,6 @@ namespace Brain
                 else
                 {
                     CreationHistory history = new CreationHistory(this, active);
-
-                    int x = (int)(active.State.X);
-                    int y = (int)(active.State.Y);
-
-                    history.Location = new Point(x, y);
                     mapHistory.Add(active, history);
                 }
             }

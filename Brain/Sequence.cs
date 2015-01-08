@@ -20,7 +20,7 @@ namespace Brain
         bool animation;
         bool disappear;
 
-        public Sequence()
+        public Sequence(Control parent) : base(parent)
         {
             neurons = new List<SequenceNeuron>();
             sequence = new List<SequenceNeuron>();
@@ -107,12 +107,6 @@ namespace Brain
             animation = value;
         }
         /*
-        protected override void changeSize()
-        {
-            Height = 90;
-            Width = Parent.Width - 168;
-            initializeGraphics();
-        }
 
         protected override void tick(object sender, EventArgs e)
         {
@@ -282,7 +276,7 @@ namespace Brain
             Rectangle rect = new Rectangle(x, y, 80, 32);
             g.FillRectangle(brush, rect);
             g.DrawRectangle(pen, rect);
-            g.DrawString(element.Name, font, Brushes.CadetBlue, rect, format);
+            //g.DrawString(element.Name, font, Brushes.CadetBlue, rect, format);
         }
     }
 }

@@ -23,28 +23,34 @@ namespace Brain
         int length;
         int pace;
 
-        Animation animation;
-        Creation creation;
-        Chart chart;
-        Sequence sequence;
-
         Mode mode;
         FormWindowState state;
         Controller controller;
 
         public Simulation()
         {
-            InitializeComponent();/*
+            InitializeComponent();
             Config.load();
             initialize();
             prepareAnimation();
-            creation.Visible = true;*/
+
+            radioButtonCreation.Checked = true;
+            creation.Visible = true;
         }
 
         void initialize()
         {
             brain = new Brain();
             frames = new List<CreationFrame>();
+
+            animation = new Animation(this);
+            creation = new Creation(this, frames);
+            sequence = new Sequence(this);
+            chart = new Chart(this);
+
+            Controls.Add(animation);
+            Controls.Add(creation);
+            Controls.Add(chart);
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             mode = Mode.Creation;
@@ -93,7 +99,7 @@ namespace Brain
             brain.addReceptors(receptors);
 
             animation.loadNeurons(brain.Neurons);
-            animation.create(creation);
+            animation.create(creation, frames);
             chart.setNeurons(animation.getNeurons());
         }
 
@@ -379,7 +385,7 @@ namespace Brain
             if (WindowState != state)
             {
                 animation.resize();
-                //sequence.resize();
+                sequence.resize();
                 creation.resize();
                 state = WindowState;
             }
@@ -388,7 +394,7 @@ namespace Brain
         private void resizeEnd(object sender, EventArgs e)
         {
             animation.resize();
-            //sequence.resize();
+            sequence.resize();
             creation.resize();
         }
 

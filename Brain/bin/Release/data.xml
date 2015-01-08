@@ -19,11 +19,11 @@
 	</receptors>
 	<sentences>
 		<sentence>jupiter is planet</sentence>
+    <sentence>saturn is planet</sentence>
 		<sentence>jupiter is big</sentence>
+    <sentence>saturn is big planet</sentence>
 		<sentence>jupiter is big planet</sentence>
     <sentence>jupiter is bigger than earth</sentence>
-		<sentence>saturn is big planet</sentence>
-		<sentence>saturn is planet</sentence>
     <sentence>saturn is smaller than jupiter</sentence>
 		<sentence>saturn is bigger than earth</sentence>
 		<sentence>mercury is small planet</sentence>

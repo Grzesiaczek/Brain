@@ -7,27 +7,6 @@ using System.Threading.Tasks;
 
 namespace Brain
 {
-    interface AnimatedElement
-    {
-        void draw(int frame);
-
-        PointF Position
-        {
-            get;
-            set;
-        }
-
-        float Radius
-        {
-            get;
-        }
-
-        String Name
-        {
-            get;
-        }
-    }
-
     interface Element
     {
         bool Active

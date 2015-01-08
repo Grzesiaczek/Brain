@@ -36,7 +36,7 @@ namespace Brain
             shift.X = x - click.X;
             shift.Y = y - click.Y;
 
-            neuron.setPosition(new PointF(original.X + shift.X, original.Y + shift.Y));
+            neuron.Position = new PointF(original.X + shift.X, original.Y + shift.Y);
             neuron.checkCollision(neurons);
             neuron.recalculate();
             moved = true;

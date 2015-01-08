@@ -253,7 +253,6 @@
             this.layerMenu.Size = new System.Drawing.Size(120, 737);
             this.layerMenu.TabIndex = 19;
             this.layerMenu.TabStop = false;
-            this.layerMenu.Text = "s";
             // 
             // radioButtonCreation
             // 
@@ -386,9 +385,6 @@
             this.radioButtonAuto.Text = "Auto";
             this.radioButtonAuto.UseVisualStyleBackColor = true;
             this.radioButtonAuto.CheckedChanged += new System.EventHandler(this.radioButtonAnimation_CheckedChanged);
-            // 
-            // Simulation
-            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
@@ -409,7 +405,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLength)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarPace)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         #endregion
@@ -443,6 +438,10 @@
         private System.Windows.Forms.TrackBar trackBarPace;
         private System.Windows.Forms.TrackBar trackBarLength;
         private System.Windows.Forms.RadioButton radioButtonCreation;
+        private Animation animation = null;
+        private Creation creation = null;
+        private Chart chart = null;
+        private Sequence sequence = null;
     }
 }
 

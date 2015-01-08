@@ -8,22 +8,15 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    class Sentence : TopLayer
+    class LayerSequence : TopLayer
     {
-        List<String> tak;
+        List<List<Neuron>> data;
 
-        public Sentence()
+        public LayerSequence(Control parent): base(parent)
         { 
 
         }
         /*
-        protected override void changeSize()
-        {
-            Height = 90;
-            Width = Parent.Width - 168;
-            initializeGraphics();
-        }
-
         protected override void tick(object sender, EventArgs e)
         {
             buffer.Graphics.Clear(Color.FromArgb(255, 225, 225, 225));
@@ -32,15 +25,28 @@ namespace Brain
 
             buffer.Render(graphics);
         }*/
+
+        public void next()
+        {
+
+        }
     }
 
-    class LearnedNeuron
+    class LearningSequence
     {
-        Neuron neuron;
+        List<Neuron> neurons;
 
-        public LearnedNeuron(Neuron neuron)
+        public LearningSequence(List<Neuron> neurons)
         {
-            this.neuron = neuron;
+            this.neurons = neurons;
+        }
+
+        public List<Neuron> Neurons
+        {
+            get
+            {
+                return neurons;
+            }
         }
     }
 }

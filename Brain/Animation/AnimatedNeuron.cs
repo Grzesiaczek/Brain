@@ -10,11 +10,8 @@ namespace Brain
 {
     class AnimatedNeuron : AnimatedElement
     {
-        Graphics graphics;
         Neuron neuron;
-
         Circle circle;
-        SizeF size;
 
         List<AnimatedSynapse> input;
         List<AnimatedSynapse> output;
@@ -32,11 +29,10 @@ namespace Brain
 
         public AnimatedNeuron() { }
 
-        public AnimatedNeuron(Neuron n, Graphics g, PointF pos)
+        public AnimatedNeuron(Neuron n, PointF pos)
         {
             neuron = n;
-            graphics = g;
-            size = new SizeF(g.VisibleClipBounds.Width, g.VisibleClipBounds.Height);
+            radius = 24;
 
             id = ++count;
             createCircle(pos);
@@ -45,11 +41,10 @@ namespace Brain
             output = new List<AnimatedSynapse>();
         }
 
-        public AnimatedNeuron(BinaryReader reader, Graphics g)
+        public AnimatedNeuron(BinaryReader reader)
         {
             id = reader.ReadInt32();
             createCircle(new PointF(reader.ReadSingle(), reader.ReadSingle()));
-            graphics = g;
 
             int count = reader.ReadInt32();
             List<NeuronData> data = new List<NeuronData>(count);
@@ -62,16 +57,6 @@ namespace Brain
 
             input = new List<AnimatedSynapse>();
             output = new List<AnimatedSynapse>();
-        }
-
-        public void setPosition(PointF pos)
-        {
-            circle.update(pos);
-        }
-
-        public void setRadius(float radius)
-        {
-            circle.Radius = radius;
         }
 
         public void checkCollision(List<AnimatedNeuron> neurons)
@@ -112,7 +97,7 @@ namespace Brain
         {
             if(collision)
             {
-                setPosition(new PointF(original.X, original.Y));
+                Position = new PointF(original.X, original.Y);
                 recalculate();
             }
 
@@ -122,15 +107,16 @@ namespace Brain
         public void recalculate()
         {
             foreach (AnimatedSynapse s in input)
-                s.recalculate();
+                s.calculate();
 
             foreach (AnimatedSynapse s in output)
-                s.recalculate();
+                s.calculate();
         }
 
         public void createCircle(PointF pos)
         {
-            circle = new Circle(pos, Config.Radius);
+            circle = new Circle(pos, radius);
+            position = pos;
         }
 
         public void animate(int number, int frame, double factor)
@@ -152,7 +138,7 @@ namespace Brain
         {
             circle.draw(g);
 
-            if (Radius == Config.Radius)
+            if (radius == Config.Radius)
                 drawLabel(g);
         }
 
@@ -205,15 +191,15 @@ namespace Brain
                 drawLabel(graphics);
         }
 
-        void drawLabel(Graphics graphics)
+        void drawLabel(Graphics g)
         {
             int width = neuron.Word.Length * 8 + 5;
-            float x = circle.Center.X - width / 2;
-            float y = circle.Center.Y + Config.Radius + 5;
+            float x = position.X - width / 2;
+            float y = position.Y + radius + 5;
 
-            graphics.FillRectangle(Brushes.AliceBlue, x, y, width, 14);
-            graphics.DrawRectangle(new Pen(SystemBrushes.ButtonFace, 2), x, y, width, 14);
-            graphics.DrawString(neuron.Word, new Font("Miriam Fixed", 9, FontStyle.Bold), Brushes.DarkSlateBlue, x + 2, y + 2);
+            g.FillRectangle(Brushes.AliceBlue, x, y, width, 14);
+            g.DrawRectangle(new Pen(SystemBrushes.ButtonFace, 2), x, y, width, 14);
+            g.DrawString(neuron.Word, new Font("Miriam Fixed", 9, FontStyle.Bold), Brushes.DarkSlateBlue, x + 2, y + 2);
         }
 
         public void save(BinaryWriter writer)
@@ -234,7 +220,7 @@ namespace Brain
 
         public void create()
         {
-            circle.Radius = Config.Radius;
+            Radius = Config.Radius;
         }
 
         public void setSynapses(List<AnimatedSynapse> input, List<AnimatedSynapse> output)
@@ -245,39 +231,21 @@ namespace Brain
             foreach (AnimatedSynapse s in input)
             {
                 s.Post = this;
-                s.recalculate();
+                s.calculate();
             }
                 
             foreach (AnimatedSynapse s in output)
             {
                 s.Pre = this;
-                s.recalculate();
+                s.calculate();
             }
         }
-
-        public void updateGraphics(Graphics g)
-        {
-            float fx = g.VisibleClipBounds.Width / size.Width;
-            float fy = g.VisibleClipBounds.Height / size.Height;
-
-            setPosition(new PointF(Position.X * fx, Position.Y * fy));
-            size = new SizeF(g.VisibleClipBounds.Width, g.VisibleClipBounds.Height);
-            graphics = g;
-        }
-
+        
         public Neuron Neuron
         {
             get
             {
                 return neuron;
-            }
-        }
-
-        public Graphics Graphics
-        {
-            get
-            {
-                return graphics;
             }
         }
 
@@ -297,23 +265,16 @@ namespace Brain
             }
         }
 
-        public float Radius
+        public override PointF Position
         {
             get
             {
-                return circle.Radius;
-            }
-        }
-
-        public PointF Position
-        {
-            get
-            {
-                return circle.Center;
+                return position;
             }
             set
             {
-                circle.Center = value;
+                position = value;
+                circle.update(value);
             }
         }
 

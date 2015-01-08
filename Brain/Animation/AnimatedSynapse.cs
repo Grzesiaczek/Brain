@@ -8,53 +8,53 @@ using System.Threading.Tasks;
 
 namespace Brain
 {
-    class AnimatedSynapse
+    class AnimatedSynapse : AnimatedElement
     {
         AnimatedElement pre;
         AnimatedElement post;
 
         PointF start;
         PointF end;
+        Vector vector;
 
         SynapseState synapse;
         SynapseState duplex;
 
-        Graphics graphics;
-
         float sin, cos;
         float dx, dy;
+        
 
-        public AnimatedSynapse(AnimatedNeuron pre, AnimatedNeuron post, Synapse synapse, Graphics g)
+        public AnimatedSynapse(AnimatedNeuron pre, AnimatedNeuron post, Synapse synapse)
         {
             this.pre = pre;
             this.post = post;
             this.synapse = new SynapseState(synapse);
 
-            graphics = g;
             duplex = null;
+            vector = new Vector();
 
             pre.Output.Add(this);
             post.Input.Add(this);
 
-            initialize();
+            calculate();
         }
 
-        public AnimatedSynapse(AnimatedReceptor pre, AnimatedNeuron post, Synapse synapse, Graphics g)
+        public AnimatedSynapse(AnimatedReceptor pre, AnimatedNeuron post, Synapse synapse)
         {
             this.pre = pre;
             this.post = post;
             this.synapse = new SynapseState(synapse);
 
-            graphics = g;
             duplex = null;
+            vector = new Vector();
 
             pre.Output = this;
             post.Input.Add(this);
 
-            initialize();
+            calculate();
         }
 
-        public AnimatedSynapse(BinaryReader reader, List<AnimatedNeuron> neurons, Graphics g)
+        public AnimatedSynapse(BinaryReader reader, List<AnimatedNeuron> neurons)
         {/*
             int id = reader.ReadInt32();
             pre = neurons.Find(k => k.ID == id);
@@ -71,10 +71,10 @@ namespace Brain
             start = new PointF();
             end = new PointF();
 
-            initialize();
+            calculate();
         }
 
-        void initialize()
+        public void calculate()
         {
             start = new PointF();
             end = new PointF();
@@ -99,17 +99,14 @@ namespace Brain
             Circle control = new Circle(new PointF(state.Center.X - cos * 8, state.Center.Y - sin * 8), 12);
             synapse.load(state, control);
 
+            vector.update(pre.Position, post.Position);
+
             if (duplex == null)
                 return;
 
             state = new Circle(new PointF(start.X + end.X - synapse.State.X, start.Y + end.Y - synapse.State.Y), 12);
             control = new Circle(new PointF(start.X + end.X - synapse.Control.X, start.Y + end.Y - synapse.Control.Y), 12);
             duplex.load(state, control);
-        }
-
-        public void recalculate()
-        {
-            initialize();
         }
 
         public void animate(int frame, float factor)
@@ -214,14 +211,6 @@ namespace Brain
                 duplex.create();
         }
 
-        public void zero()
-        {
-            synapse.Weight = 0;
-
-            if (duplex != null)
-                duplex.Weight = 0;
-        }
-
         public void setDuplex(Synapse synapse)
         {
             duplex = new SynapseState(synapse);
@@ -236,12 +225,6 @@ namespace Brain
             //writer.Write(pre.ID);
             //writer.Write(post.ID);
             //writer.Write(duplex);
-        }
-
-        public void updateGraphics(Graphics g)
-        {
-            initialize();
-            graphics = g;
         }
 
         public bool active(Point location, bool duplex)
@@ -276,6 +259,18 @@ namespace Brain
             }
         }
 
+        public Vector Vector
+        {
+            get
+            {
+                return vector;
+            }
+            set
+            {
+                vector = value;
+            }
+        }
+
         public bool isDuplex()
         {
             if (duplex == null)
@@ -305,6 +300,18 @@ namespace Brain
             get
             {
                 return duplex.Synapse;
+            }
+        }
+
+        public override PointF Position
+        {
+            get
+            {
+                return position;
+            }
+            set
+            {
+                position = value;
             }
         }
 

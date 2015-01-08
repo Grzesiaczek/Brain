@@ -8,13 +8,33 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    class MainLayer : Layer
+    abstract class MainLayer : Layer
     {
         protected ShiftedNeuron shift;
+        protected bool sequenceBar = true;
 
-        public MainLayer()
+        public override void resize()
         {
-            Location = new Point(10, 110);
+            Height = Parent.Height - 58;
+            Width = Parent.Width - 168;
+
+            if (sequenceBar)
+                Height -= 100;
+
+            initializeGraphics();
+        }
+
+        protected override void tick(object sender, EventArgs e)
+        {
+
+        }
+
+        public MainLayer(Control parent) : base(parent)
+        {
+            if (sequenceBar)
+                Location = new Point(10, 110);
+            else
+                Location = new Point(10, 10);
 
             MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
             MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
@@ -51,15 +71,5 @@ namespace Brain
         }
 
         public event EventHandler neuronShifted;
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            // 
-            // MainLayer
-            // 
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.ResumeLayout(false);
-        }
     }
 }

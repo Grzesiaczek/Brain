@@ -52,12 +52,19 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\AnimatedElement.cs" />
     <Compile Include="Animation\AnimatedNeuron.cs" />
     <Compile Include="Animation\AnimatedReceptor.cs" />
     <Compile Include="Animation\AnimatedSynapse.cs" />
+    <Compile Include="Vector.cs" />
+    <Compile Include="Balancing\BalancedElement.cs" />
+    <Compile Include="Balancing\BalancedSynapse.cs" />
     <Compile Include="Balancing\BalancedNeuron.cs" />
     <Compile Include="Balancing\BalancedReceptor.cs" />
     <Compile Include="Circle.cs" />
+    <Compile Include="CreationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Creation\CreationFrame.cs" />
     <Compile Include="Creation\CreationHistory.cs">
       <SubType>Component</SubType>
@@ -69,9 +76,6 @@
     </Compile>
     <Compile Include="Layers\Layer.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Layers\Layer.Designer.cs">
-      <DependentUpon>Layer.cs</DependentUpon>
     </Compile>
     <Compile Include="Layers\MainLayer.cs">
       <SubType>Component</SubType>
@@ -115,12 +119,6 @@
     <Compile Include="Layers\TopLayer.cs">
       <SubType>Component</SubType>
     </Compile>
-    <EmbeddedResource Include="Layers\Layer.resx">
-      <DependentUpon>Layer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Layers\MainLayer.resx">
-      <DependentUpon>MainLayer.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Simulation.resx">
       <DependentUpon>Simulation.cs</DependentUpon>
     </EmbeddedResource>

@@ -10,3 +10,6 @@ C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Release\
 C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Release\config.xml
 C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Release\Brain.Query.resources
 C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Release\Brain.Simulation.resources
+C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Release\Brain.Animation.resources
+C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Release\Brain.LayerDesigner.resources
+C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Release\Brain.MainLayer.resources

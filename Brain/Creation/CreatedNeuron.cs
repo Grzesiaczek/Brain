@@ -17,14 +17,14 @@ namespace Brain
         public CreatedNeuron(AnimatedNeuron neuron)
         {
             this.neuron = neuron;
-            neuron.setRadius(0);
+            neuron.Radius = 0;
             created = false;
         }
 
         public void create()
         {
             created = true;
-            neuron.setRadius(Config.Radius);
+            neuron.Radius = Config.Radius;
         }
 
         public void draw()
@@ -34,7 +34,7 @@ namespace Brain
 
         public void draw(float factor)
         {
-            neuron.setRadius(factor * Config.Radius);
+            neuron.Radius = factor * Config.Radius;
             neuron.draw(graphics);
         }
 

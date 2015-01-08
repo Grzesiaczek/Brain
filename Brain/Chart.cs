@@ -12,7 +12,7 @@ namespace Brain
     {
         List<ChartedNeuron> neurons;
 
-        public Chart()
+        public Chart(Control parent) : base(parent)
         {
             neurons = new List<ChartedNeuron>();
             initializeGraphics();
@@ -33,7 +33,7 @@ namespace Brain
             }
         }
 
-        protected override void changeSize()
+        public override void resize()
         {
             Height = Parent.Height - 58;
             Width = Parent.Width - 168;

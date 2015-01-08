@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Brain
 {
@@ -11,17 +12,20 @@ namespace Brain
     {
         List<BalancedNeuron> neurons;
         List<BalancedReceptor> receptors;
-        List<AnimatedSynapse> synapses;
+        List<BalancedSynapse> synapses;
 
         System.Windows.Forms.Timer timer;
-        Graphics graphics;
+        Dictionary<AnimatedElement, BalancedElement> map;
 
         float alpha;
         float beta;
         float delta;
         float step;
 
+        int interval;
         int steps;
+
+        bool extra;
         bool action;
 
         static GraphBalancing instance = new GraphBalancing();
@@ -30,7 +34,7 @@ namespace Brain
         {
             alpha = -0.2f;
             beta = 2.0f;
-            step = 0.25f;
+            step = 0.2f;
 
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
@@ -42,104 +46,135 @@ namespace Brain
             return instance;
         }
 
-        public void animate(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors, Graphics g, int steps)
+        public void animate(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors, int steps)
         {
             if (action)
                 timer.Stop();
 
-            this.neurons = new List<BalancedNeuron>();
-            this.receptors = new List<BalancedReceptor>();
+            initialize(neurons, synapses, receptors);
 
-            foreach (AnimatedNeuron neuron in neurons)
-                this.neurons.Add(new BalancedNeuron(neuron));
-
-            foreach (AnimatedReceptor receptor in receptors)
-                this.receptors.Add(new BalancedReceptor(receptor));
-
-            this.synapses = synapses;
             this.steps = steps;
-            graphics = g;
-
+            interval = 0;
             timer.Start();
         }
 
-        public void balance(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors, Graphics g)
+        public void balance(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors)
         {
-            this.neurons = new List<BalancedNeuron>();
-            this.receptors = new List<BalancedReceptor>();
-
-            foreach (AnimatedNeuron neuron in neurons)
-                this.neurons.Add(new BalancedNeuron(neuron));
-
-            foreach (AnimatedReceptor receptor in receptors)
-                this.receptors.Add(new BalancedReceptor(receptor));
-
-            this.synapses = synapses;
-            graphics = g;
+            initialize(neurons, synapses, receptors);
 
             while(true)
             {
-                delta = 0;
                 calculate();
+                update();
 
-                if (delta < 0.1)
+                if (Math.Abs(delta) < 0.1)
+                    break;
+            }
+
+            extra = true;
+
+            while (true)
+            {
+                calculate();
+                update();
+
+                if (Math.Abs(delta) < 0.1)
                     break;
             }
 
             foreach (AnimatedSynapse s in synapses)
-                s.recalculate();
+                s.calculate();
+        }
+
+        void initialize(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors)
+        {
+            this.neurons = new List<BalancedNeuron>();
+            this.receptors = new List<BalancedReceptor>();
+            this.synapses = new List<BalancedSynapse>();
+            map = new Dictionary<AnimatedElement, BalancedElement>();
+
+            foreach (AnimatedNeuron an in neurons)
+            {
+                BalancedNeuron neuron = new BalancedNeuron(an);
+                this.neurons.Add(neuron);
+                map.Add(an, neuron);
+            }
+
+            foreach (AnimatedReceptor ar in receptors)
+            {
+                BalancedReceptor receptor = new BalancedReceptor(ar);
+                this.receptors.Add(receptor);
+                map.Add(ar, receptor);
+            }
+
+            foreach (AnimatedSynapse synapse in synapses)
+                this.synapses.Add(new BalancedSynapse(synapse, map));
+
+            extra = false;
         }
 
         void tick(object sender, EventArgs e)
         {
-            for (int i = 0; i < steps; i++)
-                calculate();
+            if (interval < steps)
+                interval += 1;
 
-            if (Math.Abs(delta) < 0.05)
+            for (int i = 0; i < interval; i++)
             {
-                timer.Stop();
-                action = false;
-                balanceFinished(this, new EventArgs());
+                calculate();
+                update();
             }
 
-            foreach(BalancedNeuron n in neurons)
-                n.draw(1);
+            if (Math.Abs(delta) < 0.1)
+            {
+                if (extra)
+                {
+                    timer.Stop();
+                    action = false;
+                    balanceFinished(this, new EventArgs());
+                }
+                else
+                {
+                    interval = 0;
+                    steps /= 2;
+                    extra = true;
+                }
+            }
 
-            foreach (AnimatedSynapse s in synapses)
-                s.recalculate();
+            foreach(BalancedNeuron bn in neurons)
+                bn.draw(1);
+
+            foreach (BalancedSynapse bs in synapses)
+                bs.Synapse.calculate();
         }
 
         void calculate()
         {
-            delta = 0;
-
             foreach (BalancedNeuron n1 in neurons)
             {
-                n1.zero();
-                n1.repulse(graphics.VisibleClipBounds.Size, beta / (2 * neurons.Count));
+                n1.repulse(beta / (2 * neurons.Count));
+                n1.rotate();
 
                 foreach (BalancedNeuron n2 in neurons)
                 {
                     if (n1 == n2)
                         continue;
 
-                    n1.repulse(n2.getPosition(), beta);
+                    n1.repulse(n2.Position, beta);
                 }
                 
                 foreach(BalancedReceptor r in receptors)
-                    n1.repulse(r.getPosition(), beta / 2);
+                    n1.repulse(r.Position, beta / 2);
 
-                foreach (AnimatedSynapse s in n1.getNeuron().Output)
-                    n1.attract(s.Post, alpha + alpha * s.getWeight());
+                foreach (AnimatedSynapse s in n1.Neuron.Output)
+                    n1.attract(s.Post, 2 * alpha);
 
-                foreach (AnimatedSynapse s in n1.getNeuron().Input)
-                    n1.attract(s.Pre, alpha + alpha * s.getWeight());
+                foreach (AnimatedSynapse s in n1.Neuron.Input)
+                    n1.attract(s.Pre, 3 * alpha);
             }
 
             foreach (BalancedReceptor r1 in receptors)
             {
-                r1.zero();
-                r1.attract(alpha);
+                r1.attract(5 * alpha);
 
                 foreach (BalancedReceptor r2 in receptors)
                 {
@@ -150,11 +185,23 @@ namespace Brain
                 }
             }
 
-            foreach (BalancedNeuron neuron in neurons)
-                delta += neuron.update(step);
+            foreach (BalancedSynapse bs in synapses)
+                bs.rotate();
 
-            foreach (BalancedReceptor r in receptors)
-                delta += r.update(step);
+            if(extra)
+                foreach (BalancedSynapse bs in synapses)
+                    foreach (BalancedNeuron bn in neurons) bs.repulse(bn, beta);
+        }
+
+        void update()
+        {
+            delta = 0;
+
+            foreach (BalancedNeuron bn in neurons)
+                delta += bn.update(step);
+
+            foreach (BalancedReceptor br in receptors)
+                delta += br.update(step);
         }
 
         public void stop()

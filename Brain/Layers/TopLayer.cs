@@ -9,18 +9,21 @@ namespace Brain
 {
     class TopLayer : Layer
     {
-        public TopLayer()
+        public TopLayer(Control parent) : base(parent)
         { 
 
         }
-        /*
-        protected override void changeSize()
+        
+        public override void resize()
         {
-
+            Height = 90;
+            Width = Parent.Width - 168;
+            initializeGraphics();
         }
 
         protected override void tick(object sender, EventArgs e)
         {
-        }*/
+
+        }
     }
 }

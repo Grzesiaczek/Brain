@@ -9,8 +9,6 @@ namespace Brain
 {
     class AnimatedReceptor : AnimatedElement
     {
-        Graphics graphics;
-
         Circle circle;
         Receptor receptor;
 
@@ -23,41 +21,32 @@ namespace Brain
         {
             receptor = r;
             neuron = n;
-            graphics = n.Graphics;
+
             this.wall = wall;
+            radius = 16;
 
             //0-góra, 1-lewo, 2-prawo, 3-dół
             switch(wall)
             {
                 case 0:
-                    circle = new Circle(new PointF(n.Position.X, 0), 16);
-
-                    if (n.Position.Y > graphics.VisibleClipBounds.Height / 2)
-                        n.setPosition(new PointF(n.Position.X, graphics.VisibleClipBounds.Height - n.Position.Y));
-
+                    circle = new Circle(new PointF(n.Position.X, 0), radius);
+                    n.Position = new PointF(n.Position.X, 2 * Config.Radius);
                     break;
                 case 1:
-                    circle = new Circle(new PointF(0, n.Position.Y), 16);
-
-                    if (n.Position.X > graphics.VisibleClipBounds.Width / 2)
-                        n.setPosition(new PointF(graphics.VisibleClipBounds.Width - n.Position.X, n.Position.Y));
-
+                    circle = new Circle(new PointF(0, n.Position.Y), radius);
+                    n.Position = new PointF(2 * Config.Radius, n.Position.Y);
                     break;
                 case 2:
-                    circle = new Circle(new PointF(graphics.VisibleClipBounds.Width - 1, n.Position.Y), 16);
-
-                    if (n.Position.X < graphics.VisibleClipBounds.Width / 2)
-                        n.setPosition(new PointF(graphics.VisibleClipBounds.Width - n.Position.X, n.Position.Y));
-
+                    circle = new Circle(new PointF(size.Width - 1, n.Position.Y), radius);
+                    n.Position = new PointF(2 * Config.Radius, n.Position.Y);
                     break;
                 case 3:
-                    circle = new Circle(new PointF(n.Position.X, graphics.VisibleClipBounds.Height - 1), 16);
-
-                    if (n.Position.Y < graphics.VisibleClipBounds.Height / 2)
-                        n.setPosition(new PointF(n.Position.X, graphics.VisibleClipBounds.Height - n.Position.Y));
-
+                    circle = new Circle(new PointF(n.Position.X, size.Height - 1), radius);
+                    n.Position = new PointF(n.Position.X, 2 * Config.Radius);
                     break;
             }
+
+            position = circle.Center;
         }
 
         public void draw(int frame)
@@ -68,39 +57,6 @@ namespace Brain
                 circle.draw(graphics, Brushes.OrangeRed, pen);
             else
                 circle.draw(graphics, Brushes.LightYellow, pen);
-        }
-
-        public void setPosition(PointF pos)
-        {
-            circle.update(pos);
-        }
-
-        public void updateGraphics(Graphics g)
-        {
-            try
-            {
-                float fx = g.VisibleClipBounds.Width / graphics.VisibleClipBounds.Width;
-                float fy = g.VisibleClipBounds.Height / graphics.VisibleClipBounds.Height;
-
-                switch (wall)
-                {
-                    case 0:
-                        circle.update(new PointF(fx * circle.Center.X, 0));
-                        break;
-                    case 1:
-                        circle.update(new PointF(0, fx * circle.Center.Y));
-                        break;
-                    case 2:
-                        circle.update(new PointF(graphics.VisibleClipBounds.Width - 1, fx * circle.Center.Y));
-                        break;
-                    case 3:
-                        circle.update(new PointF(fx * circle.Center.X, graphics.VisibleClipBounds.Height - 1));
-                        break;
-                }
-            }
-            catch (Exception) { }
-
-            graphics = g;
         }
 
         public int getWall()
@@ -137,15 +93,16 @@ namespace Brain
             }
         }
 
-        public PointF Position
+        public override PointF Position
         {
             get
             {
-                return circle.Center;
+                return position;
             }
             set
             {
-                circle.Center = value;
+                position = value;
+                circle.update(value);
             }
         }
 
@@ -158,14 +115,6 @@ namespace Brain
             set
             {
                 synapse = value;
-            }
-        }
-
-        public float Radius
-        {
-            get
-            {
-                return 16;
             }
         }
     }
