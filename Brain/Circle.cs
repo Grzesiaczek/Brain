@@ -79,6 +79,39 @@ namespace Brain
             g.FillEllipse(inner, x, y, d, d);
         }
 
+        public void draw(Graphics g, float value, float change, Pen pen)
+        {
+            Brush inner = Brushes.LightYellow;
+            Brush outer = Brushes.LightGreen;
+            Brush middle = Brushes.DodgerBlue;
+
+            float start = 1.0f - value;
+            float end = start - change;
+
+            if (change < 0)
+            {
+                middle = Brushes.HotPink;
+                start -= change;
+                end += change;
+            }
+
+            g.FillEllipse(outer, position.X, position.Y, diameter, diameter);
+            g.DrawEllipse(pen, border.X, border.Y, diameter + 2, diameter + 2);
+
+            float r1 = radius * start;
+            float d1 = 2 * r1;
+            float x1 = center.X - r1;
+            float y1 = center.Y - r1;
+
+            float r2 = radius * end;
+            float d2 = 2 * r2;
+            float x2 = center.X - r2;
+            float y2 = center.Y - r2;
+
+            g.FillEllipse(middle, x1, y1, d1, d1);
+            g.FillEllipse(inner, x2, y2, d2, d2);
+        }
+
         void drawState(Graphics g, String val)
         {
             PointF position = new PointF((float)(center.X + 0.6), center.Y + 1);
@@ -89,7 +122,7 @@ namespace Brain
             StringFormat format = new StringFormat();
             format.LineAlignment = StringAlignment.Center;
             format.Alignment = StringAlignment.Center;
-            g.DrawString(val, new Font("Arial", Config.Diameter / 4 + 3, FontStyle.Bold), Brushes.DarkSlateGray, position, format);
+            g.DrawString(val, new Font("Arial", Constant.Diameter / 4 + 3, FontStyle.Bold), Brushes.DarkSlateGray, position, format);
         }
 
         public void draw(Graphics g, Brush brush, Pen pen)

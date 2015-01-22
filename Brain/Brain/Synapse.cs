@@ -66,10 +66,12 @@ namespace Brain
                 ((Neuron)post).receiveSignal(weight);
         }
 
-        public void clear()
+        public void clear(bool init)
         {
             activity.Clear();
-            activity.Add(false);
+
+            if (init)
+                activity.Add(false);
         }
 
         public Element Pre

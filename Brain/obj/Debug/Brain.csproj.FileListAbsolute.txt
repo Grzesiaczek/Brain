@@ -10,3 +10,4 @@ C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Debug\co
 C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\bin\Debug\data.xml
 C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Simulation.resources
 C:\Users\Grzesiek\Documents\Visual Studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Query.resources
+C:\Users\Grzesiek\documents\visual studio 2013\Projects\Brain\Brain\obj\Debug\Brain.Charting.resources

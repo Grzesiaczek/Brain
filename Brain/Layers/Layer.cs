@@ -10,25 +10,18 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class Layer : Control
+    class Layer : UserControl, Drawable
     {
         protected Graphics graphics;
         protected System.Windows.Forms.Timer timer;
 
-        protected Mode mode;
         protected BufferedGraphics buffer;
         BufferedGraphicsContext context;
 
-        public Layer(Control parent)
+        public Layer()
         {
-            if(parent != null)
-                parent.Controls.Add(this);
-
-            mode = Mode.Auto;
             Visible = false;
-            Location = new Point(10, 10);
-            VisibleChanged += new EventHandler(visibilityChanged);
-
+            SetStyle(ControlStyles.UserPaint, true);
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
             timer.Interval = 25;
@@ -45,26 +38,27 @@ namespace Brain
             buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
             buffer.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         }
-
-        public void setMode(Mode mode)
-        {
-            this.mode = mode;
-        }
         
-        protected virtual void visibilityChanged(object sender, EventArgs e)
+        public virtual void show()
         {
-            if (!Visible)
-            {
-                timer.Stop();
-                return;
-            }
-
             resize();
             timer.Start();
+            Visible = true;
         }
 
-        public abstract void resize();
+        public virtual void hide()
+        {
+            Visible = false;
+            timer.Stop();
+        }
 
-        protected abstract void tick(object sender, EventArgs e);
+        public virtual void save(){ }
+
+        public virtual void resize()
+        {
+            initializeGraphics();
+        }
+
+        protected virtual void tick(object sender, EventArgs e) { }
     }
 }

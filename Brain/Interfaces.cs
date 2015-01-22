@@ -30,4 +30,11 @@ namespace Brain
         bool started();
         void changePace(int pace);
     }
+
+    interface Drawable
+    {
+        void show();
+        void hide();
+        void save();
+    }
 }

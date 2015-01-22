@@ -35,7 +35,7 @@ namespace Brain
             }
         }
 
-        public float Radius
+        public virtual float Radius
         {
             get
             {

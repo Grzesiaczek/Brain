@@ -16,7 +16,7 @@ namespace Brain
         Dictionary<Synapse, CreatedSynapse> mapSynapses;
         Dictionary<SynapseState, CreationHistory> mapHistory;
 
-        List<CreationFrame> frames;
+        List<CreationSequence> sequences;
         List<AnimatedNeuron> animated;
         List<Synapse> duplex;
 
@@ -25,13 +25,15 @@ namespace Brain
 
         SynapseState active;
         CreationFrame frame;
-
-        int time;
-        int count;
+        CreationSequence sequence;
 
         bool animation;
 
-        public Creation(Control parent, List<CreationFrame> data) : base(parent)
+        int count;
+        int index;
+        int time;
+
+        public Creation(List<CreationSequence> data)
         {
             mapNeurons = new Dictionary<Neuron, CreatedNeuron>();
             mapSynapses = new Dictionary<Synapse, CreatedSynapse>();
@@ -43,7 +45,7 @@ namespace Brain
             CreationFrame.setDictionary(mapNeurons, mapSynapses);
             duplex = new List<Synapse>();
 
-            frames = data;
+            sequences = data;
             count = 0;
         }
 
@@ -66,11 +68,12 @@ namespace Brain
                     mapSynapses.Add(s.Duplex, cs);
             }
 
-            frame = frames[count];
-            frame.step();
+            sequence = sequences[0];
+            sequence.show(SequenceBar, SequenceBarType.Lower);
 
-            foreach (CreationFrame cf in frames)
-                cf.finish += new EventHandler(finish);
+            foreach(CreationSequence cs in sequences)
+                foreach (CreationFrame cf in cs.Frames)
+                    cf.finish += new EventHandler(finish);
         }
 
         public override void resize()
@@ -89,8 +92,10 @@ namespace Brain
                     mapHistory[active].show();
                 else
                 {
-                    CreationHistory history = new CreationHistory(this, active);
+                    CreationHistory history = new CreationHistory(active);
                     mapHistory.Add(active, history);
+                    Controls.Add(history);
+                    history.show();
                 }
             }
 
@@ -108,14 +113,14 @@ namespace Brain
             foreach (CreatedSynapse synapse in synapses)
                 synapse.draw();
 
+            if (frame != null)
+                frame.tick();
+
             foreach (CreatedSynapse synapse in synapses)
                 synapse.drawState();
 
             foreach (CreatedNeuron neuron in neurons)
                 neuron.draw();
-
-            if (frame != null)
-                frame.tick();
 
             buffer.Render(graphics);
         }
@@ -139,16 +144,27 @@ namespace Brain
 
         public void changePace(int pace)
         {
-            CreationFrame.setInterval(pace / 25);
+            if (frame != null)
+                frame.setInterval(pace / 25);
+            else
+                CreationFrame.Interval = pace / 25;
         }
 
         public void start()
         {
+            if (animation)
+                return;
+
             animation = true;
+            frame = sequence.next();
         }
 
         public void stop()
         {
+            if (!animation)
+                return;
+
+            sequence.pause();
             animation = false;
             animationStop(this, new EventArgs());
         }
@@ -160,8 +176,17 @@ namespace Brain
 
         public void forth()
         {
-            frame.create(neurons, synapses);
+            if(frame != null)
+                frame.create();
+
             next();
+
+            if(frame != null)
+            {
+                frame.create(neurons, synapses);
+                frame.change();
+            }
+            
         }
 
         public bool started()
@@ -171,14 +196,22 @@ namespace Brain
 
         void next()
         {
-            if (++count == frames.Count)
+            if ((frame = sequence.next()) == null)
             {
-                creationFinished(this, null);
-                return;
+                sequence.hide();
+
+                if(++index == sequences.Count)
+                {
+                    creationFinished(this, null);
+                    return;
+                }
+
+                sequence = sequences[index];
+                sequence.show(SequenceBar, SequenceBarType.Lower);
+                frame = sequence.next();
             }
 
-            frameChanged(this, new FrameEventArgs(count));
-            frame = frames[count];
+            frameChanged(this, new FrameEventArgs(++count));
             frame.step();
         }        
 
@@ -191,6 +224,27 @@ namespace Brain
                     synapses.Add(mapSynapses[s]);
             else
                 next();
+        }
+
+        public override void show()
+        {
+            sequence.show(SequenceBar, SequenceBarType.Upper);
+            frameChanged(this, new FrameEventArgs(count));
+            base.show();
+        }
+
+        public override void hide()
+        {
+            sequence.hide();
+            base.hide();
+        }
+
+        public override void save()
+        {
+            Bitmap bitmap = new Bitmap(Width, Height);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            buffer.Render(graphics);
+            bitmap.Save(Path.Combine(Constant.Path, "test.png"));
         }
 
         protected override void mouseMove(object sender, MouseEventArgs e)

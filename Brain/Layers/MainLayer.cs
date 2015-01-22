@@ -8,45 +8,44 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class MainLayer : Layer
+    class MainLayer : Layer
     {
         protected ShiftedNeuron shift;
-        protected bool sequenceBar = true;
+        static SequenceBar sequenceBar;
+
+        public MainLayer()
+        {
+            MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
+            MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
+            MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
+        }
+
+        public void relocate()
+        {
+            if (sequenceBar.Active)
+                Location = new Point(10, 110);
+            else
+                Location = new Point(10, 10);
+
+            resize();
+        }
 
         public override void resize()
         {
             Height = Parent.Height - 58;
             Width = Parent.Width - 168;
 
-            if (sequenceBar)
+            if (sequenceBar.Active)
                 Height -= 100;
 
             initializeGraphics();
         }
 
-        protected override void tick(object sender, EventArgs e)
+        public override void show()
         {
-
-        }
-
-        public MainLayer(Control parent) : base(parent)
-        {
-            if (sequenceBar)
-                Location = new Point(10, 110);
-            else
-                Location = new Point(10, 10);
-
-            MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-            MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
-            MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
-            MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
-        }
-
-        private void mouseClick(object sender, MouseEventArgs e)
-        {
-            if (shift != null && mode == Mode.Manual)
-                shift.activate();
+            relocate();
+            timer.Start();
+            Visible = true;
         }
 
         protected virtual void mouseDown(object sender, MouseEventArgs e) { }
@@ -66,10 +65,18 @@ namespace Brain
 
             shift.save();
             shift = null;
-
-            //neuronShifted(this, new EventArgs());
         }
 
-        public event EventHandler neuronShifted;
+        public static SequenceBar SequenceBar
+        {
+            get
+            {
+                return sequenceBar;
+            }
+            set
+            {
+                sequenceBar = value;
+            }
+        }
     }
 }

@@ -30,23 +30,29 @@ namespace Brain
             {
                 case 0:
                     circle = new Circle(new PointF(n.Position.X, 0), radius);
-                    n.Position = new PointF(n.Position.X, 2 * Config.Radius);
+                    n.Position = new PointF(n.Position.X, 2 * Constant.Radius);
                     break;
                 case 1:
                     circle = new Circle(new PointF(0, n.Position.Y), radius);
-                    n.Position = new PointF(2 * Config.Radius, n.Position.Y);
+                    n.Position = new PointF(2 * Constant.Radius, n.Position.Y);
                     break;
                 case 2:
                     circle = new Circle(new PointF(size.Width - 1, n.Position.Y), radius);
-                    n.Position = new PointF(2 * Config.Radius, n.Position.Y);
+                    n.Position = new PointF(2 * Constant.Radius, n.Position.Y);
                     break;
                 case 3:
                     circle = new Circle(new PointF(n.Position.X, size.Height - 1), radius);
-                    n.Position = new PointF(n.Position.X, 2 * Config.Radius);
+                    n.Position = new PointF(n.Position.X, 2 * Constant.Radius);
                     break;
             }
 
             position = circle.Center;
+        }
+
+        public void draw()
+        {
+            Pen pen = new Pen(Brushes.BlueViolet, 2);
+            circle.draw(graphics, Brushes.LightYellow, pen);
         }
 
         public void draw(int frame)
@@ -72,11 +78,6 @@ namespace Brain
             return circle.click(pos);
         }
 
-        public void setInterval(int interval)
-        {
-            receptor.setInterval(interval);
-        }
-
         public List<bool> Activity
         {
             get
@@ -85,11 +86,11 @@ namespace Brain
             }
         }
 
-        public String Name
+        public Receptor Receptor
         {
             get
             {
-                return neuron.Neuron.Word;
+                return receptor;
             }
         }
 

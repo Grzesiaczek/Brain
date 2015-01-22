@@ -62,15 +62,15 @@ namespace Brain
             float tau = 0;
             float distance = Math.Abs(b * pos.Y - a * pos.X) / synapse.Vector.Length;
 
-            if (distance < Config.Radius)
+            if (distance < Constant.Radius)
             {
-                tau = k / Config.Diameter;
+                tau = k / Constant.Diameter;
                 force = 3 * factor * tau * tau;
             }
-            else if (distance < Config.Diameter)
+            else if (distance < Constant.Diameter)
             {
-                tau = k / Config.Radius;
-                force = factor * tau * tau * (2.5f * Config.Radius - distance) / Config.Diameter;
+                tau = k / Constant.Radius;
+                force = factor * tau * tau * (2.5f * Constant.Radius - distance) / Constant.Diameter;
             }
             else
             {

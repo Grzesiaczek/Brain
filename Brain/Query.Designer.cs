@@ -29,14 +29,17 @@
         private void InitializeComponent()
         {
             this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textQuery = new System.Windows.Forms.TextBox();
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.labelInterval = new System.Windows.Forms.Label();
             this.temporalNumber = new System.Windows.Forms.NumericUpDown();
             this.temporalQuery = new System.Windows.Forms.ComboBox();
             this.labelQuery = new System.Windows.Forms.Label();
+            this.temporalWeight = new System.Windows.Forms.NumericUpDown();
+            this.labelIntensivity = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.temporalNumber)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.temporalWeight)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -49,13 +52,12 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Visible = false;
             // 
-            // textBox1
+            // textQuery
             // 
-            this.textBox1.Location = new System.Drawing.Point(78, 91);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(216, 20);
-            this.textBox1.TabIndex = 1;
-            this.textBox1.Visible = false;
+            this.textQuery.Location = new System.Drawing.Point(137, 180);
+            this.textQuery.Name = "textQuery";
+            this.textQuery.Size = new System.Drawing.Size(216, 20);
+            this.textQuery.TabIndex = 1;
             // 
             // buttonOK
             // 
@@ -71,7 +73,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(219, 294);
+            this.buttonCancel.Location = new System.Drawing.Point(230, 294);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 3;
@@ -114,10 +116,11 @@
             // 
             this.temporalQuery.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.temporalQuery.FormattingEnabled = true;
-            this.temporalQuery.Location = new System.Drawing.Point(137, 180);
+            this.temporalQuery.Location = new System.Drawing.Point(78, 116);
             this.temporalQuery.Name = "temporalQuery";
             this.temporalQuery.Size = new System.Drawing.Size(121, 21);
             this.temporalQuery.TabIndex = 6;
+            this.temporalQuery.Visible = false;
             // 
             // labelQuery
             // 
@@ -128,22 +131,58 @@
             this.labelQuery.TabIndex = 7;
             this.labelQuery.Text = "Query:";
             // 
+            // temporalWeight
+            // 
+            this.temporalWeight.DecimalPlaces = 2;
+            this.temporalWeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.temporalWeight.Increment = new decimal(new int[] {
+            5,
+            0,
+            0,
+            131072});
+            this.temporalWeight.Location = new System.Drawing.Point(278, 230);
+            this.temporalWeight.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.temporalWeight.Name = "temporalWeight";
+            this.temporalWeight.Size = new System.Drawing.Size(46, 21);
+            this.temporalWeight.TabIndex = 8;
+            this.temporalWeight.Value = new decimal(new int[] {
+            8,
+            0,
+            0,
+            65536});
+            // 
+            // labelIntensivity
+            // 
+            this.labelIntensivity.AutoSize = true;
+            this.labelIntensivity.Location = new System.Drawing.Point(216, 234);
+            this.labelIntensivity.Name = "labelIntensivity";
+            this.labelIntensivity.Size = new System.Drawing.Size(57, 13);
+            this.labelIntensivity.TabIndex = 9;
+            this.labelIntensivity.Text = "Intensivity:";
+            // 
             // Query
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 361);
+            this.Controls.Add(this.labelIntensivity);
+            this.Controls.Add(this.temporalWeight);
             this.Controls.Add(this.labelQuery);
             this.Controls.Add(this.temporalQuery);
             this.Controls.Add(this.temporalNumber);
             this.Controls.Add(this.labelInterval);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.textQuery);
             this.Controls.Add(this.button1);
             this.Name = "Query";
             this.Text = "Query";
             ((System.ComponentModel.ISupportInitialize)(this.temporalNumber)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.temporalWeight)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -152,12 +191,14 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textQuery;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Label labelInterval;
         private System.Windows.Forms.NumericUpDown temporalNumber;
         private System.Windows.Forms.ComboBox temporalQuery;
         private System.Windows.Forms.Label labelQuery;
+        private System.Windows.Forms.NumericUpDown temporalWeight;
+        private System.Windows.Forms.Label labelIntensivity;
     }
 }

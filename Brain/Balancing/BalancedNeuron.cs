@@ -170,8 +170,8 @@ namespace Brain
 
         public float update(float factor)
         {
-            position.X += shift.X * factor;
-            position.Y += shift.Y * factor;
+            position.X += Math.Min(shift.X * factor, 10);
+            position.Y += Math.Min(shift.Y * factor, 10);
             neuron.Position = position;
 
             float result = Math.Abs(shift.X) + Math.Abs(shift.Y);

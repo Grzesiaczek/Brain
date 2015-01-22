@@ -8,7 +8,8 @@ namespace Brain
 {
     class CreationFrame
     {
-        Neuron neuron;
+        SequenceNeuron neuron;
+
         List<Synapse> created;
         List<CreationData> data;
 
@@ -21,7 +22,7 @@ namespace Brain
 
         public CreationFrame(Neuron neuron)
         {
-            this.neuron = neuron;
+            this.neuron = new SequenceNeuron(neuron);
             created = new List<Synapse>();
             data = new List<CreationData>();
 
@@ -37,9 +38,9 @@ namespace Brain
 
         public void create(List<CreatedNeuron> lcn, List<CreatedSynapse> lcs)
         {
-            if (!neurons[neuron].Created)
+            if (!neurons[neuron.Neuron].Created)
             {
-                CreatedNeuron cn = neurons[neuron];
+                CreatedNeuron cn = neurons[neuron.Neuron];
                 cn.create();
                 lcn.Add(cn);
             }
@@ -49,9 +50,18 @@ namespace Brain
                 CreatedSynapse cs = synapses[s];
                 lcs.Add(cs);
             }
-                
+        }
+
+        public void create()
+        {
             foreach (CreationData cd in data)
                 synapses[cd.Synapse].Synapse.create(cd);
+        }
+
+        public void change()
+        {
+            foreach (CreationData cd in data)
+                synapses[cd.Synapse].Synapse.change(cd);
         }
 
         public void tick()
@@ -61,10 +71,10 @@ namespace Brain
             switch (phase)
             {
                 case 1:
-                    if (neurons[neuron].Created)
+                    if (neurons[neuron.Neuron].Created)
                         phase = 2;
                     else
-                        neurons[neuron].draw(factor);
+                        neurons[neuron.Neuron].draw(factor);
 
                     break;
                 case 2:
@@ -92,8 +102,8 @@ namespace Brain
                         if (synapses.Count == 0)
                             phase++;
 
-                        neurons[neuron].Created = true;
-                        finish(neurons[neuron], null);
+                        neurons[neuron.Neuron].create();
+                        finish(neurons[neuron.Neuron], null);
                         break;
                     case 2:
                         finish(created, null);
@@ -110,8 +120,9 @@ namespace Brain
             }
         }
 
-        public static void setInterval(int value)
+        public void setInterval(int value)
         {
+            count *= (int)((float)value / interval);
             interval = value;
         }
 
@@ -129,6 +140,22 @@ namespace Brain
         public void add(Synapse synapse)
         {
             created.Add(synapse);
+        }
+
+        public SequenceNeuron Neuron
+        {
+            get
+            {
+                return neuron;
+            }
+        }
+
+        public static int Interval
+        {
+            set
+            {
+                interval = value;
+            }
         }
 
         public event EventHandler finish;

@@ -35,9 +35,9 @@ namespace Brain
         public void tick(CreationData cd)
         {
             if (synapse.Synapse == cd.Synapse)
-                synapse.getState(false).Weight += cd.Step;
+                synapse.getState(false).Change += cd.Step;
             else
-                synapse.getState(true).Weight += cd.Step;
+                synapse.getState(true).Change += cd.Step;
         }
 
         public AnimatedSynapse Synapse

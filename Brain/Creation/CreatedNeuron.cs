@@ -24,7 +24,7 @@ namespace Brain
         public void create()
         {
             created = true;
-            neuron.Radius = Config.Radius;
+            neuron.Radius = Constant.Radius;
         }
 
         public void draw()
@@ -34,7 +34,7 @@ namespace Brain
 
         public void draw(float factor)
         {
-            neuron.Radius = factor * Config.Radius;
+            neuron.Radius = factor * Constant.Radius;
             neuron.draw(graphics);
         }
 

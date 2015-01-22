@@ -14,6 +14,7 @@ namespace Brain
         List<NeuronData> activity;
 
         String word;
+
         int id;
         int count;
         int length;
@@ -135,13 +136,15 @@ namespace Brain
             value = activity[activity.Count - 1].Value;
         }
 
-        public void clear()
+        public void clear(bool init)
         {
             activity.Clear();
-            activity.Add(new NeuronData());
             active = false;
             original = 0;
             value = 0;
+
+            if(init)
+                activity.Add(new NeuronData());
         }
 
         public void receiveSignal(double impulse)

@@ -56,35 +56,59 @@
     <Compile Include="Animation\AnimatedNeuron.cs" />
     <Compile Include="Animation\AnimatedReceptor.cs" />
     <Compile Include="Animation\AnimatedSynapse.cs" />
+    <Compile Include="Charting\ChartedNeuron.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Charting\Charting.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Charting\Charting.Designer.cs">
+      <DependentUpon>Charting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Sequence\CreationSequence.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Sequence\QuerySequence.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Sequence\SequenceElement.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Sequence\SequenceNeuron.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Sequence\SequenceReceptor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Vector.cs" />
     <Compile Include="Balancing\BalancedElement.cs" />
     <Compile Include="Balancing\BalancedSynapse.cs" />
     <Compile Include="Balancing\BalancedNeuron.cs" />
     <Compile Include="Balancing\BalancedReceptor.cs" />
     <Compile Include="Circle.cs" />
-    <Compile Include="CreationData.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Creation\CreationData.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Creation\CreationFrame.cs" />
     <Compile Include="Creation\CreationHistory.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Creation\CreatedNeuron.cs" />
     <Compile Include="Creation\CreatedSynapse.cs" />
     <Compile Include="Creation\Creation.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Layers\Layer.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Layers\MainLayer.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Sentence.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Sequence\Sequence.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Sequence.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Sequence\ResultSequence.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Simulation.cs">
       <SubType>Form</SubType>
@@ -93,9 +117,6 @@
       <DependentUpon>Simulation.cs</DependentUpon>
     </Compile>
     <Compile Include="Brain\Brain.cs" />
-    <Compile Include="Chart.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="Balancing\GraphBalancing.cs" />
     <Compile Include="Interfaces.cs" />
@@ -111,14 +132,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Brain\Receptor.cs" />
     <Compile Include="Animation\Animation.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Structures.cs" />
     <Compile Include="Brain\Synapse.cs" />
     <Compile Include="SynapseState.cs" />
-    <Compile Include="Layers\TopLayer.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Layers\SequenceBar.cs">
+      <SubType>UserControl</SubType>
     </Compile>
+    <EmbeddedResource Include="Charting\Charting.resx">
+      <DependentUpon>Charting.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Simulation.resx">
       <DependentUpon>Simulation.cs</DependentUpon>
     </EmbeddedResource>

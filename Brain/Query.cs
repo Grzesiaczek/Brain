@@ -40,11 +40,27 @@ namespace Brain
             }
         }
 
+        public float Intensivity
+        {
+            get
+            {
+                return (float)temporalWeight.Value;
+            }
+        }
+
         public int Interval
         {
             get
             {
                 return (int)temporalNumber.Value;
+            }
+        }
+
+        public String[] Data
+        {
+            get
+            {
+                return textQuery.Text.Split(' ');
             }
         }
     }

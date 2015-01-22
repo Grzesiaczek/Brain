@@ -18,7 +18,7 @@ namespace Brain
         float finish;
         float step;
 
-        public CreationData(Synapse synapse, int frame, float start, float finish) : base(null)
+        public CreationData(Synapse synapse, int frame, float start, float finish)
         {
             this.synapse = synapse;
             this.frame = frame;
@@ -27,6 +27,7 @@ namespace Brain
 
             Height = 35;
             Width = 160;
+            initializeGraphics();
 
             MouseEnter += new EventHandler(mouseEnter);
             MouseLeave += new EventHandler(mouseLeave);
@@ -44,7 +45,7 @@ namespace Brain
             Circle left = new Circle(new PointF(64, y), 12);
             Circle right = new Circle(new PointF(100, y), 12);
 
-            left.draw(g, start, pen);
+            left.draw(g, start, finish - start, pen);
             right.draw(g, finish, pen);
 
             int change = (int)((finish - start) * 100);
@@ -60,15 +61,10 @@ namespace Brain
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;
 
-            g.DrawString(frame.ToString(), new Font("Calibri", 15, FontStyle.Bold), Brushes.SaddleBrown, 28, y, format);
+            g.DrawString(frame.ToString(), new Font("Calibri", 14, FontStyle.Bold), Brushes.SaddleBrown, 28, y, format);
             g.DrawString(change.ToString(), new Font("Arial", 12, FontStyle.Bold), brush, 136, y, format);
 
             buffer.Render(graphics);
-        }
-
-        public override void resize()
-        {
-            initializeGraphics();
         }
 
         protected override void tick(object sender, EventArgs e)

@@ -17,33 +17,20 @@ namespace Brain
         float alpha;
         float beta;
 
+        int sentences;
+        int length;
+
         public Brain()
         {
             neurons = new List<Neuron>();
             synapses = new List<Synapse>();
             receptors = new List<Receptor>();
 
-            alpha = Config.Alpha;
-            beta = Config.Beta;
-        }
+            alpha = Constant.Alpha;
+            beta = Constant.Beta;
 
-        public void addReceptors(List<ReceptorData> receptors)
-        {
-            if (receptors.Count == 0)
-                return;
-
-            foreach(ReceptorData rd in receptors)
-            {
-                Neuron n = neurons.Find(k => k.Word == rd.Word);
-                Receptor r = new Receptor(rd);
-                Synapse s = new Synapse(r, n);
-
-                this.receptors.Add(r);
-                synapses.Add(s);
-                n.Sensin.Add(r);
-                r.Output = s;
-                s.Weight = (float)rd.Value;
-            }
+            sentences = 0;
+            length = 0;
         }
 
         public void simulate(int length)
@@ -62,6 +49,8 @@ namespace Brain
 
             foreach (Neuron n in neurons)
                 n.tick();
+
+            this.length = length;
         }
 
         public void tick()
@@ -74,6 +63,8 @@ namespace Brain
 
             foreach (Synapse s in synapses)
                 s.tick();
+
+            length++;
         }
 
         public void undo()
@@ -86,34 +77,29 @@ namespace Brain
 
             foreach (Synapse s in synapses)
                 s.undo();
+
+            length--;
         }
 
-        public void clear()
+        public void clear(bool manual)
         {
             foreach (Neuron n in neurons)
-                n.clear();
+                n.clear(manual);
 
             foreach (Synapse s in synapses)
-                s.clear();
+                s.clear(manual);
 
             foreach (Receptor r in receptors)
                 r.clear();
+
+            length = 0;
         }
 
-        public void addSentence(String sentence)
+        public CreationSequence addSentence(String sentence)
         {
-            addSentence(sentence.Split(' '));
-        }
-
-        public void addSentence(String sentence, List<CreationFrame> data)
-        {
-            addSentence(sentence.Split(' '), data);
-        }
-
-        public void addSentence(String[] words, List<CreationFrame> data = null)
-        {
-            List<Neuron> fragment = new List<Neuron>();
             List<CreationFrame> frames = new List<CreationFrame>();
+            List<Neuron> sequence = new List<Neuron>();
+            String[] words = sentence.Split(' ');
 
             foreach (String word in words)
             {
@@ -123,46 +109,51 @@ namespace Brain
                 {
                     neuron = new Neuron(word, alpha, beta);
                     neurons.Add(neuron);
+
+                    Receptor receptor = new Receptor();
+                    Synapse synapse = new Synapse(receptor, neuron);
+
+                    synapses.Add(synapse);
+                    receptors.Add(receptor);
+                    receptor.Output = synapse;
                 }
 
                 neuron.Count++;
-                fragment.Add(neuron);
+                sequence.Add(neuron);
                 frames.Add(new CreationFrame(neuron));
             }
 
-            for (int i = 0; i < fragment.Count; i++)
+            for (int i = 0; i < sequence.Count; i++)
             {
-                for (int j = i + 1; j < fragment.Count; j++)
+                for (int j = i + 1; j < sequence.Count; j++)
                 {
-                    Synapse synapse = fragment[i].Output.Find(k => k.Post.Equals(fragment[j]));
+                    Synapse synapse = sequence[i].Output.Find(k => k.Post.Equals(sequence[j]));
 
                     if (synapse == null)
                     {
-                        synapse = new Synapse(fragment[i], fragment[j]);
+                        synapse = new Synapse(sequence[i], sequence[j]);
                         synapses.Add(synapse);
-                        fragment[i].Output.Add(synapse);
-                        fragment[j].Input.Add(synapse);
+                        sequence[i].Output.Add(synapse);
+                        sequence[j].Input.Add(synapse);
                         frames[j].add(synapse);
                     }
 
                     synapse.Factor += 1 / (float)(j - i);
                 }
 
-                foreach (Synapse s in fragment[i].Input)
+                sentences++;
+
+                foreach (Synapse s in sequence[i].Input)
                 {
                     float weight = s.Weight;
-                    s.Weight = (2 * s.Factor) / (fragment[i].Count + s.Factor);
+                    s.Weight = (2 * s.Factor) / (sequence[i].Count + s.Factor);
 
                     if (weight != s.Weight)
-                        frames[i].add(new CreationData(s, data.Count + i, weight, s.Weight));
+                        frames[i].add(new CreationData(s, sentences, weight, s.Weight));
                 }
             }
 
-            if (data == null)
-                return;
-
-            foreach (CreationFrame frame in frames)
-                data.Add(frame);
+            return new CreationSequence(frames);
         }
 
         public List<Neuron> Neurons
@@ -170,6 +161,30 @@ namespace Brain
             get
             {
                 return neurons;
+            }
+        }
+
+        public List<Synapse> Synapses
+        {
+            get
+            {
+                return synapses;
+            }
+        }
+
+        public List<Receptor> Receptors
+        {
+            get
+            {
+                return receptors;
+            }
+        }
+
+        public int Length
+        {
+            get
+            {
+                return length;
             }
         }
     }

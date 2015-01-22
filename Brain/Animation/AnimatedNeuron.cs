@@ -71,17 +71,17 @@ namespace Brain
                 double dx = Position.X - an.Position.X;
                 double dy = Position.Y - an.Position.Y;
 
-                if (Math.Sqrt(dx * dx + dy * dy) < Config.Diameter)
+                if (Math.Sqrt(dx * dx + dy * dy) < Constant.Diameter)
                 {
                     collision = true;
                     break;
                 }
             }
 
-            if (Position.X < Config.Radius || Position.X > size.Width - Config.Radius)
+            if (Position.X < Constant.Radius || Position.X > size.Width - Constant.Radius)
                 collision = true;
 
-            if (Position.Y < Config.Radius || Position.Y > size.Height - Config.Radius)
+            if (Position.Y < Constant.Radius || Position.Y > size.Height - Constant.Radius)
                 collision = true;
         }
 
@@ -134,11 +134,16 @@ namespace Brain
             draw(data.Initial + delta);
         }
 
+        public void draw()
+        {
+            draw((float)0);
+        }
+
         public void draw(Graphics g)
         {
             circle.draw(g);
 
-            if (radius == Config.Radius)
+            if (radius == Constant.Radius && label)
                 drawLabel(g);
         }
 
@@ -220,25 +225,7 @@ namespace Brain
 
         public void create()
         {
-            Radius = Config.Radius;
-        }
-
-        public void setSynapses(List<AnimatedSynapse> input, List<AnimatedSynapse> output)
-        {
-            this.input = input;
-            this.output = output;
-
-            foreach (AnimatedSynapse s in input)
-            {
-                s.Post = this;
-                s.calculate();
-            }
-                
-            foreach (AnimatedSynapse s in output)
-            {
-                s.Pre = this;
-                s.calculate();
-            }
+            Radius = Constant.Radius;
         }
         
         public Neuron Neuron
@@ -299,6 +286,19 @@ namespace Brain
             set
             {
                 output = value;
+            }
+        }
+
+        public override float Radius
+        {
+            get
+            {
+                return radius;
+            }
+            set
+            {
+                radius = value;
+                circle.Radius = radius;
             }
         }
 

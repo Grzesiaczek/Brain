@@ -56,7 +56,7 @@
             this.labelLength = new System.Windows.Forms.Label();
             this.radioButtonQuery = new System.Windows.Forms.RadioButton();
             this.radioButtonManual = new System.Windows.Forms.RadioButton();
-            this.radioButtonAuto = new System.Windows.Forms.RadioButton();
+            this.radioButtonChart = new System.Windows.Forms.RadioButton();
             this.layerMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLength)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarPace)).BeginInit();
@@ -239,7 +239,7 @@
             this.layerMenu.Controls.Add(this.buttonPlay);
             this.layerMenu.Controls.Add(this.buttonBalance);
             this.layerMenu.Controls.Add(this.radioButtonManual);
-            this.layerMenu.Controls.Add(this.radioButtonAuto);
+            this.layerMenu.Controls.Add(this.radioButtonChart);
             this.layerMenu.Controls.Add(this.buttonBack);
             this.layerMenu.Controls.Add(this.checkBoxLabel);
             this.layerMenu.Controls.Add(this.checkBoxState);
@@ -375,16 +375,19 @@
             this.radioButtonManual.UseVisualStyleBackColor = true;
             this.radioButtonManual.CheckedChanged += new System.EventHandler(this.radioButtonManual_CheckedChanged);
             // 
-            // radioButtonAuto
+            // radioButtonChart
             // 
-            this.radioButtonAuto.AutoSize = true;
-            this.radioButtonAuto.Location = new System.Drawing.Point(26, 512);
-            this.radioButtonAuto.Name = "radioButtonAuto";
-            this.radioButtonAuto.Size = new System.Drawing.Size(47, 17);
-            this.radioButtonAuto.TabIndex = 19;
-            this.radioButtonAuto.Text = "Auto";
-            this.radioButtonAuto.UseVisualStyleBackColor = true;
-            this.radioButtonAuto.CheckedChanged += new System.EventHandler(this.radioButtonAnimation_CheckedChanged);
+            this.radioButtonChart.AutoSize = true;
+            this.radioButtonChart.Location = new System.Drawing.Point(26, 512);
+            this.radioButtonChart.Name = "radioButtonChart";
+            this.radioButtonChart.Size = new System.Drawing.Size(50, 17);
+            this.radioButtonChart.TabIndex = 19;
+            this.radioButtonChart.Text = "Chart";
+            this.radioButtonChart.UseVisualStyleBackColor = true;
+            this.radioButtonChart.CheckedChanged += new System.EventHandler(this.radioButtonChart_CheckedChanged);
+            // 
+            // Simulation
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
@@ -405,6 +408,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLength)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarPace)).EndInit();
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -428,7 +432,7 @@
         private System.Windows.Forms.FolderBrowserDialog changeFolderDialog;
         private System.Windows.Forms.GroupBox layerMenu;
         private System.Windows.Forms.RadioButton radioButtonManual;
-        private System.Windows.Forms.RadioButton radioButtonAuto;
+        private System.Windows.Forms.RadioButton radioButtonChart;
         private System.Windows.Forms.RadioButton radioButtonQuery;
         private System.Windows.Forms.Button buttonLengthUp;
         private System.Windows.Forms.Button buttonLengthDown;
@@ -438,10 +442,6 @@
         private System.Windows.Forms.TrackBar trackBarPace;
         private System.Windows.Forms.TrackBar trackBarLength;
         private System.Windows.Forms.RadioButton radioButtonCreation;
-        private Animation animation = null;
-        private Creation creation = null;
-        private Chart chart = null;
-        private Sequence sequence = null;
     }
 }
 

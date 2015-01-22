@@ -9,25 +9,26 @@ namespace Brain
 {
     class Receptor : Element
     {
-        ReceptorData data;
         Synapse synapse;
-        Random random;
 
         int count = 0;
         int interval = 0;
 
         List<bool> activity;
         bool active;
-        bool draw;
 
-        public Receptor(ReceptorData data)
+        public Receptor()
         {
-            this.data = data;
-
-            random = new Random();
             activity = new List<bool>();
-            draw = true;
-            newInterval();
+            interval = 0;
+        }
+
+        public void initialize(int interval, int count, float weight)
+        {
+            activity = new List<bool>();
+            this.interval = interval;
+            this.count = count;
+            synapse.Weight = weight;
         }
 
         public void tick()
@@ -37,9 +38,6 @@ namespace Brain
                 count = 0;
                 activity.Add(true);
                 active = true;
-
-                if(draw)
-                    newInterval();
             }
             else
             {
@@ -65,18 +63,9 @@ namespace Brain
             activity.Clear();
             activity.Add(false);
             active = false;
-        }
 
-        public void setInterval(int interval)
-        {
-            this.interval = interval;
-            draw = false;
+            interval = 0;
             count = 0;
-        }
-
-        public void newInterval()
-        {
-            interval = (int)(data.Alpha + random.Next() % data.Beta);
         }
 
         public List<bool> Activity

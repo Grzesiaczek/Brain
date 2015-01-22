@@ -13,8 +13,13 @@ namespace Brain
 {
     class Animation : MainLayer, Controller
     {
+        Brain brain;
+        Mode mode;
+
+        ResultSequence result;
+        QuerySequence query;
+
         GraphBalancing balancing;
-        Sequence sequence;
         Size size;
 
         List<AnimatedNeuron> neurons;
@@ -24,7 +29,7 @@ namespace Brain
         bool animation = false;
         bool loaded = false;
 
-        int frame = 1;
+        int frame = 0;
         int interval = 1;
         int arrival = 0;
 
@@ -37,11 +42,17 @@ namespace Brain
         public event EventHandler queryAccepted;
         public event EventHandler<FrameEventArgs> frameChanged;
 
-        public Animation(Control parent) : base(parent)
+        public Animation()
         {
             balancing = GraphBalancing.getInstance();
             balancing.balanceFinished += balanceEnded;
             size = new Size(Width, Height);
+
+            result = new ResultSequence();
+            query = new QuerySequence();
+
+            MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
+            MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
 
             neurons = new List<AnimatedNeuron>();
             synapses = new List<AnimatedSynapse>();
@@ -55,7 +66,7 @@ namespace Brain
             return new PointF(x, y);
         }
 
-        public void loadNeurons(List<Neuron> list)
+        public void loadBrain(Brain brain)
         {
             StreamReader reader = new StreamReader(File.Open("data.xml", FileMode.Open));
             Random random = new Random(DateTime.Now.Millisecond);
@@ -66,7 +77,7 @@ namespace Brain
             reader.Close();
 
             XmlNode node = xml.ChildNodes.Item(1).FirstChild;
-            int counter = 0;
+            this.brain = brain;
 
             if (buffer == null)
                 initializeGraphics();
@@ -91,17 +102,9 @@ namespace Brain
                 }
                 catch (Exception) { }
 
-                Neuron n = list.Find(k => k.Word == xn.InnerText);
+                Neuron n = brain.Neurons.Find(k => k.Word == xn.InnerText);
                 AnimatedNeuron an = new AnimatedNeuron(n, position);
                 neurons.Add(an);
-
-                if (n.Sensin.Count > 0)
-                {
-                    Receptor r = n.Sensin[0];
-                    AnimatedReceptor ar = new AnimatedReceptor(r, an, counter++ % 4);
-                    synapses.Add(new AnimatedSynapse(ar, an, r.Output));
-                    receptors.Add(ar);
-                }
             }
 
             foreach (AnimatedNeuron start in neurons)
@@ -124,14 +127,9 @@ namespace Brain
 
                             break;
                         }
-        }
 
-        public void setSequence(Sequence seq)
-        {
-            sequence = seq;
-            seq.setData(neurons, receptors);
-            seq.setInterval(interval);
-            frameChanged += new EventHandler<FrameEventArgs>(seq.frameChanged);
+            addQuery("jupiter is".Split(' '), 4, 0.6f);
+            queryAccepted(query, null);
         }
 
         public void create()
@@ -143,7 +141,7 @@ namespace Brain
                 s.create();
         }
 
-        public void create(Creation creation, List<CreationFrame> frames)
+        public void create(Creation creation)
         {
             resize();
             balancing.balance(neurons, synapses, receptors);
@@ -156,7 +154,13 @@ namespace Brain
             {
                 animationStop(this, new EventArgs());
                 animation = false;
-            }   
+            }
+
+            if(frame == 0)
+            {
+                draw();
+                return;
+            }
 
             if (animation)
                 animate();
@@ -166,14 +170,27 @@ namespace Brain
 
         public void start()
         {
+            if (animation)
+                return;
+
+            if (frame == 0)
+            {
+                frame = 1;
+                frameChanged(this, new FrameEventArgs(frame));
+            }
+
             animation = true;
-            sequence.animate(true);
+                
+            //sequence.animate(true);
         }
 
         public void stop()
         {
+            if (!animation)
+                return;
+
             animation = false;
-            sequence.animate(false);
+            //sequence.animate(false);
             animationStop(this, new EventArgs());
         }
 
@@ -189,8 +206,8 @@ namespace Brain
 
             if (count++ == interval)
             {
-                frameChanged(this, new FrameEventArgs(frame));
                 frame++;
+                changeFrame();
                 count = 1;
             }
 
@@ -214,6 +231,25 @@ namespace Brain
 
             foreach (AnimatedReceptor ar in receptors)
                 ar.draw(frame);
+
+            buffer.Render(graphics);
+        }
+
+        void draw()
+        {
+            buffer.Graphics.Clear(SystemColors.Control);
+
+            foreach (AnimatedSynapse s in synapses)
+                s.draw();
+
+            foreach (AnimatedSynapse s in synapses)
+                s.drawState();
+
+            foreach (AnimatedNeuron an in neurons)
+                an.draw();
+
+            foreach (AnimatedReceptor ar in receptors)
+                ar.draw();
 
             buffer.Render(graphics);
         }
@@ -242,9 +278,9 @@ namespace Brain
             count = (int)(count * (float)pace / (interval * 25));
             interval = pace / 25;
             arrival = (interval * 3) / 4;
-
+            /*
             if(sequence != null)
-                sequence.setInterval(interval);
+                sequence.setInterval(interval);*/
         }
 
         public void balance()
@@ -254,8 +290,8 @@ namespace Brain
             
             if(Visible)
                 balancing.animate(neurons, synapses, receptors, 80);
-            /*else
-                balancing.animate(neurons, synapses, receptors, 120);*/
+            else
+                balancing.animate(neurons, synapses, receptors, 120);
 
             balanceStarted(this, new EventArgs());
         }
@@ -270,7 +306,6 @@ namespace Brain
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.State = true;
 
-            redraw();
             balanceFinished(this, new EventArgs());
         }
 
@@ -279,7 +314,7 @@ namespace Brain
             if (frame > 1)
                 frame--;
 
-            frameChanged(this, new FrameEventArgs(frame));
+            changeFrame();
         }
 
         public void forth()
@@ -287,6 +322,13 @@ namespace Brain
             if (frame < length)
                 frame++;
 
+            changeFrame();
+        }
+
+        void changeFrame()
+        {
+            result.tick(frame);
+            query.tick(frame);
             frameChanged(this, new FrameEventArgs(frame));
         }
 
@@ -294,12 +336,13 @@ namespace Brain
         {
             base.resize();
 
+            frameChanged(this, new FrameEventArgs(frame));
             AnimatedElement.Graphics = buffer.Graphics;
 
             if (size.Width != 0)
             {
-                float fx = Width / size.Width;
-                float fy = Height / size.Height;
+                float fx = (float)Width / size.Width;
+                float fy = (float)Height / size.Height;
 
                 SizeF factor = new SizeF(fx, fy);
 
@@ -317,35 +360,19 @@ namespace Brain
             AnimatedElement.Size = size;
             BalancedElement.Size = size;
             
-            if (loaded)
-                balance();
-        }
-
-        public void relocate(bool seq)
-        {
-            sequenceBar = seq;
-            resize();
-
-            if (seq)
-                Location = new Point(10, 110);
-            else
-                Location = new Point(10, 10);
+            balance();
         }
 
         public void labelChanged(bool value)
         {
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.Label = value;
-
-            redraw();
         }
 
         public void stateChanged(bool value)
         {
             foreach (AnimatedNeuron neuron in neurons)
                 neuron.State = value;
-
-            redraw();
         }
 
         public void load(int value)
@@ -359,35 +386,89 @@ namespace Brain
             loaded = false;
         }
 
-        public Mode newQuery(Mode mode)
+        public void setMode(Mode mode)
+        {
+            this.mode = mode;
+
+            if(mode == Mode.Manual && frame == 0)
+            {
+                frame = 1;
+                changeFrame();
+            }
+        }
+
+        public void addQuery(String[]words, int interval, float intensivity)
+        {
+            int index = 0;
+            frame = 0;
+
+            frameChanged(this, new FrameEventArgs(0));
+            query.clear();
+
+            foreach (String word in words)
+            {
+                AnimatedNeuron an = neurons.Find(k => k.Name == word);
+
+                if (an == null)
+                    continue;
+
+                Receptor r = brain.Receptors.Find(k => k.Name == word);
+                Synapse s = brain.Synapses.Find(k => k.Pre == r);
+
+                r.initialize(interval, interval - index - 1, intensivity);
+                new SequenceReceptor(query, r);
+
+                AnimatedReceptor ar = new AnimatedReceptor(r, an, index++ % 4);
+                synapses.Add(new AnimatedSynapse(ar, an, s));
+                receptors.Add(ar);
+            }
+        }
+
+        public void newQuery()
         {
             Query query = new Query();
             DialogResult result = query.ShowDialog();
 
             if (result == DialogResult.Cancel)
-                return mode;
-            
-            foreach (AnimatedReceptor r in receptors)
-                r.setInterval(1000);
+                return;
 
-            AnimatedReceptor ar = receptors[query.Index];
-            ar.setInterval(query.Interval);
+            foreach (AnimatedReceptor ar in receptors)
+                synapses.Remove(ar.Output);
 
-            queryAccepted(this, new EventArgs());
+            receptors.Clear();
+            brain.clear(false);
+            addQuery(query.Data, query.Interval, query.Intensivity);
+
+            balancing.animate(neurons, synapses, receptors, 160);
+            queryAccepted(this.query, new EventArgs());
             loaded = true;
-
-            setMode(Mode.Query);
-            return this.mode;
         }
 
-        public List<Neuron> getNeurons()
+        public override void show()
         {
-            List<Neuron> result = new List<Neuron>();
+            create();
+            result.show(SequenceBar, SequenceBarType.Upper);
+            query.show(SequenceBar, SequenceBarType.Lower);
+            base.show();
+        }
 
-            foreach (AnimatedNeuron n in neurons)
-                result.Add(n.Neuron);
+        public override void hide()
+        {
+            query.hide();
+            result.hide();
+            base.hide();
+        }
 
-            return result;
+        public override void save()
+        {
+            Bitmap bitmap = new Bitmap(Width, Height, graphics);
+            bitmap.Save(Constant.Path + "test.png");
+        }
+
+        private void mouseClick(object sender, MouseEventArgs e)
+        {
+            if (shift != null && mode == Mode.Manual)
+                shift.activate();
         }
 
         protected override void mouseDown(object sender, MouseEventArgs e)
@@ -400,8 +481,6 @@ namespace Brain
                     break;
                 }
             }
-
-            redraw();
         }
     }
 }

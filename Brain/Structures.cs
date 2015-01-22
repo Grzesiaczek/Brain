@@ -9,7 +9,10 @@ using System.Xml;
 
 namespace Brain
 {
-    enum Mode { Auto, Creation, Manual, Query }
+    enum Format { Button }
+    enum Mode { Chart, Creation, Manual, Query }
+    enum SequenceBarType { Lower, Upper }
+    enum SequenceElementType { Normal, Active, Activated, Receptor, ActiveReceptor}
 
     class NeuronData
     {
@@ -114,80 +117,6 @@ namespace Brain
             set
             {
                 original = value;
-            }
-        }
-
-        public double Value
-        {
-            get
-            {
-                return value;
-            }
-            set
-            {
-                this.value = value;
-            }
-        }
-    }
-
-    class ReceptorData
-    {
-        String word;
-        int alpha;
-        int beta;
-        double value;
-
-        public ReceptorData(XmlNode node)
-        {
-            word = node.InnerText;
-
-            try
-            {
-                alpha = Int32.Parse(node.Attributes["alpha"].Value);
-                beta = Int32.Parse(node.Attributes["beta"].Value);
-                value = Double.Parse(node.Attributes["value"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            }
-            catch(Exception)
-            {
-                alpha = 6;
-                beta = 2;
-                value = 0.8;
-            }
-        }
-
-        public String Word
-        {
-            get
-            {
-                return word;
-            }
-            set
-            {
-                word = value;
-            }
-        }
-
-        public int Alpha
-        {
-            get
-            {
-                return alpha;
-            }
-            set
-            {
-                alpha = value;
-            }
-        }
-
-        public int Beta
-        {
-            get
-            {
-                return beta;
-            }
-            set
-            {
-                beta = value;
             }
         }
 

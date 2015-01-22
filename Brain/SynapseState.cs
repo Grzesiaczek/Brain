@@ -16,18 +16,29 @@ namespace Brain
         Synapse synapse;
 
         bool activated;
+        bool duplex;
+
+        float change;
         float weight;
 
-        public SynapseState(Synapse synapse)
+        public SynapseState(Synapse synapse, bool duplex = false)
         {
             this.synapse = synapse;
             history = new List<CreationData>();
         }
 
-        public void load(Circle state, Circle control)
+        public void load(Vector vector)
         {
-            this.state = state;
-            this.control = control;
+            if(duplex)
+            {
+                state = new Circle(vector.getPoint(vector.Start, 50 + (int)(vector.Length / 12)), 12);
+                control = new Circle(vector.getPoint(state.Center, 8), 12);
+            }
+            else
+            {
+                state = new Circle(vector.getPoint(vector.End, -50 - (int)(vector.Length / 12)), 12);
+                control = new Circle(vector.getPoint(state.Center, -8), 12);
+            }                
         }
 
         public void draw(Graphics g, int frame)
@@ -35,7 +46,7 @@ namespace Brain
             Brush brush = Brushes.LightYellow;
             Pen pen = new Pen(Brushes.DarkSlateGray, 2);
 
-            if (synapse.Activity[frame - 1])
+            if (frame > 0 && synapse.Activity[frame - 1])
                 brush = Brushes.Red;
 
             control.draw(g, brush, pen);
@@ -46,12 +57,26 @@ namespace Brain
         {
             Pen pen = new Pen(Brushes.DarkSlateGray, 2);
 
-            if(activated)
-                control.draw(g, Brushes.LightSkyBlue, pen);
-            else
-                control.draw(g, Brushes.LightYellow, pen);
+            if (change == 0)
+            {
+                if (activated)
+                    control.draw(g, Brushes.LightSkyBlue, pen);
+                else
+                    control.draw(g, Brushes.LightYellow, pen);
 
-            state.draw(g, Weight, pen);
+                state.draw(g, Weight, pen);
+            }
+            else
+            {
+                if (activated)
+                    control.draw(g, Brushes.SkyBlue, pen);
+                else if(change > 0)
+                    control.draw(g, Brushes.DarkOliveGreen, pen);
+                else
+                    control.draw(g, Brushes.Violet, pen);
+
+                state.draw(g, weight, change, pen);
+            }
         }
 
         public bool active(Point location)
@@ -131,6 +156,18 @@ namespace Brain
             set
             {
                 control.Center = value;
+            }
+        }
+
+        public float Change
+        {
+            get
+            {
+                return change;
+            }
+            set
+            {
+                change = value;
             }
         }
 

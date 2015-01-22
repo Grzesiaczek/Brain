@@ -12,15 +12,13 @@ namespace Brain
     {
         SynapseState synapse;
 
-        public CreationHistory(Control parent, SynapseState active) : base(parent)
+        public CreationHistory(SynapseState active)
         {
             synapse = active;
 
             int x = (int)(active.State.X);
             int y = (int)(active.State.Y);
             Location = new Point(x, y);
-
-            show();
         }
 
         protected override void initializeGraphics()
@@ -43,21 +41,18 @@ namespace Brain
             base.initializeGraphics();
         }
 
-        public void show()
+        public override void show()
         {
-            initializeGraphics();
+            base.show();
             Controls.Clear();
-            Visible = true;
 
             for (int i = Math.Max(0, synapse.History.Count - 4), j = 0; i < synapse.History.Count; i++, j++)
             {
                 CreationData cd = synapse.History[i];
-                cd.Location = new Point(2, i * 36 + 40);
-                cd.Visible = true;
                 Controls.Add(cd);
+                cd.Location = new Point(2, j * 36 + 40);
+                cd.show();
             }
-
-            timer.Start();
         }
 
         public void redraw()
@@ -76,23 +71,17 @@ namespace Brain
             buffer.Render(graphics);
         }
 
-        public override void resize()
-        {
-
-        }
-
         protected override void tick(object sender, EventArgs e)
         {
             redraw();
         }
 
-        public void hide()
+        public override void hide()
         {
-            Visible = false;
-            timer.Stop();
+            base.hide();
 
             foreach (Control control in Controls)
-                control.Visible = false;
+                ((CreationData)control).hide();
         }
     }
 }

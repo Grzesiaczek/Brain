@@ -17,8 +17,12 @@ namespace Brain
     public partial class Simulation : Form
     {
         Brain brain;
-        List<CreationFrame> frames;
-        List<ReceptorData> receptors;
+        List<CreationSequence> sequences;
+
+        Animation animation;
+        Creation creation;
+        Charting charting;
+        SequenceBar sequenceBar;
 
         int length;
         int pace;
@@ -26,35 +30,63 @@ namespace Brain
         Mode mode;
         FormWindowState state;
         Controller controller;
+        Drawable visible;
 
         public Simulation()
         {
             InitializeComponent();
-            Config.load();
+            Constant.load();
             initialize();
             prepareAnimation();
 
-            radioButtonCreation.Checked = true;
-            creation.Visible = true;
+            //animate();
+            create();
+            //chart();
+        }
+
+        void animate()
+        {
+            controller = animation;
+            visible = animation;
+            animation.show();
+            mode = Mode.Query;
+        }
+
+        void create()
+        {
+            controller = creation;
+            visible = creation;
+            creation.show();
+            mode = Mode.Creation;
+        }
+
+        void chart()
+        {
+            controller = creation;
+            visible = charting;
+            charting.show();
+            mode = Mode.Chart;
         }
 
         void initialize()
         {
             brain = new Brain();
-            frames = new List<CreationFrame>();
+            sequences = new List<CreationSequence>();
 
-            animation = new Animation(this);
-            creation = new Creation(this, frames);
-            sequence = new Sequence(this);
-            chart = new Chart(this);
+            sequenceBar = new SequenceBar();
+            MainLayer.SequenceBar = sequenceBar;
+            Controls.Add(sequenceBar);
+            sequenceBar.show();
+
+            animation = new Animation();
+            creation = new Creation(sequences);
+            charting = new Charting();
 
             Controls.Add(animation);
+            Controls.Add(charting);
             Controls.Add(creation);
-            Controls.Add(chart);
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            mode = Mode.Creation;
-            controller = creation;
 
             length = trackBarLength.Value * 10;
             pace = trackBarPace.Value * 100;
@@ -71,11 +103,10 @@ namespace Brain
             creation.frameChanged += new EventHandler<FrameEventArgs>(frameChanged);
             
             load();
-            simulate();
-            animation.setSequence(sequence);
         }
 
         public void load()
+
         {
             DateTime date = DateTime.Now;
             String name = date.ToString("yyyyMMdd-HHmmss");
@@ -86,33 +117,20 @@ namespace Brain
             reader.Close();
 
             XmlNode node = xml.ChildNodes.Item(1).ChildNodes.Item(1);
-            receptors = new List<ReceptorData>();
+            Dictionary<Neuron, SequenceNeuron> map = new Dictionary<Neuron, SequenceNeuron>();
 
             foreach (XmlNode xn in node.ChildNodes)
-                receptors.Add(new ReceptorData(xn));
+                sequences.Add(brain.addSentence(xn.InnerText));
 
-            node = node.NextSibling;
-
-            foreach (XmlNode xn in node.ChildNodes)
-                brain.addSentence(xn.InnerText, frames);
-
-            brain.addReceptors(receptors);
-
-            animation.loadNeurons(brain.Neurons);
-            animation.create(creation, frames);
-            chart.setNeurons(animation.getNeurons());
+            animation.loadBrain(brain);
+            animation.create(creation);
+            charting.loadBrain(brain);
         }
 
         void simulate()
         {
             brain.simulate(length);
             animation.load(length);
-        }
-
-        void clear()
-        {
-            animation.unload();
-            brain.clear();
         }
 
         void prepareAnimation()
@@ -136,7 +154,6 @@ namespace Brain
                 return;
             }
 
-            buttonBalance.Enabled = false;
             buttonOpen.Enabled = false;
             buttonSimulate.Enabled = true;
 
@@ -162,6 +179,7 @@ namespace Brain
             }
 
             labelPace.Text = pace.ToString();
+            trackBarPace.Value = pace / 100;
         }
 
         private void buttonPaceDown_Click(object sender, EventArgs e)
@@ -173,11 +191,12 @@ namespace Brain
             }
 
             labelPace.Text = pace.ToString();
+            trackBarPace.Value = pace / 100;
         }
 
         private void buttonReset_Click(object sender, EventArgs e)
         {
-            brain.clear();
+            brain.clear(false);
             animation.unload();
         }
 
@@ -203,6 +222,7 @@ namespace Brain
                 length -= 10;
 
             labelLength.Text = length.ToString();
+            trackBarLength.Value = length / 10;
         }
 
         private void buttonLengthUp_Click(object sender, EventArgs e)
@@ -211,20 +231,21 @@ namespace Brain
                 length += 10;
 
             labelLength.Text = length.ToString();
+            trackBarLength.Value = length / 10;
         }
 
         private void buttonOpen_Click(object sender, EventArgs e)
         {
             openFile.FileName = "";
             openFile.Filter = "Save Files (*.abs)|*.abs";
-            openFile.InitialDirectory = Config.SaveFolder();
+            openFile.InitialDirectory = Constant.SaveFolder();
             openFile.ShowDialog();
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
             String name = "";
-            FileInfo[] info = new DirectoryInfo(Config.SaveFolder()).GetFiles();
+            FileInfo[] info = new DirectoryInfo(Constant.SaveFolder()).GetFiles();
 
             if (info.Length == 0)
                 name = "save001";
@@ -236,7 +257,7 @@ namespace Brain
             }
 
             saveFile.Filter = "Save Files (*.abs)|*.abs";
-            saveFile.InitialDirectory = Config.SaveFolder();
+            saveFile.InitialDirectory = Constant.SaveFolder();
             saveFile.FileName = name;
             saveFile.ShowDialog();
         }
@@ -286,7 +307,7 @@ namespace Brain
 
         private void balanceStarted(object sender, EventArgs e)
         {
-            layerMenu.Enabled = false;
+            buttonBalance.Enabled = false;
         }
 
         private void balanceFinished(object sender, EventArgs e)
@@ -294,8 +315,7 @@ namespace Brain
             if(mode != Mode.Manual)
                 buttonPlay.Enabled = true;
 
-            buttonBalance.Enabled = false;
-            layerMenu.Enabled = true;
+            buttonBalance.Enabled = true;
         }
 
         private void checkBoxLabel_CheckedChanged(object sender, EventArgs e)
@@ -310,18 +330,18 @@ namespace Brain
 
         private void changeFolder()
         {
-            changeFolderDialog.SelectedPath = Config.Path;
+            changeFolderDialog.SelectedPath = Constant.Path;
             DialogResult result = changeFolderDialog.ShowDialog();
 
             if (result == DialogResult.OK)
-                Config.changePath(changeFolderDialog.SelectedPath);
+                Constant.changePath(changeFolderDialog.SelectedPath);
         }
 
         private void loadSimulation()
         {
             openFile.FileName = "";
             openFile.Filter = "Save Files (*.abs)|*.abs";
-            openFile.InitialDirectory = Config.SimulationFolder();
+            openFile.InitialDirectory = Constant.SimulationFolder();
             DialogResult result = openFile.ShowDialog();
 
             if (result == DialogResult.OK)
@@ -335,28 +355,19 @@ namespace Brain
             switch(e.KeyCode)
             {
                 case Keys.F1:
+                    visible.save();
+                    break;
+                case Keys.F12:
                     changeFolder();
                     break;
                 case Keys.F8:
                     loadSimulation();
                     break;
                 case Keys.F4:
-                    if(animation.Visible)
-                    {
-                        animation.Visible = false;
-                        sequence.Visible = false;
-                        chart.Visible = true;
-                    }
-                    else
-                    {
-                        chart.Visible = false;
-                        animation.Visible = true;
-                        sequence.Visible = false;
-                    }
+
                     break;
                 case Keys.F11:
                     animation.stopBalance();
-                    layerMenu.Enabled = true;
                     break;
                 case Keys.Left:
 
@@ -384,9 +395,7 @@ namespace Brain
 
             if (WindowState != state)
             {
-                animation.resize();
-                sequence.resize();
-                creation.resize();
+                resizeEnd(this, null);
                 state = WindowState;
             }
         }
@@ -394,42 +403,31 @@ namespace Brain
         private void resizeEnd(object sender, EventArgs e)
         {
             animation.resize();
-            sequence.resize();
+            sequenceBar.resize();
             creation.resize();
+            charting.resize();
         }
 
         private void radioButtonCreation_CheckedChanged(object sender, EventArgs e)
         {
             if (!radioButtonCreation.Checked)
-            {
-                animation.create();
-
-                buttonBack.Enabled = true;
-                buttonForth.Enabled = true;
-
-                animation.Visible = true;
-                sequence.Visible = true;
-                creation.Visible = false;
                 return;
-            }
 
             mode = Mode.Creation;
-
-            creation.Visible = true;
-            animation.Visible = false;
+            change(creation);
+            controller = creation;
 
             buttonPlay.Enabled = true;
             buttonQuery.Enabled = false;
-            buttonBack.Enabled = false;
         }
 
-        private void radioButtonAnimation_CheckedChanged(object sender, EventArgs e)
+        private void radioButtonChart_CheckedChanged(object sender, EventArgs e)
         {
-            if (!radioButtonAuto.Checked)
+            if (!radioButtonChart.Checked)
                 return;
 
-            mode = Mode.Auto;
-            animation.setMode(Mode.Auto);
+            mode = Mode.Chart;
+            change(charting);
 
             buttonPlay.Enabled = true;
             buttonQuery.Enabled = false;
@@ -440,6 +438,9 @@ namespace Brain
             if (!radioButtonManual.Checked)
                 return;
 
+            change(animation);
+            controller = animation;
+
             mode = Mode.Manual;
             animation.setMode(Mode.Manual);
 
@@ -449,37 +450,43 @@ namespace Brain
             if (MessageBox.Show("Reset all data?", "Data Reset", MessageBoxButtons.YesNo) == DialogResult.No)
                 return;*/
 
-            clear();
+            animation.unload();
+            brain.clear(true);
         }
 
         private void radioButtonQuery_CheckedChanged(object sender, EventArgs e)
         {
-            newQuery();
+            if (!radioButtonQuery.Checked)
+                return;
 
-            if (mode == Mode.Query)
-                buttonQuery.Enabled = true;
-            else
-            {
-                buttonQuery.Enabled = false;
+            change(animation);
+            controller = animation;
 
-                if (mode == Mode.Auto)
-                    radioButtonAuto.Checked = true;
-                else
-                    radioButtonManual.Checked = true;
-            }
+            mode = Mode.Query;
+            animation.setMode(Mode.Query);
+
+            buttonPlay.Enabled = true;
+            buttonQuery.Enabled = true;
+        }
+
+        private void change(Drawable area)
+        {
+            if (visible.Equals(area))
+                return;
+
+            controller.stop();
+            visible.hide();
+            area.show();
+            visible = area;
         }
 
         private void buttonQuery_Click(object sender, EventArgs e)
         {
-            newQuery();
-        }
-
-        private void newQuery()
-        {
             if (!radioButtonQuery.Checked)
                 return;
 
-            mode = animation.newQuery(mode);
+            controller.stop();
+            animation.newQuery();
         }
 
         private void animationStop(object sender, EventArgs e)
@@ -497,8 +504,8 @@ namespace Brain
 
         public void queryAccepted(object sender, EventArgs e)
         {
-            clear();
             simulate();
+            charting.addQuery((QuerySequence)sender);
         }
 
         public void creationFinished(object sender, EventArgs e)
@@ -508,14 +515,16 @@ namespace Brain
 
         private void checkBoxSequence_CheckedChanged(object sender, EventArgs e)
         {
-            sequence.Visible = checkBoxSequence.Checked;
-            animation.relocate(checkBoxSequence.Checked);
+            sequenceBar.Active = checkBoxSequence.Checked;
+            animation.relocate();
+            creation.relocate();
+            charting.relocate();
         }
 
         private void trackBarPace_Scroll(object sender, EventArgs e)
         {
             pace = trackBarPace.Value * 100;
-            animation.changePace(pace);
+            controller.changePace(pace);
             labelPace.Text = pace.ToString();
         }
 

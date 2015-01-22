@@ -78,12 +78,12 @@ namespace Brain
                 calculate();
                 update();
 
+                foreach (AnimatedSynapse s in synapses)
+                    s.calculate();
+
                 if (Math.Abs(delta) < 0.1)
                     break;
             }
-
-            foreach (AnimatedSynapse s in synapses)
-                s.calculate();
         }
 
         void initialize(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors)

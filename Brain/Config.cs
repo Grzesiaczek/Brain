@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,20 +9,24 @@ using System.Xml;
 
 namespace Brain
 {
-    class Config
+    class Constant
     {
         static String path;
+        static StringFormat format;
 
         static float alpha;
         static float beta;
 
         static float diameter;
-        static float halo;
         static float radius;
 
         public static void load()
         {
             StreamReader reader;
+
+            format = new StringFormat();
+            format.Alignment = StringAlignment.Center;
+            format.LineAlignment = StringAlignment.Center;
 
             try
             {
@@ -43,7 +48,6 @@ namespace Brain
                 node = node.NextSibling;
                 beta = Single.Parse(node.InnerText, System.Globalization.CultureInfo.InvariantCulture);
 
-                halo = radius + 2;
                 diameter = radius * 2;
             }
             catch(Exception)
@@ -68,20 +72,22 @@ namespace Brain
         public static void changePath(String path)
         {
             Path = path;
-            Config.save();
+            Constant.save();
 
             if (File.Exists(System.IO.Path.Combine(path, "data.xml")))
                 return;
 
             Directory.CreateDirectory(path);
             File.Create(System.IO.Path.Combine(path, "data.xml"));
+            Directory.CreateDirectory(System.IO.Path.Combine(path, "Data"));
+            Directory.CreateDirectory(System.IO.Path.Combine(path, "Images"));
             Directory.CreateDirectory(System.IO.Path.Combine(path, "Save"));
             Directory.CreateDirectory(System.IO.Path.Combine(path, "Simulation"));
         }
 
         static void loadDefault()
         {
-            changePath(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Data"));
+            changePath(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Files"));
             radius = 24;
             diameter = 48;
 
@@ -116,15 +122,23 @@ namespace Brain
             }
         }
 
+        public static StringFormat Format
+        {
+            get
+            {
+                return format;
+            }
+            set
+            {
+                format = value;
+            }
+        }
+
         public static float Alpha
         {
             get
             {
                 return alpha;
-            }
-            set
-            {
-                alpha = value;
             }
         }
 
@@ -133,10 +147,6 @@ namespace Brain
             get
             {
                 return beta;
-            }
-            set
-            {
-                beta = value;
             }
         }
 
@@ -149,18 +159,6 @@ namespace Brain
             set
             {
                 diameter = value;
-            }
-        }
-
-        public static float Halo
-        {
-            get
-            {
-                return halo;
-            }
-            set
-            {
-                halo = value;
             }
         }
 
