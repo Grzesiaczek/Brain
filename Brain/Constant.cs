@@ -30,7 +30,7 @@ namespace Brain
 
             try
             {
-                reader = new StreamReader(File.Open("config.xml", FileMode.Open));
+                reader = new StreamReader(File.Open("Files\\config.xml", FileMode.Open));
                 XmlDocument xml = new XmlDocument();
                 xml.Load(reader);
                 reader.Close();
@@ -58,12 +58,12 @@ namespace Brain
 
         public static void save()
         {
-            StreamReader reader = new StreamReader(File.Open("config.xml", FileMode.Open));
+            StreamReader reader = new StreamReader(File.Open("Files\\config.xml", FileMode.Open));
             XmlDocument xml = new XmlDocument();
             xml.Load(reader);
             reader.Close();
 
-            StreamWriter writer = new StreamWriter(File.Open("config.xml", FileMode.Open));
+            StreamWriter writer = new StreamWriter(File.Open("Files\\config.xml", FileMode.Open));
             xml.FirstChild.NextSibling.FirstChild.InnerText = path;
             xml.Save(writer);
             writer.Close();

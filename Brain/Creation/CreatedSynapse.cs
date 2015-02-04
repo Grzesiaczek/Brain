@@ -19,17 +19,17 @@ namespace Brain
 
         public void draw()
         {
-            synapse.draw(graphics);
+            synapse.draw();
         }
 
         public void draw(float factor)
         {
-            synapse.draw(graphics, factor);
+            synapse.draw(factor);
         }
 
         public void drawState()
         {
-            synapse.drawState(graphics);
+            synapse.drawState();
         }
 
         public void tick(CreationData cd)

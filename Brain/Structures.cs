@@ -132,22 +132,4 @@ namespace Brain
             }
         }
     }
-
-    class FrameEventArgs : EventArgs
-    {
-        int frame;
-
-        public FrameEventArgs(int frame)
-        {
-            this.frame = frame;
-        }
-
-        public int Frame
-        {
-            get
-            {
-                return frame;
-            }
-        }
-    }
 }

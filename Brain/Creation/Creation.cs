@@ -10,11 +10,13 @@ using System.Xml;
 
 namespace Brain
 {
-    class Creation : MainLayer, Controller
+    class Creation : Presentation
     {
+        #region deklaracje
+
         Dictionary<Neuron, CreatedNeuron> mapNeurons;
         Dictionary<Synapse, CreatedSynapse> mapSynapses;
-        Dictionary<SynapseState, CreationHistory> mapHistory;
+        Dictionary<AnimatedState, CreationHistory> mapHistory;
 
         List<CreationSequence> sequences;
         List<AnimatedNeuron> animated;
@@ -23,21 +25,24 @@ namespace Brain
         List<CreatedNeuron> neurons;
         List<CreatedSynapse> synapses;
 
-        SynapseState active;
+        AnimatedState active;
         CreationFrame frame;
         CreationSequence sequence;
-
-        bool animation;
 
         int count;
         int index;
         int time;
 
+        public event EventHandler animationStop;
+        public event EventHandler creationFinished;
+        public event EventHandler frameChanged;
+        #endregion
+
         public Creation(List<CreationSequence> data)
         {
             mapNeurons = new Dictionary<Neuron, CreatedNeuron>();
             mapSynapses = new Dictionary<Synapse, CreatedSynapse>();
-            mapHistory = new Dictionary<SynapseState, CreationHistory>();
+            mapHistory = new Dictionary<AnimatedState, CreationHistory>();
 
             neurons = new List<CreatedNeuron>();
             synapses = new List<CreatedSynapse>();
@@ -69,19 +74,11 @@ namespace Brain
             }
 
             sequence = sequences[0];
-            sequence.show(SequenceBar, SequenceBarType.Lower);
+            sequence.show(Parent);
 
             foreach(CreationSequence cs in sequences)
                 foreach (CreationFrame cf in cs.Frames)
                     cf.finish += new EventHandler(finish);
-        }
-
-        public override void resize()
-        {
-            base.resize();
-
-            CreatedNeuron.Graphics = buffer.Graphics;
-            CreatedSynapse.Graphics = buffer.Graphics;
         }
 
         protected override void tick(object sender, EventArgs e)
@@ -104,6 +101,40 @@ namespace Brain
             else
                 redraw();
         }
+
+        void next()
+        {
+            if ((frame = sequence.next()) == null)
+            {
+                sequence.hide();
+
+                if (++index == sequences.Count)
+                {
+                    creationFinished(this, null);
+                    return;
+                }
+
+                sequence = sequences[index];
+                sequence.show(Parent);
+                frame = sequence.next();
+            }
+
+            frameChanged(++count, null);
+            frame.step();
+        }
+
+        void finish(object sender, EventArgs e)
+        {
+            if (sender is CreatedNeuron)
+                neurons.Add((CreatedNeuron)sender);
+            else if (sender is List<Synapse>)
+                foreach (Synapse s in (List<Synapse>)sender)
+                    synapses.Add(mapSynapses[s]);
+            else
+                next();
+        }
+
+        #region rysowanie
 
         void animate()
         {
@@ -141,16 +172,11 @@ namespace Brain
 
             buffer.Render(graphics);
         }
+        #endregion
 
-        public void changePace(int pace)
-        {
-            if (frame != null)
-                frame.setInterval(pace / 25);
-            else
-                CreationFrame.Interval = pace / 25;
-        }
+        #region funkcje sterujące
 
-        public void start()
+        public override void start()
         {
             if (animation)
                 return;
@@ -159,7 +185,7 @@ namespace Brain
             frame = sequence.next();
         }
 
-        public void stop()
+        public override void stop()
         {
             if (!animation)
                 return;
@@ -169,12 +195,12 @@ namespace Brain
             animationStop(this, new EventArgs());
         }
 
-        public void back()
+        public override void back()
         {
 
         }
 
-        public void forth()
+        public override void forth()
         {
             if(frame != null)
                 frame.create();
@@ -189,48 +215,29 @@ namespace Brain
             
         }
 
-        public bool started()
+        public override void changeFrame(int frame)
         {
-            return animation;
+
         }
 
-        void next()
+        public override void changePace(int pace)
         {
-            if ((frame = sequence.next()) == null)
-            {
-                sequence.hide();
-
-                if(++index == sequences.Count)
-                {
-                    creationFinished(this, null);
-                    return;
-                }
-
-                sequence = sequences[index];
-                sequence.show(SequenceBar, SequenceBarType.Lower);
-                frame = sequence.next();
-            }
-
-            frameChanged(this, new FrameEventArgs(++count));
-            frame.step();
-        }        
-
-        void finish(object sender, EventArgs e)
-        {
-            if (sender is CreatedNeuron)
-                neurons.Add((CreatedNeuron)sender);
-            else if (sender is List<Synapse>)
-                foreach (Synapse s in (List<Synapse>)sender)
-                    synapses.Add(mapSynapses[s]);
+            if (frame != null)
+                frame.setInterval(pace / 25);
             else
-                next();
+                CreationFrame.Interval = pace / 25;
         }
 
+        #endregion
+
+        #region interfejs drawable
         public override void show()
         {
-            sequence.show(SequenceBar, SequenceBarType.Upper);
-            frameChanged(this, new FrameEventArgs(count));
+            sequence.show();
+            frameChanged(count, null);
             base.show();
+
+            AnimatedElement.Graphics = buffer.Graphics;
         }
 
         public override void hide()
@@ -246,7 +253,9 @@ namespace Brain
             buffer.Render(graphics);
             bitmap.Save(Path.Combine(Constant.Path, "test.png"));
         }
+        #endregion
 
+        #region obsługa zdarzeń myszy
         protected override void mouseMove(object sender, MouseEventArgs e)
         {
             if(shift != null)
@@ -299,9 +308,6 @@ namespace Brain
 
             redraw();
         }
-
-        public event EventHandler animationStop;
-        public event EventHandler creationFinished;
-        public event EventHandler<FrameEventArgs> frameChanged;
+        #endregion
     }
 }

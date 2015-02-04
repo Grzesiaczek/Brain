@@ -9,12 +9,16 @@ namespace Brain
 {
     class Circle
     {
+        #region deklaracje
+
         PointF center;
         PointF position;
         PointF border;
 
         float radius;
         float diameter;
+
+        #endregion
 
         public Circle(PointF center, float radius)
         {
@@ -25,6 +29,8 @@ namespace Brain
             border = new PointF(position.X - 1, position.Y - 1);
             diameter = 2 * radius;
         }
+
+        #region logika
 
         public bool click(PointF pos)
         {
@@ -43,6 +49,10 @@ namespace Brain
             position = new PointF(center.X - radius, center.Y - radius);
             border = new PointF(position.X - 1, position.Y - 1);
         }
+
+        #endregion
+
+        #region rysowanie
 
         public void draw(Graphics g, double value, Pen pen, String val)
         {
@@ -114,15 +124,12 @@ namespace Brain
 
         void drawState(Graphics g, String val)
         {
-            PointF position = new PointF((float)(center.X + 0.6), center.Y + 1);
+            PointF position = new PointF(center.X + radius / 24, center.Y + radius / 12);
 
             if (val[0] == '-')
                 position.X -= 1.2f;
 
-            StringFormat format = new StringFormat();
-            format.LineAlignment = StringAlignment.Center;
-            format.Alignment = StringAlignment.Center;
-            g.DrawString(val, new Font("Arial", Constant.Diameter / 4 + 3, FontStyle.Bold), Brushes.DarkSlateGray, position, format);
+            g.DrawString(val, new Font("Arial", radius / 2 + 4, FontStyle.Bold), Brushes.DarkSlateGray, position, Constant.Format);
         }
 
         public void draw(Graphics g, Brush brush, Pen pen)
@@ -136,6 +143,10 @@ namespace Brain
             g.FillEllipse(Brushes.LightYellow, position.X, position.Y, diameter, diameter);
             g.DrawEllipse(Pens.Purple, border.X, border.Y, diameter + 2, diameter + 2);
         }
+        
+        #endregion
+
+        #region właściwości
 
         public PointF Center
         {
@@ -164,5 +175,7 @@ namespace Brain
                 border = new PointF(position.X - 1, position.Y - 1);
             }
         }
+
+        #endregion
     }
 }

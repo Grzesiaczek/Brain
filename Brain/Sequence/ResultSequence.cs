@@ -98,21 +98,23 @@ namespace Brain
             animation = value;
         }
 
-        public void frameChanged(object sender, FrameEventArgs e)
+        public void frameChanged(object sender, EventArgs e)
         {
-            if(e.Frame == 1)
+            int frame = (int)sender;
+
+            if(frame == 1)
             {
                 frame = 1;
                 clear();
                 return;
             }
 
-            if (e.Frame > frame)
-                tick(e.Frame);
+            if (frame > this.frame)
+                tick(frame);
             else
                 undo();
 
-            frame = e.Frame;
+            this.frame = frame;
         }
     }
 }

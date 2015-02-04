@@ -10,6 +10,8 @@ namespace Brain
 {
     class GraphBalancing
     {
+        #region deklaracje
+
         List<BalancedNeuron> neurons;
         List<BalancedReceptor> receptors;
         List<BalancedSynapse> synapses;
@@ -29,6 +31,10 @@ namespace Brain
         bool action;
 
         static GraphBalancing instance = new GraphBalancing();
+
+        public event EventHandler balanceFinished;
+
+        #endregion
 
         private GraphBalancing()
         {
@@ -79,7 +85,7 @@ namespace Brain
                 update();
 
                 foreach (AnimatedSynapse s in synapses)
-                    s.calculate();
+                    s.changePosition();
 
                 if (Math.Abs(delta) < 0.1)
                     break;
@@ -140,11 +146,8 @@ namespace Brain
                 }
             }
 
-            foreach(BalancedNeuron bn in neurons)
-                bn.draw(1);
-
             foreach (BalancedSynapse bs in synapses)
-                bs.Synapse.calculate();
+                bs.Synapse.changePosition();
         }
 
         void calculate()
@@ -209,7 +212,5 @@ namespace Brain
             timer.Stop();
             action = false;
         }
-
-        public event EventHandler balanceFinished;
     }
 }

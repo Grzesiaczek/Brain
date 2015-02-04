@@ -80,6 +80,12 @@
     <Compile Include="Sequence\SequenceReceptor.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Layers\StateBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Layers\StateBar.Designer.cs">
+      <DependentUpon>StateBar.cs</DependentUpon>
+    </Compile>
     <Compile Include="Vector.cs" />
     <Compile Include="Balancing\BalancedElement.cs" />
     <Compile Include="Balancing\BalancedSynapse.cs" />
@@ -101,7 +107,7 @@
     <Compile Include="Layers\Layer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Layers\MainLayer.cs">
+    <Compile Include="Layers\Presentation.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Sequence\Sequence.cs">
@@ -117,7 +123,7 @@
       <DependentUpon>Simulation.cs</DependentUpon>
     </Compile>
     <Compile Include="Brain\Brain.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="Constant.cs" />
     <Compile Include="Balancing\GraphBalancing.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Query.cs">
@@ -136,10 +142,7 @@
     </Compile>
     <Compile Include="Structures.cs" />
     <Compile Include="Brain\Synapse.cs" />
-    <Compile Include="SynapseState.cs" />
-    <Compile Include="Layers\SequenceBar.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="Animation\AnimatedState.cs" />
     <EmbeddedResource Include="Charting\Charting.resx">
       <DependentUpon>Charting.cs</DependentUpon>
     </EmbeddedResource>
@@ -198,10 +201,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="config.xml">
+    <Content Include="Files\config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="data.xml">
+    <None Include="Files\data.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </None>

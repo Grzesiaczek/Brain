@@ -11,13 +11,14 @@ namespace Brain
     abstract class Sequence : Layer
     {
         protected List<SequenceElement> sequence;
-        SequenceBar sequenceBar;
 
         public Sequence()
         {
             sequence = new List<SequenceElement>();
             BackColor = Color.FromArgb(255, 225, 225, 225);
         }
+
+        #region logika
 
         public void add(SequenceElement element)
         {
@@ -31,30 +32,20 @@ namespace Brain
             Controls.Clear();
         }
 
-        public void show(SequenceBar bar, SequenceBarType type)
+        #endregion
+
+        #region funkcje klasy bazowej
+
+        public override void resize()
         {
-            Height = bar.Height / 2;
-            Width = bar.Width;
-
-            sequenceBar = bar;
-            bar.Controls.Add(this);
-            base.show();
-
-            switch(type)
-            {
-                case SequenceBarType.Lower:
-                    Location = new Point(0, Height);
-                    break;
-
-                case SequenceBarType.Upper:
-                    Location = new Point(0, 0);
-                    break;
-            }
+            Height = 50;
+            Width = Parent.Width - margin.Horizontal + 30;
+            initializeGraphics();
         }
 
         public override void hide()
         {
-            sequenceBar.Controls.Remove(this);
+            Parent.Controls.Remove(this);
             base.hide();
         }
 
@@ -64,6 +55,10 @@ namespace Brain
                 element.draw();
         }
 
+        #endregion
+
+        #region właściwości
+
         public int Count
         {
             get
@@ -71,5 +66,7 @@ namespace Brain
                 return sequence.Count;
             }
         }
+
+        #endregion
     }
 }

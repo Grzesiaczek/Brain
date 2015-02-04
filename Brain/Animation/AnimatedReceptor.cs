@@ -9,6 +9,8 @@ namespace Brain
 {
     class AnimatedReceptor : AnimatedElement
     {
+        #region deklaracje
+
         Circle circle;
         Receptor receptor;
 
@@ -16,6 +18,8 @@ namespace Brain
         AnimatedSynapse synapse;
 
         int wall;
+
+        #endregion
 
         public AnimatedReceptor(Receptor r, AnimatedNeuron n, int wall)
         {
@@ -49,6 +53,30 @@ namespace Brain
             position = circle.Center;
         }
 
+        #region osbługa żądań
+
+        public override void changePosition()
+        {
+            circle.update(calculatePosition());
+        }
+
+        public int getWall()
+        {
+            if (wall == 0 || wall == 3)
+                return 0;
+
+            return 1;
+        }
+
+        public bool click(PointF pos)
+        {
+            return circle.click(pos);
+        }
+
+        #endregion
+
+        #region rysowanie
+
         public void draw()
         {
             Pen pen = new Pen(Brushes.BlueViolet, 2);
@@ -65,18 +93,9 @@ namespace Brain
                 circle.draw(graphics, Brushes.LightYellow, pen);
         }
 
-        public int getWall()
-        {
-            if (wall == 0 || wall == 3)
-                return 0;
+        #endregion
 
-            return 1;
-        }
-
-        public bool click(PointF pos)
-        {
-            return circle.click(pos);
-        }
+        #region właściwości
 
         public List<bool> Activity
         {
@@ -86,11 +105,15 @@ namespace Brain
             }
         }
 
-        public Receptor Receptor
+        public override PointF Location
         {
             get
             {
-                return receptor;
+                return circle.Center;
+            }
+            set
+            {
+                circle.update(value);
             }
         }
 
@@ -103,7 +126,7 @@ namespace Brain
             set
             {
                 position = value;
-                circle.update(value);
+                circle.update(calculatePosition());
             }
         }
 
@@ -118,5 +141,7 @@ namespace Brain
                 synapse = value;
             }
         }
+
+        #endregion
     }
 }

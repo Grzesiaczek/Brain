@@ -11,7 +11,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Brain
 {
-    partial class Charting : MainLayer, Drawable
+    partial class Charting : Layer, Drawable
     {
         List<ChartedNeuron> neurons;
         QuerySequence query;
@@ -74,25 +74,25 @@ namespace Brain
         public void addQuery(QuerySequence query)
         {
             this.query = query;
-            query.show(SequenceBar, SequenceBarType.Upper);
         }
 
         public override void resize()
         {
-            Height = Parent.Height - 58;
-            Width = Parent.Width - 168;
+            Height = Parent.Height - margin.Vertical;
+            Width = Parent.Width - margin.Horizontal;
 
             chart.Width = Width - 60;
             scrollBar.Width = chart.Width - 64;
 
             length = 5 * (Width / 80) + 4;
             area.AxisX.Maximum = area.AxisX.Minimum + length;
-            scrollBar.Maximum = Math.Max((brain.Length - length) / 5 + 10, 0);
+            //scrollBar.Maximum = Math.Max((brain.Length - length) / 5 + 10, 0);
 
             if (scrollBar.Value > scrollBar.Maximum - 9)
                 scrollBar.Value = scrollBar.Maximum - 9;
         }
 
+        #region interfejs drawable
         public override void show()
         {
             area.AxisX.Minimum = 0;
@@ -125,6 +125,7 @@ namespace Brain
             Bitmap bitmap = new Bitmap(Width, Height, CreateGraphics());
             bitmap.Save(Constant.Path + "test.png");
         }
+#endregion
 
         void show(object sender, EventArgs e)
         {

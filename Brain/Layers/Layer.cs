@@ -15,6 +15,7 @@ namespace Brain
         protected Graphics graphics;
         protected System.Windows.Forms.Timer timer;
 
+        protected Padding margin;
         protected BufferedGraphics buffer;
         BufferedGraphicsContext context;
 
@@ -22,6 +23,8 @@ namespace Brain
         {
             Visible = false;
             SetStyle(ControlStyles.UserPaint, true);
+            BackColor = SystemColors.Control;
+
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
             timer.Interval = 25;
@@ -46,6 +49,12 @@ namespace Brain
             Visible = true;
         }
 
+        public virtual void show(Control parent)
+        {
+            parent.Controls.Add(this);
+            show();
+        }
+
         public virtual void hide()
         {
             Visible = false;
@@ -56,9 +65,20 @@ namespace Brain
 
         public virtual void resize()
         {
+            Height = Parent.Height - margin.Vertical;
+            Width = Parent.Width - margin.Horizontal;
             initializeGraphics();
         }
 
         protected virtual void tick(object sender, EventArgs e) { }
+
+        public void setMargin(Padding margin)
+        {
+            this.margin = margin;
+            Location = new Point(margin.Left, margin.Top);
+
+            Height = Parent.Height - margin.Vertical;
+            Width = Parent.Width - margin.Horizontal;
+        }
     }
 }

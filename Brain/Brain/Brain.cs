@@ -156,6 +156,8 @@ namespace Brain
             return new CreationSequence(frames);
         }
 
+        //właściwości
+        #region
         public List<Neuron> Neurons
         {
             get
@@ -187,5 +189,6 @@ namespace Brain
                 return length;
             }
         }
+        #endregion
     }
 }

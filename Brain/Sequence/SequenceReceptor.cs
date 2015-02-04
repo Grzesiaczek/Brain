@@ -25,6 +25,12 @@ namespace Brain
 
         public void tick(int frame)
         {
+            if(frame == 0)
+            {
+                active = false;
+                return;
+            }
+
             active = receptor.Activity[frame - 1];
 
             if(active)

@@ -10,9 +10,9 @@ namespace Brain
 {
     class CreationHistory : Layer
     {
-        SynapseState synapse;
+        AnimatedState synapse;
 
-        public CreationHistory(SynapseState active)
+        public CreationHistory(AnimatedState active)
         {
             synapse = active;
 

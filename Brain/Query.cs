@@ -40,7 +40,7 @@ namespace Brain
             }
         }
 
-        public float Intensivity
+        public float Intensity
         {
             get
             {

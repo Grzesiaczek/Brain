@@ -10,13 +10,14 @@ namespace Brain
 {
     class AnimatedNeuron : AnimatedElement
     {
+        #region deklaracje
+
         Neuron neuron;
         Circle circle;
 
         List<AnimatedSynapse> input;
         List<AnimatedSynapse> output;
 
-        int id;
         bool active = false;
         bool collision = false;
         bool shifted = false;
@@ -25,7 +26,10 @@ namespace Brain
         bool state = true;
 
         int frame = 0;
-        static int count = 0;
+
+        public static event EventHandler activation;
+
+        #endregion
 
         public AnimatedNeuron() { }
 
@@ -34,30 +38,14 @@ namespace Brain
             neuron = n;
             radius = 24;
 
-            id = ++count;
-            createCircle(pos);
+            position = pos;
+            circle = new Circle(calculatePosition(), Constant.Radius);
 
             input = new List<AnimatedSynapse>();
             output = new List<AnimatedSynapse>();
         }
 
-        public AnimatedNeuron(BinaryReader reader)
-        {
-            id = reader.ReadInt32();
-            createCircle(new PointF(reader.ReadSingle(), reader.ReadSingle()));
-
-            int count = reader.ReadInt32();
-            List<NeuronData> data = new List<NeuronData>(count);
-
-            neuron = new Neuron(data);
-            neuron.setLength(count);
-
-            for (int i = 0; i < count; i++)
-                data.Add(new NeuronData(reader));
-
-            input = new List<AnimatedSynapse>();
-            output = new List<AnimatedSynapse>();
-        }
+        #region logika
 
         public void checkCollision(List<AnimatedNeuron> neurons)
         {
@@ -71,17 +59,17 @@ namespace Brain
                 double dx = Position.X - an.Position.X;
                 double dy = Position.Y - an.Position.Y;
 
-                if (Math.Sqrt(dx * dx + dy * dy) < Constant.Diameter)
+                if (Math.Sqrt(dx * dx + dy * dy) < 2 * radius)
                 {
                     collision = true;
                     break;
                 }
             }
 
-            if (Position.X < Constant.Radius || Position.X > size.Width - Constant.Radius)
+            if (Position.X < radius || Position.X > size.Width - radius)
                 collision = true;
 
-            if (Position.Y < Constant.Radius || Position.Y > size.Height - Constant.Radius)
+            if (Position.Y < radius || Position.Y > size.Height - radius)
                 collision = true;
         }
 
@@ -107,20 +95,36 @@ namespace Brain
         public void recalculate()
         {
             foreach (AnimatedSynapse s in input)
-                s.calculate();
+                s.changePosition();
 
             foreach (AnimatedSynapse s in output)
-                s.calculate();
+                s.changePosition();
         }
 
-        public void createCircle(PointF pos)
+        public override void changePosition()
         {
-            circle = new Circle(pos, radius);
-            position = pos;
+            circle.update(calculatePosition());
         }
+
+        public bool click(PointF pos)
+        {
+            return circle.click(pos);
+        }
+
+        public void create()
+        {
+            Radius = Constant.Radius;
+        }
+
+        #endregion
+
+        #region rysowanie
 
         public void animate(int number, int frame, double factor)
         {
+            if (!drawable)
+                return;
+
             NeuronData data = neuron.Activity[number];
             double delta = factor * data.Relaxation;
 
@@ -130,30 +134,33 @@ namespace Brain
                 delta += factor * data.Impulse;
             }
 
-            active = true;
             draw(data.Initial + delta);
         }
 
         public void draw()
         {
-            draw((float)0);
-        }
+            if (!drawable)
+                return;
 
-        public void draw(Graphics g)
-        {
-            circle.draw(g);
+            circle.draw(graphics);
 
             if (radius == Constant.Radius && label)
-                drawLabel(g);
+                drawLabel();
         }
 
         public void draw(int number)
         {
+            if (!drawable)
+                return;
+
             draw(neuron.Activity[number - 1].Value);
         }
 
-        void draw(double value)
+        public void draw(double value)
         {
+            if (!drawable)
+                return;
+
             Pen pen = new Pen(Brushes.Purple, 3);
 
             if (shifted)
@@ -164,23 +171,31 @@ namespace Brain
                     pen = new Pen(Brushes.Green, 3);
             }
 
+            if (active && value < 1)
+                active = false;
+
             if (value >= 1)
             {
                 Brush brush;
-                value = 1;
 
-                if (active)
+                if (animation)
                 {
                     if (frame++ % 8 < 4)
                         brush = Brushes.Red;
                     else
                         brush = Brushes.Orange;
+
+                    if(!active)
+                    {
+                        active = true;
+                        activation(this, null);
+                    }
                 }
                 else
                     brush = Brushes.OrangeRed;
 
                 if (state)
-                    circle.draw(graphics, brush, pen, "100");
+                    circle.draw(graphics, brush, pen, ((int)(value * 100)).ToString());
                 else
                     circle.draw(graphics, brush, pen);
             }
@@ -193,41 +208,29 @@ namespace Brain
             }
 
             if (label)
-                drawLabel(graphics);
+                drawLabel();
         }
 
-        void drawLabel(Graphics g)
+        void drawLabel()
         {
-            int width = neuron.Word.Length * 8 + 5;
-            float x = position.X - width / 2;
-            float y = position.Y + radius + 5;
+            if (!drawable)
+                return;
 
-            g.FillRectangle(Brushes.AliceBlue, x, y, width, 14);
-            g.DrawRectangle(new Pen(SystemBrushes.ButtonFace, 2), x, y, width, 14);
-            g.DrawString(neuron.Word, new Font("Miriam Fixed", 9, FontStyle.Bold), Brushes.DarkSlateBlue, x + 2, y + 2);
+            float size = radius / 4 + 3;
+            float width = neuron.Word.Length * size + 6;
+            float x = Location.X;
+            float y = Location.Y + radius + 14;
+            RectangleF rect = new RectangleF(x - width / 2, y - size, width, size + 4);
+
+            graphics.FillRectangle(Brushes.AliceBlue, rect);
+            graphics.DrawRectangle(new Pen(SystemBrushes.ButtonFace, 2), rect.Left, rect.Top, rect.Width, rect.Height);
+            graphics.DrawString(neuron.Word, new Font("Miriam Fixed", size, FontStyle.Bold), Brushes.DarkSlateBlue, x, y, Constant.Format);
         }
 
-        public void save(BinaryWriter writer)
-        {
-            writer.Write(id);
-            writer.Write(circle.Center.X);
-            writer.Write(circle.Center.Y);
-            writer.Write(neuron.Length);
+        #endregion
 
-            foreach (NeuronData data in neuron.Activity)
-                data.save(writer);
-        }
+        #region właściwości
 
-        public bool click(PointF pos)
-        {
-            return circle.click(pos);
-        }
-
-        public void create()
-        {
-            Radius = Constant.Radius;
-        }
-        
         public Neuron Neuron
         {
             get
@@ -236,32 +239,11 @@ namespace Brain
             }
         }
 
-        public List<NeuronData> Activity
-        {
-            get
-            {
-                return neuron.Activity;
-            }
-        }
-
         public String Name
         {
             get
             {
                 return neuron.Word;
-            }
-        }
-
-        public override PointF Position
-        {
-            get
-            {
-                return position;
-            }
-            set
-            {
-                position = value;
-                circle.update(value);
             }
         }
 
@@ -286,6 +268,33 @@ namespace Brain
             set
             {
                 output = value;
+            }
+        }
+
+        public override PointF Position
+        {
+            get
+            {
+                return position;
+            }
+            set
+            {
+                position = value;
+                circle.update(calculatePosition());
+                checkDrawable();
+            }
+        }
+
+        public override PointF Location
+        {
+            get
+            {
+                return circle.Center;
+            }
+            set
+            {
+                circle.update(value);
+                checkDrawable();
             }
         }
 
@@ -325,17 +334,6 @@ namespace Brain
                 state = value;
             }
         }
-
-        public int ID
-        {
-            get
-            {
-                return id;
-            }
-            set
-            {
-                id = value;
-            }
-        }
+        #endregion
     }
 }

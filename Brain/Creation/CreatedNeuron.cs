@@ -10,8 +10,6 @@ namespace Brain
     class CreatedNeuron
     {
         AnimatedNeuron neuron;
-        static Graphics graphics;
-
         bool created;
 
         public CreatedNeuron(AnimatedNeuron neuron)
@@ -29,21 +27,13 @@ namespace Brain
 
         public void draw()
         {
-            neuron.draw(graphics);
+            neuron.draw();
         }
 
         public void draw(float factor)
         {
             neuron.Radius = factor * Constant.Radius;
-            neuron.draw(graphics);
-        }
-
-        public static Graphics Graphics
-        {
-            set
-            {
-                graphics = value;
-            }
+            neuron.draw();
         }
 
         public bool Created

@@ -33,11 +33,6 @@ namespace Brain
                 output.Add(synapse.Vector);
         }
 
-        public void draw(int frame)
-        {
-            neuron.draw(frame);
-        }
-
         public void attract(AnimatedElement n, float factor)
         {
             PointF delta = diff(position, n.Position);
@@ -69,8 +64,8 @@ namespace Brain
         {
             PointF sub = new PointF(size.Width - position.X, size.Height - 10 - position.Y);
 
-            shift.X += 4 * (float)(k * k * factor) * (1 / (position.X * position.X) - 1 / (sub.X * sub.X));
-            shift.Y += 4 * (float)(k * k * factor) * (1 / (position.Y * position.Y) - 1 / (sub.Y * sub.Y));
+            shift.X += 16 * (float)(k * k * factor) * (1 / (position.X * position.X) - 1 / (sub.X * sub.X));
+            shift.Y += 16 * (float)(k * k * factor) * (1 / (position.Y * position.Y) - 1 / (sub.Y * sub.Y));
         }
 
         public void rotate()
@@ -172,6 +167,7 @@ namespace Brain
         {
             position.X += Math.Min(shift.X * factor, 10);
             position.Y += Math.Min(shift.Y * factor, 10);
+
             neuron.Position = position;
 
             float result = Math.Abs(shift.X) + Math.Abs(shift.Y);

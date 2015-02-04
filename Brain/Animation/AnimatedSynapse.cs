@@ -15,14 +15,14 @@ namespace Brain
 
         Vector vector;
 
-        SynapseState synapse;
-        SynapseState duplex;
+        AnimatedState synapse;
+        AnimatedState duplex;
         
         public AnimatedSynapse(AnimatedNeuron pre, AnimatedNeuron post, Synapse synapse)
         {
             this.pre = pre;
             this.post = post;
-            this.synapse = new SynapseState(synapse);
+            this.synapse = new AnimatedState(synapse);
 
             duplex = null;
             vector = new Vector();
@@ -30,14 +30,14 @@ namespace Brain
             pre.Output.Add(this);
             post.Input.Add(this);
 
-            calculate();
+            changePosition();
         }
 
         public AnimatedSynapse(AnimatedReceptor pre, AnimatedNeuron post, Synapse synapse)
         {
             this.pre = pre;
             this.post = post;
-            this.synapse = new SynapseState(synapse);
+            this.synapse = new AnimatedState(synapse);
 
             duplex = null;
             vector = new Vector();
@@ -45,35 +45,28 @@ namespace Brain
             pre.Output = this;
             post.Input.Add(this);
 
-            calculate();
+            changePosition();
         }
 
-        public AnimatedSynapse(BinaryReader reader, List<AnimatedNeuron> neurons)
-        {/*
-            int id = reader.ReadInt32();
-            pre = neurons.Find(k => k.ID == id);
+        #region pozycjonowanie
 
-            id = reader.ReadInt32();
-            post = neurons.Find(k => k.ID == id);
-
-            graphics = g;
-            duplex = reader.ReadBoolean();
-
-            pre.Output.Add(this);
-            post.Input.Add(this);
-            */
-
-            calculate();
-        }
-
-        public void calculate()
+        public override void changePosition()
         {
-            vector.update(pre.Position, post.Position);
+            vector.update(pre.Location, post.Location);
             synapse.load(vector);
 
             if (duplex != null)
                 duplex.load(vector);
         }
+
+        public override void executeShift()
+        {
+            changePosition();
+        }
+
+        #endregion
+
+        #region rysowanie
 
         public void animate(int frame, float factor)
         {
@@ -91,14 +84,9 @@ namespace Brain
             vector.draw(graphics);
         }
 
-        public void draw(Graphics g)
+        public void draw(float factor)
         {
-            vector.draw(g);
-        }
-
-        public void draw(Graphics g, float factor)
-        {
-            vector.draw(g, factor);
+            vector.draw(graphics, factor);
         }
 
         public void drawState()
@@ -106,21 +94,16 @@ namespace Brain
             drawState(0);
         }
 
-        public void drawState(Graphics g)
-        {
-            synapse.draw(g);
-
-            if (duplex != null && duplex.Weight > 0)
-                duplex.draw(g);
-        }
-
         public void drawState(int frame)
         {
-            synapse.draw(graphics, frame);
+            synapse.draw(frame);
 
             if (duplex != null)
-                duplex.draw(graphics, frame);
+                duplex.draw(frame);
         }
+        #endregion
+
+        #region sterowanie
 
         public void change(CreationData data)
         {
@@ -156,15 +139,8 @@ namespace Brain
 
         public void setDuplex(Synapse synapse)
         {
-            duplex = new SynapseState(synapse, true);
+            duplex = new AnimatedState(synapse, true);
             duplex.load(vector);
-        }
-
-        public void save(BinaryWriter writer)
-        {
-            //writer.Write(pre.ID);
-            //writer.Write(post.ID);
-            //writer.Write(duplex);
         }
 
         public bool active(Point location, bool duplex)
@@ -183,13 +159,16 @@ namespace Brain
             return true;
         }
 
-        public SynapseState getState(bool duplex)
+        public AnimatedState getState(bool duplex)
         {
             if (duplex)
                 return this.duplex;
 
             return synapse;
         }
+        #endregion
+
+        #region właściwości
 
         public AnimatedElement Pre
         {
@@ -243,6 +222,18 @@ namespace Brain
             }
         }
 
+        public override PointF Location
+        {
+            get
+            {
+                return position;
+            }
+            set
+            {
+
+            }
+        }
+
         public override PointF Position
         {
             get
@@ -255,14 +246,22 @@ namespace Brain
             }
         }
 
-        public float getWeight()
+        public override float Radius
         {
-            float result = synapse.Weight;
+            get
+            {
+                return radius;
+            }
+            set
+            {
+                radius = value;
+                synapse.Radius = radius;
 
-            if (duplex != null)
-                result += duplex.Weight;
-
-            return result;
+                if (duplex != null)
+                    duplex.Radius = radius;
+            }
         }
+
+        #endregion
     }
 }

@@ -9,6 +9,8 @@ namespace Brain
 {
     class Vector
     {
+        #region deklaracje
+
         PointF start;
         PointF end;
 
@@ -22,13 +24,20 @@ namespace Brain
         float length;
         float rotation;
 
+        #endregion
+
+        #region logika
+
         public void update(PointF p1, PointF p2)
         {
-            start = p1;
-            end = p2;
+            if(p1 != null)
+                start = p1;
 
-            x = p2.X - p1.X;
-            y = p2.Y - p1.Y;
+            if (p2 != null)
+                end = p2;
+
+            x = end.X - start.X;
+            y = end.Y - start.Y;
 
             length = (float)Math.Sqrt(x * x + y * y);
             
@@ -41,6 +50,15 @@ namespace Brain
             if (y > 0)
                 angle = -angle;
         }
+
+        public PointF getPoint(PointF point, int length)
+        {
+            return new PointF(point.X + cos * length, point.Y + sin * length);
+        }
+
+        #endregion
+
+        #region rysowanie
 
         public void draw(Graphics g)
         {
@@ -76,10 +94,9 @@ namespace Brain
             g.DrawLine(pen, sx, sy, ex, ey);
         }
 
-        public PointF getPoint(PointF point, int length)
-        {
-            return new PointF(point.X + cos * length, point.Y + sin * length);
-        }
+        #endregion
+
+        #region właściwości
 
         public PointF Start
         {
@@ -164,5 +181,7 @@ namespace Brain
                 rotation = value;
             }
         }
+
+        #endregion
     }
 }
