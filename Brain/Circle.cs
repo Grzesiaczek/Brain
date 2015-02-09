@@ -124,12 +124,12 @@ namespace Brain
 
         void drawState(Graphics g, String val)
         {
-            PointF position = new PointF(center.X + radius / 24, center.Y + radius / 12);
+            PointF position = new PointF(center.X + radius / 24, center.Y + radius / 8);
 
             if (val[0] == '-')
                 position.X -= 1.2f;
 
-            g.DrawString(val, new Font("Arial", radius / 2 + 4, FontStyle.Bold), Brushes.DarkSlateGray, position, Constant.Format);
+            g.DrawString(val, new Font("System", radius / 2 + 3, FontStyle.Bold), Brushes.DarkSlateGray, position, Constant.Format);
         }
 
         public void draw(Graphics g, Brush brush, Pen pen)

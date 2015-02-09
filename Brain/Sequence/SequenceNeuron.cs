@@ -17,12 +17,10 @@ namespace Brain
         int frame = 1;
         int interval = 20;
 
-        public SequenceNeuron(Neuron neuron)
+        public SequenceNeuron(Neuron neuron) : base(neuron.Word)
         {
             this.neuron = neuron;
             activity = new List<bool>();
-            name = neuron.Word;
-
             changeType(SequenceElementType.Normal);
         }
 

@@ -15,10 +15,7 @@ namespace Brain
     {
         #region deklaracje
 
-        Brain brain;
         Mode mode;
-
-        //wynik nie jest sekwencją, lecz grafem!
         QuerySequence query;
 
         GraphBalancing balancing;
@@ -28,6 +25,7 @@ namespace Brain
         List<AnimatedSynapse> synapses;
         List<AnimatedReceptor> receptors;
 
+        bool activation = false;
         bool loaded = false;
         bool pause = false;
 
@@ -38,35 +36,28 @@ namespace Brain
         int count = 0;
         int length = 250;
 
-        int frames = 0;
-
         public event EventHandler animationStop;
-        public event EventHandler balanceStarted;
         public event EventHandler balanceFinished;
         public event EventHandler queryAccepted;
-
-        public event EventHandler factorChanged;
         public event EventHandler frameChanged;
-        public event EventHandler sizeChanged;
+        public event EventHandler framesChanged;
 
         #endregion
 
-        public Animation()
+        public Animation(Display display) : base(display)
         {
             balancing = GraphBalancing.getInstance();
-            balancing.balanceFinished += balanceEnded;
-            size = new Size(Width, Height);
+            balancing.balanceEnded += balanceEnded;
+            balancing.balanceState += balanceState;
 
-            Padding = new Padding(10, 50, 10, 10);
+            size = new Size(Width, Height);
             query = new QuerySequence();
-            area = new Rectangle(10, 50, 0, 0);
-            
-            Controls.Add(query);
-            query.setMargin(new Padding(0));
+
+            display.add(this);
+            display.show(query);
 
             MouseClick += new MouseEventHandler(mouseClick);
             MouseDoubleClick += new MouseEventHandler(mouseClick);
-            AnimatedNeuron.activation += new EventHandler(neuronActivated);
 
             neurons = new List<AnimatedNeuron>();
             synapses = new List<AnimatedSynapse>();
@@ -82,46 +73,13 @@ namespace Brain
             return new PointF(x, y);
         }
 
-        void balanceSize()
-        {
-            int optimum = (int)Math.Pow(brain.Neurons.Count + 1, 1.5) * 20;
-            int nominal = (size.Width + size.Height) / 2;
-
-            if (optimum > nominal * 1.5)
-            {
-                float min = Height;
-
-                if (Width < min)
-                    min = Width;
-
-                size.Width = optimum;
-                size.Height = optimum;
-
-                float factor = min / optimum;
-                AnimatedElement.Factor = factor;
-
-                Constant.Radius = 24 * factor;
-                factorChanged(Constant.Radius, null);
-
-                sizeChanged(this, null);
-            }
-            else
-                AnimatedElement.Factor = 1.0f;
-
-            resize();
-        }
-
         public void loadBrain(Brain brain)
         {
             Random random = new Random();
-            this.brain = brain;
+            Presentation.brain = brain;
 
             balanceSize();
 
-            while (buffer == null)
-                Thread.Sleep(10);
-
-            AnimatedElement.Graphics = buffer.Graphics;
             AnimatedElement.Area = area;
             AnimatedElement.Size = size;
             BalancedElement.Size = size;
@@ -170,114 +128,127 @@ namespace Brain
 
         public void create(Creation creation)
         {
-            resize();
-            //balancing.balance(neurons, synapses, receptors);
             creation.load(neurons, synapses);
+
+            Thread thread = new Thread(fastBalancing);
+            thread.Start();
         }
 
-        #endregion
-
-        #region obsługa paska stanu
+        void fastBalancing()
+        {
+            stateBar.Phase = StateBarPhase.BalanceNormal;
+            balancing.balance(neurons, synapses, receptors);
+        }
 
         public void setBar(StateBar stateBar)
         {
             this.stateBar = stateBar;
-            stateBar.finished += new EventHandler(pauseFinished);
-        }
-
-        void neuronActivated(object sender, EventArgs e)
-        {
-            stateBar.run();
-            pause = true;
-        }
-
-        void pauseFinished(object sender, EventArgs e)
-        {
-            stateBar.next();
-            pause = false;
         }
 
         #endregion
 
         #region obsługa grafiki
 
-        void clear()
-        {
-            buffer.Graphics.Clip = new Region();
-            buffer.Graphics.Clear(SystemColors.Control);
-            buffer.Graphics.Clip = new Region(area);
-        }
-
         void animate()
         {
             if (!loaded)
                 return;
 
-            if (!pause && count++ == interval)
+            if (pause)
             {
-                frame++;
-                changeFrame();
-                count = 1;
+                stateBar.State -= 3;
+
+                if (stateBar.State <= 0)
+                {
+                    stateBar.reset();
+                    pause = false;
+                }
+            }
+            else if (count++ == interval)
+            {
+                if (activation)
+                {
+                    stateBar.Phase = StateBarPhase.Activation;
+                    activation = false;
+                    pause = true;
+                    count--;
+                    return;
+                }
+                else
+                {
+                    frame++;
+                    changeFrame();
+                    count = 1;
+
+                    foreach (AnimatedNeuron neuron in neurons)
+                    {
+                        if (neuron.Neuron.Activity[frame].Active)
+                        {
+                            activation = true;
+                            break;
+                        }
+                    }
+                }
             }
 
-            clear();
+            buffer.Graphics.Clear(SystemColors.Control);
 
             int number = count - interval / 2;
 
             if (number >= 0 && number <= interval / 4)
             {
-                foreach (AnimatedSynapse s in synapses)
-                    s.animate(frame, ((float)number * 4) / interval);
+                foreach (AnimatedSynapse synapse in synapses)
+                    synapse.animate(frame, ((float)number * 4) / interval);
             }
-            else foreach (AnimatedSynapse s in synapses)
-                    s.draw();
+            else foreach (AnimatedSynapse synapse in synapses)
+                    synapse.draw();
 
-            foreach (AnimatedSynapse s in synapses)
-                s.drawState(frame);
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.drawState(frame);
 
-            foreach (AnimatedNeuron an in neurons)
-                an.animate(frame, count, (double)count / interval);
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.animate(frame, count, (double)count / interval);
 
-            foreach (AnimatedReceptor ar in receptors)
-                ar.draw(frame);
+            foreach (AnimatedReceptor receptor in receptors)
+                receptor.draw(frame);
 
             buffer.Render(graphics);
         }
 
         void draw()
         {
-            clear();
+            buffer.Graphics.Clear(SystemColors.Control);
 
-            foreach (AnimatedSynapse s in synapses)
-                s.draw();
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.draw();
 
-            foreach (AnimatedSynapse s in synapses)
-                s.drawState();
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.drawState();
 
-            foreach (AnimatedNeuron an in neurons)
-                an.draw(0.0);
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.draw(0.0);
 
-            foreach (AnimatedReceptor ar in receptors)
-                ar.draw();
+            foreach (AnimatedReceptor receptor in receptors)
+                receptor.draw();
 
             buffer.Render(graphics);
         }
 
         void redraw()
         {
-            clear();
+            buffer.Graphics.Clear(SystemColors.Control);
 
-            foreach (AnimatedSynapse s in synapses)
-                s.draw();
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.draw();
 
-            foreach (AnimatedSynapse s in synapses)
-                s.drawState(frame);
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.drawState(frame);
 
-            foreach (AnimatedNeuron an in neurons)
-                an.draw(frame);
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.draw(frame);
 
-            foreach (AnimatedReceptor ar in receptors)
-                ar.draw(frame);
+            foreach (AnimatedReceptor receptor in receptors)
+                receptor.draw(frame);
 
             buffer.Render(graphics);
         }
@@ -352,15 +323,12 @@ namespace Brain
 
         public void balance()
         {
-            foreach (AnimatedNeuron neuron in neurons)
-                neuron.State = false;
-            
+            stateBar.Phase = StateBarPhase.BalanceNormal;
+
             if(Visible)
                 balancing.animate(neurons, synapses, receptors, 80);
             else
                 balancing.animate(neurons, synapses, receptors, 120);
-
-            balanceStarted(this, new EventArgs());
         }
 
         public void stopBalance()
@@ -368,21 +336,35 @@ namespace Brain
             balancing.stop();
         }
 
+        private void balanceState(object sender, EventArgs e)
+        {
+            double result = Math.Log10((float)sender);
+            int value = (int)Math.Min(stateBar.Height, result * 40);
+            stateBar.State = value;
+        }
+
         private void balanceEnded(object sender, EventArgs e)
         {
-            foreach (AnimatedNeuron neuron in neurons)
-                neuron.State = true;
-
-            balanceFinished(this, new EventArgs());
+            if ((bool)sender)
+            {
+                stateBar.reset();
+                balanceFinished(this, new EventArgs());
+            }
+            else
+            {
+                stateBar.reset();
+                stateBar.Phase = StateBarPhase.BalanceExtra;
+            }
         }
+
         #endregion
 
         #region zmiana rozmiaru i skali
 
         public void scroll(int x, int y)
         {
-            area.X = 20 * x + padding.Left;
-            area.Y = 20 * y + padding.Top;
+            area.X = 20 * x;
+            area.Y = 20 * y;
 
             AnimatedElement.Area = area;
             
@@ -396,48 +378,58 @@ namespace Brain
                 synapse.changePosition();
         }
 
-        public void rescale(float radius)
+        public void rescale(float value)
         {
+            float radius;
+            float rec;
+            float syn;
+
+            if(value < 50)
+            {
+                radius = 12;
+                rec = 8;
+                syn = 6;
+            }
+            else
+            {
+                radius = value * 0.24f;
+                rec = value * 0.16f;
+                syn = value * 0.12f;
+            }
+
             Constant.Radius = radius;
-            float syn = radius / 2;
 
-            for (int i = 0; i < neurons.Count; i++)
-                neurons[i].Radius = radius;
+            foreach (AnimatedNeuron neuron in neurons)
+            {
+                neuron.changePosition();
+                neuron.Radius = radius;
+            }
 
-            for (int i = 0; i < synapses.Count; i++)
-                synapses[i].Radius = syn;
+            foreach (AnimatedReceptor receptor in receptors)
+            {
+                receptor.changePosition();
+                receptor.Radius = rec;
+            }
+
+            foreach (AnimatedSynapse synapse in synapses)
+            {
+                synapse.changePosition();
+                synapse.Radius = syn;
+            }
         }
 
         public override void resize()
         {
             base.resize();
-
-            if(area.Height == 0)
-            {
-                area.Width = Width - padding.Horizontal;
-                area.Height = Height - padding.Vertical;
-                return;
-            }
-
-            float f = (float)Height / area.Height;
             query.resize();
+            balance();
+        }
 
-            if (Height > Width)
-                f = (float)Width / area.Width;
-
-            area.Width = Width - padding.Horizontal;
-            area.Height = Height - padding.Vertical;
-
-            AnimatedElement.Graphics = buffer.Graphics;
-            AnimatedElement.Factor *= f;
-            AnimatedElement.Area = area;
-
-            frameChanged(frame, null);
-            sizeChanged(this, null);
-            
-            if (Math.Abs(1 - f) > 0.1)
+        public void calculateShift(float factor)
+        {
+            if (factor > 0.1)
             {
-                frames = (int)(Math.Abs(1 - f) / 0.01);
+                frames = (int)(factor / 0.01);
 
                 foreach (AnimatedNeuron neuron in neurons)
                     neuron.calculateShift(frames);
@@ -447,6 +439,18 @@ namespace Brain
             }
 
             balance();
+        }
+
+        public void changeSize(float factor)
+        {
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.changePosition(factor);
+
+            foreach (AnimatedReceptor receptor in receptors)
+                receptor.changePosition(factor);
+
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.changePosition();
         }
 
         #endregion
@@ -506,16 +510,18 @@ namespace Brain
                 if (an == null)
                     continue;
 
-                Receptor r = brain.Receptors.Find(k => k.Name == word);
-                Synapse s = brain.Synapses.Find(k => k.Pre == r);
+                Receptor receptor = brain.Receptors.Find(k => k.Name == word);
+                Synapse synapse = brain.Synapses.Find(k => k.Pre == receptor);
 
-                r.initialize(interval, interval - index - 1, intensivity);
-                new SequenceReceptor(query, r);
+                receptor.initialize(interval, interval - index - 1, intensivity);
+                new SequenceReceptor(query, receptor);
 
-                AnimatedReceptor ar = new AnimatedReceptor(r, an, index++ % 4);
-                synapses.Add(new AnimatedSynapse(ar, an, s));
+                AnimatedReceptor ar = new AnimatedReceptor(receptor, an, index++ % 4);
+                synapses.Add(new AnimatedSynapse(ar, an, synapse));
                 receptors.Add(ar);
             }
+
+            query.arrange();
         }
 
         public void newQuery()
@@ -537,6 +543,7 @@ namespace Brain
             queryAccepted(this.query, new EventArgs());
             loaded = true;
         }
+
         #endregion
 
         #region interfejs drawable
@@ -546,6 +553,9 @@ namespace Brain
             create();
             query.show();
             base.show();
+
+            framesChanged(length, null);
+            frameChanged(frame, null);
 
             AnimatedElement.Graphics = buffer.Graphics;
         }
@@ -562,7 +572,7 @@ namespace Brain
             bitmap.Save(Constant.Path + "test.png");
         }
 
-        void animatedResize()
+        public void executeShift()
         {
             frames--;
 
@@ -579,7 +589,7 @@ namespace Brain
         protected override void tick(object sender, EventArgs e)
         {
             if (frames != 0)
-                animatedResize();
+                executeShift();
 
             if (frame == length && animation)
             {
@@ -598,6 +608,7 @@ namespace Brain
             else
                 redraw();
         }
+
         #endregion
 
         #region obsługa zdarzeń myszy
@@ -619,6 +630,7 @@ namespace Brain
                 }
             }
         }
+
         #endregion
     }
 }

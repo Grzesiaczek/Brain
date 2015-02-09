@@ -27,7 +27,7 @@ namespace Brain
             neuron = n;
 
             this.wall = wall;
-            radius = 16;
+            radius = Constant.Radius * 2 / 3;
 
             //0-góra, 1-lewo, 2-prawo, 3-dół
             switch(wall)
@@ -139,6 +139,19 @@ namespace Brain
             set
             {
                 synapse = value;
+            }
+        }
+
+        public override float Radius
+        {
+            get
+            {
+                return radius;
+            }
+            set
+            {
+                radius = value;
+                circle.Radius = radius;
             }
         }
 

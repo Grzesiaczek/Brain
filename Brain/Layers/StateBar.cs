@@ -12,61 +12,27 @@ namespace Brain
 {
     partial class StateBar : Layer
     {
+        StateBarPhase phase;
         int state;
-        bool stopped;
-        bool running;
 
         public StateBar()
         {
             InitializeComponent();
 
             BackColor = System.Drawing.SystemColors.InactiveBorder;
-            Location = new System.Drawing.Point(20, 240);
-            Name = "stateBar";
-            Size = new System.Drawing.Size(23, 120);
+            Location = new System.Drawing.Point(20, 30);
+            Size = new System.Drawing.Size(20, 120);
             TabIndex = 32;
             Visible = false;
+
+            Name = "stateBar";
+            phase = StateBarPhase.Idle;
         }
 
-        //sterowanie
-        #region
-        public void run()
+        public void reset()
         {
+            phase = StateBarPhase.Idle;
             state = Height;
-            running = true;
-        }
-
-        public void pause()
-        {
-            running = false;
-            stopped = true;
-        }
-
-        public void next()
-        {
-            stopped = false;
-        }
-        #endregion
-
-        void redraw()
-        {
-            Graphics g = buffer.Graphics;
-            g.Clear(SystemColors.Control);
-
-            Brush brush = Brushes.Green;
-            Rectangle rect = new Rectangle(0, 0, Width, Height);
-
-            if(running)
-            {
-                brush = Brushes.IndianRed;
-                rect = new Rectangle(0, Height - state, Width, state);
-            }
-            else if (stopped)
-                brush = Brushes.Orange;
-
-            g.DrawRectangle(Pens.Purple, rect);
-            g.FillRectangle(brush, rect);
-            buffer.Render(graphics);
         }
 
         public override void resize()
@@ -76,20 +42,62 @@ namespace Brain
 
         protected override void tick(object sender, EventArgs e)
         {
-            if (running)
-            {
-                state -= 3;
+            Graphics g = buffer.Graphics;
+            g.Clear(SystemColors.Control);
 
-                if (state <= 0)
-                {
-                    finished(this, null);
-                    running = false;
-                }
+            Brush brush = Brushes.Green;
+            Rectangle rect = new Rectangle(0, Height - state, Width, state);
+
+            switch (phase)
+            {
+                case StateBarPhase.Activation:
+                    brush = Brushes.IndianRed;
+                    break;
+
+                case StateBarPhase.BalanceNormal:
+                    brush = Brushes.DarkSlateBlue;
+                    break;
+
+                case StateBarPhase.BalanceExtra:
+                    brush = Brushes.DarkSlateGray;
+                    break;
+
+                case StateBarPhase.Idle:
+                    rect = new Rectangle(0, 0, Width, Height);
+                    break;
             }
 
-            redraw();
+            g.DrawRectangle(Pens.Purple, rect);
+            g.FillRectangle(brush, rect);
+            buffer.Render(graphics);
         }
 
-        public event EventHandler finished;
+        #region właściwości
+
+        public StateBarPhase Phase
+        {
+            get
+            {
+                return phase;
+            }
+            set
+            {
+                phase = value;
+            }
+        }
+
+        public int State
+        {
+            get
+            {
+                return state;
+            }
+            set
+            {
+                state = value;
+            }
+        }
+
+        #endregion
     }
 }

@@ -18,25 +18,24 @@ namespace Brain
         List<AnimatedSynapse> input;
         List<AnimatedSynapse> output;
 
-        bool active = false;
         bool collision = false;
         bool shifted = false;
 
         bool label = true;
         bool state = true;
 
-        int frame = 0;
-
-        public static event EventHandler activation;
+        int frame;
 
         #endregion
+
+        #region konstruktory
 
         public AnimatedNeuron() { }
 
         public AnimatedNeuron(Neuron n, PointF pos)
         {
             neuron = n;
-            radius = 24;
+            radius = Constant.Radius;
 
             position = pos;
             circle = new Circle(calculatePosition(), Constant.Radius);
@@ -44,6 +43,8 @@ namespace Brain
             input = new List<AnimatedSynapse>();
             output = new List<AnimatedSynapse>();
         }
+
+        #endregion
 
         #region logika
 
@@ -56,8 +57,8 @@ namespace Brain
                 if (an == this)
                     continue;
 
-                double dx = Position.X - an.Position.X;
-                double dy = Position.Y - an.Position.Y;
+                double dx = Location.X - an.Location.X;
+                double dy = Location.Y - an.Location.Y;
 
                 if (Math.Sqrt(dx * dx + dy * dy) < 2 * radius)
                 {
@@ -128,7 +129,9 @@ namespace Brain
             NeuronData data = neuron.Activity[number];
             double delta = factor * data.Relaxation;
 
-            if (factor > 0.75)
+            if (data.Impulse < 0)
+                delta += factor * data.Impulse;
+            else if (factor > 0.75)
             {
                 factor = 4 * (factor - 0.75);
                 delta += factor * data.Impulse;
@@ -171,9 +174,6 @@ namespace Brain
                     pen = new Pen(Brushes.Green, 3);
             }
 
-            if (active && value < 1)
-                active = false;
-
             if (value >= 1)
             {
                 Brush brush;
@@ -184,12 +184,6 @@ namespace Brain
                         brush = Brushes.Red;
                     else
                         brush = Brushes.Orange;
-
-                    if(!active)
-                    {
-                        active = true;
-                        activation(this, null);
-                    }
                 }
                 else
                     brush = Brushes.OrangeRed;
@@ -219,12 +213,11 @@ namespace Brain
             float size = radius / 4 + 3;
             float width = neuron.Word.Length * size + 6;
             float x = Location.X;
-            float y = Location.Y + radius + 14;
-            RectangleF rect = new RectangleF(x - width / 2, y - size, width, size + 4);
+            float y = Location.Y + radius + 12;
 
-            graphics.FillRectangle(Brushes.AliceBlue, rect);
-            graphics.DrawRectangle(new Pen(SystemBrushes.ButtonFace, 2), rect.Left, rect.Top, rect.Width, rect.Height);
-            graphics.DrawString(neuron.Word, new Font("Miriam Fixed", size, FontStyle.Bold), Brushes.DarkSlateBlue, x, y, Constant.Format);
+            RectangleF rect = new RectangleF(x - width / 2, y - size - 1, width, size + 6);
+            graphics.FillRectangle(new SolidBrush(Color.FromArgb(160, Color.AliceBlue)), rect);
+            graphics.DrawString(neuron.Word, new Font("Verdana", size, FontStyle.Bold), Brushes.Purple, x, y, Constant.Format);
         }
 
         #endregion

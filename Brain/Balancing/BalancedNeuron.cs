@@ -10,21 +10,22 @@ namespace Brain
     class BalancedNeuron : BalancedElement
     {
         AnimatedNeuron neuron;
-        List<Vector> input;
-        List<Vector> output;
-        List<Vector> vectors;
+        List<AnimatedVector> input;
+        List<AnimatedVector> output;
+        List<AnimatedVector> vectors;
 
         static float k = 320;
+        List<float> test = new List<float>();
 
         public BalancedNeuron(AnimatedNeuron neuron)
         {
-            shift = new PointF(0, 0);
             this.neuron = neuron;
+            shift = new PointF(0, 0);
             position = new PointF(neuron.Position.X, neuron.Position.Y);
 
-            input = new List<Vector>();
-            output = new List<Vector>();
-            vectors = new List<Vector>();
+            input = new List<AnimatedVector>();
+            output = new List<AnimatedVector>();
+            vectors = new List<AnimatedVector>();
 
             foreach (AnimatedSynapse synapse in neuron.Input)
                 input.Add(synapse.Vector);
@@ -72,11 +73,11 @@ namespace Brain
         {
             int count = input.Count + output.Count;
 
-            foreach(Vector v1 in input)
+            foreach (AnimatedVector v1 in input)
             {
                 float rotation = 0;
 
-                foreach(Vector v2 in input)
+                foreach (AnimatedVector v2 in input)
                 {
                     if (v1 == v2)
                         continue;
@@ -84,7 +85,7 @@ namespace Brain
                     rotation += diff(v1.Angle, v2.Angle);
                 }
 
-                foreach (Vector v2 in output)
+                foreach (AnimatedVector v2 in output)
                 {
                     float angle = v2.Angle;
 
@@ -99,11 +100,11 @@ namespace Brain
                 v1.Rotation += rotation / count;
             }
 
-            foreach (Vector v1 in output)
+            foreach (AnimatedVector v1 in output)
             {
                 float rotation = 0;
 
-                foreach (Vector v2 in output)
+                foreach (AnimatedVector v2 in output)
                 {
                     if (v1 == v2)
                         continue;
@@ -111,9 +112,10 @@ namespace Brain
                     rotation += diff(v1.Angle, v2.Angle);
                 }
 
-                foreach (Vector v2 in input)
+                foreach (AnimatedVector v2 in input)
                 {
                     float angle = v2.Angle;
+                    test.Add(rotation);
 
                     if (angle < Math.PI)
                         angle += (float)Math.PI;
@@ -173,8 +175,8 @@ namespace Brain
             float result = Math.Abs(shift.X) + Math.Abs(shift.Y);
             shift = new PointF(0, 0);
 
-            foreach (Vector vector in input)
-                vector.Rotation = 0;
+            foreach (AnimatedVector vector in input)
+                vector.udpate();
 
             return result;
         }

@@ -10,6 +10,8 @@ namespace Brain
 {
     class Brain
     {
+        #region deklaracje
+
         List<Neuron> neurons;  
         List<Synapse> synapses;
         List<Receptor> receptors;
@@ -19,6 +21,8 @@ namespace Brain
 
         int sentences;
         int length;
+
+        #endregion
 
         public Brain()
         {
@@ -32,6 +36,8 @@ namespace Brain
             sentences = 0;
             length = 0;
         }
+
+        #region sterowanie
 
         public void simulate(int length)
         {
@@ -95,6 +101,10 @@ namespace Brain
             length = 0;
         }
 
+        #endregion
+
+        #region uczenie
+
         public CreationSequence addSentence(String sentence)
         {
             List<CreationFrame> frames = new List<CreationFrame>();
@@ -103,24 +113,9 @@ namespace Brain
 
             foreach (String word in words)
             {
-                Neuron neuron = neurons.Find(i => i.Word == word);
-
-                if (neuron == null)
-                {
-                    neuron = new Neuron(word, alpha, beta);
-                    neurons.Add(neuron);
-
-                    Receptor receptor = new Receptor();
-                    Synapse synapse = new Synapse(receptor, neuron);
-
-                    synapses.Add(synapse);
-                    receptors.Add(receptor);
-                    receptor.Output = synapse;
-                }
-
-                neuron.Count++;
-                sequence.Add(neuron);
-                frames.Add(new CreationFrame(neuron));
+                CreationFrame frame = create(word, ++sentences);
+                sequence.Add(frame.Neuron.Neuron);
+                frames.Add(frame);
             }
 
             for (int i = 0; i < sequence.Count; i++)
@@ -141,23 +136,56 @@ namespace Brain
                     synapse.Factor += 1 / (float)(j - i);
                 }
 
-                sentences++;
-
-                foreach (Synapse s in sequence[i].Input)
+                foreach (Synapse synapse in sequence[i].Input)
                 {
-                    float weight = s.Weight;
-                    s.Weight = (2 * s.Factor) / (sequence[i].Count + s.Factor);
+                    float weight = synapse.Weight;
+                    synapse.Weight = (2 * synapse.Factor) / (sequence[i].Count + synapse.Factor);
 
-                    if (weight != s.Weight)
-                        frames[i].add(new CreationData(s, sentences, weight, s.Weight));
+                    if (weight != synapse.Weight)
+                        frames[i].add(new CreationData(synapse, frames[i], weight, synapse.Weight));
                 }
             }
 
             return new CreationSequence(frames);
         }
 
-        //właściwości
-        #region
+        CreationFrame create(String word, int frame)
+        {
+            Neuron neuron = neurons.Find(i => i.Word == word);
+
+            if (neuron == null)
+            {
+                neuron = new Neuron(word, alpha, beta);
+                neurons.Add(neuron);
+
+                Receptor receptor = new Receptor();
+                Synapse synapse = new Synapse(receptor, neuron);
+
+                synapses.Add(synapse);
+                receptors.Add(receptor);
+                receptor.Output = synapse;
+            }
+
+            neuron.Count++;
+            return new CreationFrame(neuron, frame);
+        }
+
+        public CreationFrame add(BuiltSequence sequence, BuiltElement element, int frame)
+        {
+            CreationFrame result = create(element.Name, frame);
+
+            return result;
+        }
+
+        public void remove(CreationFrame frame)
+        {
+
+        }
+
+        #endregion
+
+        #region właściwości
+
         public List<Neuron> Neurons
         {
             get
@@ -189,6 +217,7 @@ namespace Brain
                 return length;
             }
         }
+
         #endregion
     }
 }

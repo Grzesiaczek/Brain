@@ -12,13 +12,9 @@ namespace Brain
         Receptor receptor;
         bool active;
 
-        public SequenceReceptor(Sequence sequence, Receptor receptor)
+        public SequenceReceptor(Sequence sequence, Receptor receptor) : base(receptor.Name)
         {
             this.receptor = receptor;
-            name = receptor.Name;
-
-            Location = new Point(10 + 90 * sequence.Count, 8);
-
             sequence.add(this);
             changeType(SequenceElementType.Receptor);
         }

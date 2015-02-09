@@ -19,7 +19,6 @@ namespace Brain
 
         protected static Graphics graphics;
         protected static Rectangle area;
-        protected static PointF padding;
         protected static Size size;
 
         protected static bool animation;
@@ -52,9 +51,15 @@ namespace Brain
 
         protected PointF calculatePosition()
         {
-            float x = factor * position.X + padding.X;
-            float y = factor * position.Y + padding.Y;
+            float x = factor * position.X - area.X;
+            float y = factor * position.Y - area.Y;
             return new PointF(x, y);
+        }
+
+        public void changePosition(float factor)
+        {
+            position = new PointF(position.X * factor, position.Y * factor);
+            Location = calculatePosition();
         }
 
         protected void checkDrawable()
@@ -85,14 +90,6 @@ namespace Brain
             set
             {
                 area = value;
-            }
-        }
-
-        public static PointF Padding
-        {
-            set
-            {
-                padding = value;
             }
         }
 

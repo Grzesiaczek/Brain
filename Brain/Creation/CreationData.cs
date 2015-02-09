@@ -10,15 +10,19 @@ namespace Brain
 {
     class CreationData : Layer
     {
+        #region deklaracje
+
+        CreationFrame frame;
         Synapse synapse;
         Color background;
-        int frame;
 
         float start;
         float finish;
         float step;
 
-        public CreationData(Synapse synapse, int frame, float start, float finish)
+        #endregion
+
+        public CreationData(Synapse synapse, CreationFrame frame, float start, float finish)
         {
             this.synapse = synapse;
             this.frame = frame;
@@ -34,7 +38,7 @@ namespace Brain
             background = SystemColors.Control;
         }
 
-        public void redraw()
+        protected override void tick(object sender, EventArgs e)
         {
             Graphics g = buffer.Graphics;
             g.Clear(background);
@@ -61,15 +65,10 @@ namespace Brain
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;
 
-            g.DrawString(frame.ToString(), new Font("Calibri", 14, FontStyle.Bold), Brushes.SaddleBrown, 28, y, format);
+            g.DrawString(frame.Frame.ToString(), new Font("Calibri", 14, FontStyle.Bold), Brushes.SaddleBrown, 28, y, format);
             g.DrawString(change.ToString(), new Font("Arial", 12, FontStyle.Bold), brush, 136, y, format);
 
             buffer.Render(graphics);
-        }
-
-        protected override void tick(object sender, EventArgs e)
-        {
-            redraw();
         }
 
         private void mouseEnter(object sender, EventArgs e)
@@ -81,6 +80,8 @@ namespace Brain
         {
             background = SystemColors.Control;
         }
+
+        #region właściwości
 
         public Synapse Synapse
         {
@@ -117,5 +118,7 @@ namespace Brain
                 return finish;
             }
         }
+
+        #endregion
     }
 }

@@ -32,7 +32,8 @@ namespace Brain
 
         static GraphBalancing instance = new GraphBalancing();
 
-        public event EventHandler balanceFinished;
+        public event EventHandler balanceEnded;
+        public event EventHandler balanceState;
 
         #endregion
 
@@ -40,7 +41,7 @@ namespace Brain
         {
             alpha = -0.2f;
             beta = 2.0f;
-            step = 0.2f;
+            step = 0.5f;
 
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(tick);
@@ -55,7 +56,7 @@ namespace Brain
         public void animate(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors, int steps)
         {
             if (action)
-                timer.Stop();
+                return;
 
             initialize(neurons, synapses, receptors);
 
@@ -66,18 +67,26 @@ namespace Brain
 
         public void balance(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors)
         {
+            if (action)
+                return;
+
             initialize(neurons, synapses, receptors);
+            int count = 0;
 
             while(true)
             {
                 calculate();
                 update();
 
-                if (Math.Abs(delta) < 0.1)
+                if (Math.Abs(delta) < 1)
                     break;
+
+                balanceState(delta, null);
+                count++;
             }
 
             extra = true;
+            balanceEnded(false, null);
 
             while (true)
             {
@@ -87,13 +96,20 @@ namespace Brain
                 foreach (AnimatedSynapse s in synapses)
                     s.changePosition();
 
-                if (Math.Abs(delta) < 0.1)
+                if (Math.Abs(delta) < 1)
                     break;
+
+                balanceState(delta, null);
             }
+
+            balanceEnded(true, null);
+            action = false;
         }
 
         void initialize(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors)
         {
+            action = true;
+
             this.neurons = new List<BalancedNeuron>();
             this.receptors = new List<BalancedReceptor>();
             this.synapses = new List<BalancedSynapse>();
@@ -130,21 +146,24 @@ namespace Brain
                 update();
             }
 
-            if (Math.Abs(delta) < 0.1)
+            if (Math.Abs(delta) < 1)
             {
                 if (extra)
                 {
                     timer.Stop();
                     action = false;
-                    balanceFinished(this, new EventArgs());
+                    balanceEnded(true, null);
                 }
                 else
                 {
                     interval = 0;
                     steps /= 2;
                     extra = true;
+                    balanceEnded(false, null);
                 }
             }
+            else
+                balanceState(delta, null);
 
             foreach (BalancedSynapse bs in synapses)
                 bs.Synapse.changePosition();
@@ -174,7 +193,7 @@ namespace Brain
                 foreach (AnimatedSynapse s in n1.Neuron.Input)
                     n1.attract(s.Pre, 3 * alpha);
             }
-
+            
             foreach (BalancedReceptor r1 in receptors)
             {
                 r1.attract(5 * alpha);
@@ -187,7 +206,7 @@ namespace Brain
                     r1.repulse(r2, beta);
                 }
             }
-
+            
             foreach (BalancedSynapse bs in synapses)
                 bs.rotate();
 

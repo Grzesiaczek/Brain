@@ -9,10 +9,9 @@ using System.Xml;
 
 namespace Brain
 {
-    enum Format { Button }
     enum Mode { Chart, Creation, Manual, Query }
-    enum SequenceBarType { Lower, Upper }
-    enum SequenceElementType { Normal, Active, Activated, Receptor, ActiveReceptor}
+    enum SequenceElementType { Normal, Built, Active, Activated, Receptor, ActiveReceptor}
+    enum StateBarPhase { Idle, Activation, BalanceNormal, BalanceExtra}
 
     class NeuronData
     {

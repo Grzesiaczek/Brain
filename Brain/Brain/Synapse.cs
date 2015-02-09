@@ -9,31 +9,44 @@ namespace Brain
 {
     class Synapse
     {
+        #region deklaracje
+
         Element pre;
         Element post;
 
         float factor;
         float weight;
 
+        List<CreationFrame> changes;
         List<bool> activity;
+
+        #endregion
+
+        #region konstruktory
 
         public Synapse(Neuron pre, Neuron post)
         {
-            activity = new List<bool>();
             this.pre = pre;
             this.post = post;
-            factor = 0;
-            weight = 0;
+            initialize();
         }
 
         public Synapse(Receptor pre, Neuron post)
         {
-            activity = new List<bool>();
             this.pre = pre;
             this.post = post;
-            factor = 0;
-            weight = 0;
+            initialize();
         }
+
+        void initialize()
+        {
+            activity = new List<bool>();
+            changes = new List<CreationFrame>();
+        }
+
+        #endregion
+
+        #region logika
 
         public void tick()
         {
@@ -74,6 +87,10 @@ namespace Brain
                 activity.Add(false);
         }
 
+        #endregion
+
+        #region właściwości
+
         public Element Pre
         {
             get
@@ -110,6 +127,14 @@ namespace Brain
             }
         }
 
+        public List<CreationFrame> t
+        {
+            get
+            {
+                return changes;
+            }
+        }
+
         public float Factor
         {
             get
@@ -133,5 +158,7 @@ namespace Brain
                 weight = value;
             }
         }
+
+        #endregion
     }
 }

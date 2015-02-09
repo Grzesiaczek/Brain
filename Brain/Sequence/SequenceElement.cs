@@ -10,8 +10,9 @@ namespace Brain
 {
     abstract class SequenceElement : Layer
     {
-        static Rectangle rect = new Rectangle(0, 0, 80, 32);
+        #region deklaracje
 
+        Rectangle rect;
         Color background;
         Brush fontColor;
         Pen border;
@@ -20,16 +21,21 @@ namespace Brain
         protected String name;
         protected StringFormat format;
 
-        public SequenceElement()
+        #endregion
+
+        public SequenceElement(String name)
         {
-            Width = rect.Width;
-            Height = rect.Height;
+            Width = 16 + 8 * name.Length;
+            Height = 32;
+
+            this.name = name;
+            rect = new Rectangle(0, 0, Width, Height);
 
             Visible = true;
             initializeGraphics();
 
             fontColor = Brushes.Indigo;
-            font = new Font("Arial", 12, FontStyle.Bold);
+            font = new Font("Calibri", 12, FontStyle.Bold);
             format = new StringFormat();
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;
@@ -44,23 +50,28 @@ namespace Brain
                     break;
 
                 case SequenceElementType.Active:
-                    background = Pens.LightSkyBlue.Color;
+                    background = Color.LightSkyBlue;
                     border = Pens.Thistle;
                     break;
 
+                case SequenceElementType.Built:
+                    background = Color.GreenYellow;
+                    border = Pens.Purple;
+                    break;
+
                 case SequenceElementType.Normal:
-                    background = Pens.GreenYellow.Color;
+                    background = Color.GreenYellow;
                     border = Pens.Thistle;
                     break;
 
                 case SequenceElementType.Receptor:
-                    background = Pens.LightCyan.Color;
+                    background = Color.LightCyan;
                     fontColor = Brushes.DarkSlateGray;
                     border = Pens.Purple;
                     break;
 
                 case SequenceElementType.ActiveReceptor:
-                    background = Pens.PaleVioletRed.Color;
+                    background = Color.PaleVioletRed;
                     fontColor = Brushes.DarkSlateBlue;
                     border = Pens.Purple;
                     break;

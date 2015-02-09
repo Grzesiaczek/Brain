@@ -14,7 +14,7 @@ namespace Brain
         BalancedElement pre;
         BalancedElement post;
 
-        static float k = 100;
+        static float k = 120;
 
         public BalancedSynapse(AnimatedSynapse synapse, Dictionary<AnimatedElement, BalancedElement> map)
         {
@@ -30,8 +30,8 @@ namespace Brain
 
             PointF pos = new PointF(neuron.Position.X - synapse.Pre.Position.X, neuron.Position.Y - synapse.Pre.Position.Y);
 
-            float a = synapse.Vector.Y;
-            float b = synapse.Vector.X;
+            float a = synapse.Vector.Position.Y;
+            float b = synapse.Vector.Position.X;
             float c = b * pos.X + a * pos.Y;
             float x, y;
             float eq; // punkt równowagi
@@ -92,8 +92,8 @@ namespace Brain
         {
             if (pre is BalancedReceptor)
                 return;
-
-            if (Math.Abs(synapse.Vector.Rotation) < 0.01)
+            
+            if (Math.Abs(synapse.Vector.Rotation) < 0.001)
             {
                 synapse.Vector.Rotation = 0;
                 return;
@@ -108,9 +108,8 @@ namespace Brain
         }
 
         public override void move(float x, float y)
-        {/*
-            shift.X += value.X;
-            shift.Y += shift.Y;*/
+        {
+
         }
 
         public AnimatedSynapse Synapse

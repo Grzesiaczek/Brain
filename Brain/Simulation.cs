@@ -24,15 +24,19 @@ namespace Brain
         Animation animation;
         Creation creation;
         Charting charting;
+
+        Display display;
         Presentation presentation;
         StateBar stateBar;
 
+        int frames;
         int length;
         int pace;
 
         Mode mode;
         FormWindowState state;
         Drawable visible;
+
         #endregion
 
         public Simulation()
@@ -41,10 +45,6 @@ namespace Brain
             Constant.load();
             initialize();
             prepareAnimation();
-
-            animate();
-            //create();
-            //chart();
         }
 
         #region funkcje inicjalizacji dla poszczególnych trybów
@@ -72,29 +72,35 @@ namespace Brain
             charting.show();
             mode = Mode.Chart;
         }
+
         #endregion
 
-        //inicjalizacja
+        #region inicjalizacja
+
         void initialize()
         {
             brain = new Brain();
             sequences = new List<CreationSequence>();
 
-            animation = new Animation();
-            creation = new Creation(sequences);
             charting = new Charting();
+            display = new Display();
+
+            animation = new Animation(display);
+            creation = new Creation(display);
             stateBar = new StateBar();
 
-            Controls.Add(animation);
+            Controls.Add(display);
             Controls.Add(charting);
-            Controls.Add(creation);
 
-            Padding margin = new Padding(0, 0, rightPanel.Width + 40, 120);
-            charting.setMargin(new Padding(0, 0, rightPanel.Width + 20, 20));
+            Padding margin = new Padding(10, 50, 10, 10);
 
             animation.setBar(stateBar);
             animation.setMargin(margin);
             creation.setMargin(margin);
+
+            margin = new Padding(0, 0, rightPanel.Width + 20, 100);
+            charting.setMargin(margin);
+            display.setMargin(margin);
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
@@ -105,42 +111,21 @@ namespace Brain
             pace = trackBarPace.Value * 100;
 
             animation.changePace(pace);
-            animation.balanceStarted += new EventHandler(balanceStarted);
-            animation.balanceFinished += new EventHandler(balanceFinished);
             animation.animationStop += new EventHandler(animationStop);
+            animation.balanceFinished += new EventHandler(balanceFinished);
             animation.queryAccepted += new EventHandler(queryAccepted);
-
-            animation.factorChanged += new EventHandler(factorChanged);
             animation.frameChanged += new EventHandler(frameChanged);
-            animation.sizeChanged += new EventHandler(sizeChanged);
-
+            animation.framesChanged += new EventHandler(framesChanged);
+            
             creation.animationStop += new EventHandler(animationStop);
             creation.creationFinished += new EventHandler(creationFinished);
             creation.frameChanged += new EventHandler(frameChanged);
+            creation.framesChanged += new EventHandler(framesChanged);
+
+            Presentation.factorChanged += new EventHandler(factorChanged);
+            Presentation.sizeChanged += new EventHandler(sizeChanged);
             
-            load();
             resize();
-        }
-
-        public void load()
-        {
-            DateTime date = DateTime.Now;
-            String name = date.ToString("yyyyMMdd-HHmmss");
-
-            StreamReader reader = new StreamReader(File.Open("Files\\data.xml", FileMode.Open));
-            XmlDocument xml = new XmlDocument();
-            xml.Load(reader);
-            reader.Close();
-
-            XmlNode node = xml.ChildNodes.Item(1).FirstChild;
-            Dictionary<Neuron, SequenceNeuron> map = new Dictionary<Neuron, SequenceNeuron>();
-
-            foreach (XmlNode xn in node.ChildNodes)
-                sequences.Add(brain.addSentence(xn.InnerText.ToLower()));
-
-            animation.loadBrain(brain);
-            animation.create(creation);
-            charting.loadBrain(brain);
         }
 
         void simulate()
@@ -152,11 +137,11 @@ namespace Brain
         void prepareAnimation()
         {
             buttonPlay.Enabled = true;
-            buttonBalance.Enabled = true;
-
             buttonBack.Enabled = true;
             buttonForth.Enabled = true;
         }
+
+        #endregion
 
         #region obsługa przycisków
 
@@ -257,28 +242,6 @@ namespace Brain
 
         #endregion
 
-        #region obsługa balansowania grafu
-
-        private void buttonBalance_Click(object sender, EventArgs e)
-        {
-            animation.balance();
-        }
-
-        private void balanceStarted(object sender, EventArgs e)
-        {
-            buttonBalance.Enabled = false;
-        }
-
-        private void balanceFinished(object sender, EventArgs e)
-        {
-            if(mode != Mode.Manual)
-                buttonPlay.Enabled = true;
-
-            buttonBalance.Enabled = true;
-        }
-
-        #endregion
-
         #region obsługa checkBox
 
         private void checkBoxLabel_CheckedChanged(object sender, EventArgs e)
@@ -308,10 +271,10 @@ namespace Brain
                     animation.stopBalance();
                     break;
                 case Keys.Left:
-                    presentation.forth();
+                    presentation.back();
                     break;
                 case Keys.Right:
-                    presentation.back();
+                    presentation.forth();
                     break;
                 case Keys.Add:
                     //if (e.Modifiers == Keys.Control)
@@ -362,28 +325,27 @@ namespace Brain
             int py = Height - 100;
 
             rightPanel.Left = px;
+            rightPanel.Height = py + 40;
+
+            labelFrame.Top = py;
+
+            scrollHorizontal.Top = py - 12;
+            scrollHorizontal.Width = px - 32;
 
             scrollVertical.Left = px - 20;
-            scrollVertical.Height = py - 72;
+            scrollVertical.Height = py - 48;
 
-            bottomPanel.Top = py;
+            bottomPanel.Top = py + 4;
             bottomPanel.Width = px - 10;
-
-            scrollHorizontal.Top = py - 16;
-            scrollHorizontal.Width = px - 32;
 
             trackBarFrame.Width = px - 100;
             buttonForth.Left = px - 50;
-
-            labelFrame.Top = 10;
-            labelFrame.Left = px - 100;
         }
 
         private void resizeEnd(object sender, EventArgs e)
         {
-            animation.resize();
-            creation.resize();
             charting.resize();
+            display.resize();
         }
         #endregion
 
@@ -464,28 +426,63 @@ namespace Brain
 
         #region obsługa zdarzeń
 
+        private void Simulation_Load(object sender, EventArgs e)
+        {
+            DateTime date = DateTime.Now;
+            String name = date.ToString("yyyyMMdd-HHmmss");
+
+            StreamReader reader = new StreamReader(File.Open("Files\\data.xml", FileMode.Open));
+            XmlDocument xml = new XmlDocument();
+            xml.Load(reader);
+            reader.Close();
+
+            XmlNode node = xml.ChildNodes.Item(1).FirstChild;
+            Dictionary<Neuron, SequenceNeuron> map = new Dictionary<Neuron, SequenceNeuron>();
+
+            foreach (XmlNode xn in node.ChildNodes)
+                sequences.Add(brain.addSentence(xn.InnerText.ToLower()));
+
+            creation.load(sequences);
+            animation.loadBrain(brain);
+            animation.create(creation);
+            charting.loadBrain(brain);
+
+            display.show();
+            create();
+            //animate();
+        }
+
         private void animationStop(object sender, EventArgs e)
         {
             buttonPlay.Text = "Play";
-            buttonBalance.Enabled = true;
             buttonSimulate.Enabled = true;
+        }
+
+        private void balanceFinished(object sender, EventArgs e)
+        {
+            if (mode != Mode.Manual)
+                buttonPlay.Enabled = true;
         }
 
         private void factorChanged(object sender, EventArgs e)
         {
-            int value = (int)((float)sender / 2);
+            trackBarScale.Minimum = (int)sender;
+            trackBarScale.Value = (int)sender;
 
-            if (value >= trackBarScale.Minimum)
-                trackBarScale.Value = value;
-            else
-                trackBarScale.Value = trackBarScale.Minimum;
-
-            animation.rescale(2 * trackBarScale.Value);
+            AnimatedElement.Factor = (float)(int)sender / 100;
+            animation.rescale(trackBarScale.Value);
         }
 
         private void frameChanged(object sender, EventArgs e)
         {
-            labelFrame.Text = ((int)sender).ToString();
+            labelFrame.Text = ((int)sender).ToString() + "/" + frames.ToString();
+            trackBarFrame.Value = (int)sender;
+        }
+
+        private void framesChanged(object sender, EventArgs e)
+        {
+            frames = (int)sender;
+            trackBarFrame.Maximum = frames;
         }
 
         private void sizeChanged(object sender, EventArgs e)
@@ -493,10 +490,10 @@ namespace Brain
             Presentation presentation = (Presentation)sender;
             float factor = AnimatedElement.Factor;
 
-            scrollHorizontal.LargeChange = presentation.Width / 20;
+            scrollHorizontal.LargeChange = presentation.Width / 20 + 1;
             scrollHorizontal.Maximum = (int)(factor * presentation.Size.Width / 20);
 
-            scrollVertical.LargeChange = presentation.Height / 20;
+            scrollVertical.LargeChange = presentation.Height / 20 + 1;
             scrollVertical.Maximum = (int)(factor * presentation.Size.Height / 20);
         }
 
@@ -531,13 +528,26 @@ namespace Brain
         private void trackBarFrame_Scroll(object sender, EventArgs e)
         {
             presentation.changeFrame(trackBarFrame.Value);
+            labelFrame.Text = trackBarFrame.Value.ToString() + "/" + frames.ToString();
         }
 
         private void trackBarScale_Scroll(object sender, EventArgs e)
         {
-            int radius = 2 * trackBarScale.Value;
-            Constant.Radius = radius;
-            animation.rescale(radius);
+            float factor = (float)trackBarScale.Value / 100;
+
+            animation.rescale(trackBarScale.Value);
+            AnimatedElement.Factor = factor;
+
+            scrollHorizontal.LargeChange = presentation.Width / 20 + 1;
+            scrollHorizontal.Maximum = (int)(factor * presentation.Size.Width / 20);
+
+            scrollVertical.LargeChange = presentation.Height / 20 + 1;
+            scrollVertical.Maximum = (int)(factor * presentation.Size.Height / 20);
+        }
+
+        private void trackBarDensity_Scroll(object sender, EventArgs e)
+        {
+            presentation.changeDensity(trackBarDensity.Value);
         }
 
         private void scrollHorizontal_ValueChanged(object sender, EventArgs e)

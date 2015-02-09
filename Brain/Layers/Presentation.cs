@@ -13,16 +13,27 @@ namespace Brain
         #region deklaracje
 
         protected ShiftedNeuron shift;
+        protected Display display;
+
+        protected static Brain brain;
         protected static Size size;
-        protected static Padding padding;
         protected static Rectangle area;
 
+        protected static int frames;
         protected bool animation;
+
+        int density = 20;
+
+        public static event EventHandler factorChanged;
+        public static event EventHandler sizeChanged;
 
         #endregion
 
-        public Presentation()
+        public Presentation(Display display)
         {
+            this.display = display;
+            display.Controls.Add(this);
+
             MouseDown += new System.Windows.Forms.MouseEventHandler(this.mouseDown);
             MouseUp += new System.Windows.Forms.MouseEventHandler(this.mouseUp);
             MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
@@ -51,6 +62,64 @@ namespace Brain
 
         #endregion
 
+        public override void resize()
+        {
+            base.resize();
+
+            if (brain == null)
+                return;
+
+            balanceSize();
+
+            if (area.Height != 0)
+            {
+                float factor = (float)Height / area.Height;
+
+                if (Height > Width)
+                    factor = (float)Width / area.Width;
+
+                display.calculateShift(factor);
+            }
+
+            area.Width = Width;
+            area.Height = Height;
+
+            AnimatedElement.Graphics = buffer.Graphics;
+            AnimatedElement.Area = area;
+
+            sizeChanged(this, null);
+        }
+
+        protected void balanceSize()
+        {
+            int optimum = (int)Math.Pow(brain.Neurons.Count + 1, 1.5) * density;
+            float min = Height;
+
+            if (Width < min)
+                min = Width;
+
+            if (optimum > min)
+            {
+                size.Width = optimum;
+                size.Height = optimum;
+
+                factorChanged((int)(min * 100 / optimum), null);
+                sizeChanged(this, null);
+            }
+            else
+                factorChanged(1, null);
+        }
+
+        public void changeDensity(int value)
+        {
+            int width = size.Width;
+            density = (int)Math.Sqrt(100 * value);
+            balanceSize();
+
+            float factor = (float)size.Width / width;
+            display.changeSize(factor);
+        }
+
         #region funkcje sterujące
 
         public bool started()
@@ -78,16 +147,16 @@ namespace Brain
 
         public virtual void space() { }
 
+
         #endregion
 
         #region właściwości
 
-        public Padding Padding
+        public Brain Brain
         {
             set
             {
-                padding = value;
-                AnimatedElement.Padding = new PointF(padding.Left, padding.Top);
+                brain = value;
             }
         }
 

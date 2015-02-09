@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class Sequence : Layer
+    class Sequence : Layer
     {
         protected List<SequenceElement> sequence;
 
@@ -32,6 +32,18 @@ namespace Brain
             Controls.Clear();
         }
 
+        public void arrange()
+        {
+            int position = 10;
+
+            foreach(SequenceElement element in sequence)
+            {
+                element.Top = 8;
+                element.Left = position;
+                position = element.Right + 10;
+            }
+        }
+
         #endregion
 
         #region funkcje klasy bazowej
@@ -41,6 +53,7 @@ namespace Brain
             Height = 50;
             Width = Parent.Width - margin.Horizontal + 30;
             initializeGraphics();
+            graphics.Clear(BackColor);
         }
 
         public override void hide()

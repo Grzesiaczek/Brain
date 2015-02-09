@@ -156,10 +156,6 @@ namespace Brain
             {
                 return diameter;
             }
-            set
-            {
-                diameter = value;
-            }
         }
 
         public static float Radius
@@ -171,6 +167,7 @@ namespace Brain
             set
             {
                 radius = value;
+                diameter = value * 2;
             }
         }
     }

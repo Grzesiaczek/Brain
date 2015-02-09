@@ -11,6 +11,7 @@ namespace Brain
     {
         #region deklaracje
 
+        AnimatedVector vector;
         Circle state;
         Circle control;
 
@@ -25,30 +26,17 @@ namespace Brain
 
         #endregion
 
-        public AnimatedState(Synapse synapse, bool duplex = false)
+        public AnimatedState(Synapse synapse, AnimatedVector vector, bool duplex = false)
         {
-            this.duplex = duplex;
             this.synapse = synapse;
+            this.vector = vector;
+            this.duplex = duplex;
 
             radius = Constant.Radius / 2;
             history = new List<CreationData>();
         }
 
         #region sterowanie
-
-        public void load(Vector vector)
-        {
-            if(duplex)
-            {
-                state = new Circle(vector.getPoint(vector.Start, 50 + (int)(vector.Length / 12)), radius);
-                control = new Circle(vector.getPoint(state.Center, (int)(3 * radius / 4)), radius);
-            }
-            else
-            {
-                state = new Circle(vector.getPoint(vector.End, -50 - (int)(vector.Length / 12)), radius);
-                control = new Circle(vector.getPoint(state.Center, (int)(-3 * radius / 4)), radius);
-            }                
-        }
 
         public bool active(Point location)
         {
@@ -76,7 +64,20 @@ namespace Brain
 
         public override void changePosition()
         {
-            
+            float length = vector.Length * factor;
+            int stateLength = 50 + (int)(length / 12);
+            int controlLength = 50 + (int)((9 * radius + length) / 12);
+
+            if (duplex)
+            {
+                state = new Circle(vector.getLocation(stateLength, true), radius);
+                control = new Circle(vector.getLocation(controlLength, true), radius);
+            }
+            else
+            {
+                state = new Circle(vector.getLocation(stateLength), radius);
+                control = new Circle(vector.getLocation(controlLength), radius);
+            }   
         }
 
         #endregion

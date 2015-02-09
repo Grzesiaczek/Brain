@@ -10,12 +10,13 @@ namespace Brain
     class CreatedNeuron
     {
         AnimatedNeuron neuron;
+
         bool created;
+        int frame;
 
         public CreatedNeuron(AnimatedNeuron neuron)
         {
             this.neuron = neuron;
-            neuron.Radius = 0;
             created = false;
         }
 
@@ -23,6 +24,17 @@ namespace Brain
         {
             created = true;
             neuron.Radius = Constant.Radius;
+        }
+
+        public void delete()
+        {
+            created = false;
+            neuron.Radius = 0;
+        }
+
+        public void load()
+        {
+            neuron.Radius = 0;
         }
 
         public void draw()
@@ -36,6 +48,8 @@ namespace Brain
             neuron.draw();
         }
 
+        #region właściwości
+
         public bool Created
         {
             get
@@ -47,5 +61,19 @@ namespace Brain
                 created = value;
             }
         }
+
+        public int Frame
+        {
+            get
+            {
+                return frame;
+            }
+            set
+            {
+                frame = value;
+            }
+        }
+
+        #endregion
     }
 }

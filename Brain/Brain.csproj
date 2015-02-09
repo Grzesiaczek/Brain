@@ -65,10 +65,19 @@
     <Compile Include="Charting\Charting.Designer.cs">
       <DependentUpon>Charting.cs</DependentUpon>
     </Compile>
+    <Compile Include="Layers\Display.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Sequence\BuiltSequence.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Sequence\CreationSequence.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Sequence\QuerySequence.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Sequence\SequenceBuilder.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Sequence\SequenceElement.cs">
@@ -86,7 +95,7 @@
     <Compile Include="Layers\StateBar.Designer.cs">
       <DependentUpon>StateBar.cs</DependentUpon>
     </Compile>
-    <Compile Include="Vector.cs" />
+    <Compile Include="Animation\AnimatedVector.cs" />
     <Compile Include="Balancing\BalancedElement.cs" />
     <Compile Include="Balancing\BalancedSynapse.cs" />
     <Compile Include="Balancing\BalancedNeuron.cs" />

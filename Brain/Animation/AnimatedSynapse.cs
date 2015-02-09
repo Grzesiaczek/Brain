@@ -10,22 +10,28 @@ namespace Brain
 {
     class AnimatedSynapse : AnimatedElement
     {
+        #region deklaracje
+
         AnimatedElement pre;
         AnimatedElement post;
 
-        Vector vector;
+        AnimatedVector vector;
 
         AnimatedState synapse;
         AnimatedState duplex;
-        
-        public AnimatedSynapse(AnimatedNeuron pre, AnimatedNeuron post, Synapse synapse)
+
+        #endregion
+
+        #region konstruktory
+
+        public AnimatedSynapse(AnimatedNeuron pre, AnimatedNeuron post, Synapse syn)
         {
             this.pre = pre;
             this.post = post;
-            this.synapse = new AnimatedState(synapse);
 
             duplex = null;
-            vector = new Vector();
+            vector = new AnimatedVector(pre, post);
+            synapse = new AnimatedState(syn, vector);
 
             pre.Output.Add(this);
             post.Input.Add(this);
@@ -33,14 +39,15 @@ namespace Brain
             changePosition();
         }
 
-        public AnimatedSynapse(AnimatedReceptor pre, AnimatedNeuron post, Synapse synapse)
+        public AnimatedSynapse(AnimatedReceptor pre, AnimatedNeuron post, Synapse syn)
         {
             this.pre = pre;
             this.post = post;
-            this.synapse = new AnimatedState(synapse);
-
+            
             duplex = null;
-            vector = new Vector();
+
+            vector = new AnimatedVector(pre, post);
+            synapse = new AnimatedState(syn, vector);
 
             pre.Output = this;
             post.Input.Add(this);
@@ -48,15 +55,17 @@ namespace Brain
             changePosition();
         }
 
+        #endregion
+
         #region pozycjonowanie
 
         public override void changePosition()
         {
-            vector.update(pre.Location, post.Location);
-            synapse.load(vector);
+            vector.changePosition();
+            synapse.changePosition();
 
             if (duplex != null)
-                duplex.load(vector);
+                duplex.changePosition();
         }
 
         public override void executeShift()
@@ -73,20 +82,20 @@ namespace Brain
             draw();
 
             if (synapse.Activity[frame - 1])
-                vector.drawSignal(graphics, factor);
+                vector.drawSignal(factor);
 
             if (duplex != null && duplex.Activity[frame - 1])
-                vector.drawSignal(graphics, 1 - factor);
+                vector.drawSignal(1 - factor);
         }
 
         public void draw()
         {
-            vector.draw(graphics);
+            vector.draw();
         }
 
         public void draw(float factor)
         {
-            vector.draw(graphics, factor);
+            vector.draw(factor);
         }
 
         public void drawState()
@@ -129,6 +138,14 @@ namespace Brain
             }
         }
 
+        public void undo(CreationData data)
+        {
+            if (data.Synapse == synapse.Synapse)
+                synapse.Weight = data.Start;
+            else
+                duplex.Weight = data.Weight;
+        }
+
         public void create()
         {
             synapse.create();
@@ -139,8 +156,8 @@ namespace Brain
 
         public void setDuplex(Synapse synapse)
         {
-            duplex = new AnimatedState(synapse, true);
-            duplex.load(vector);
+            duplex = new AnimatedState(synapse, vector, true);
+            duplex.changePosition();
         }
 
         public bool active(Point location, bool duplex)
@@ -194,7 +211,7 @@ namespace Brain
             }
         }
 
-        public Vector Vector
+        public AnimatedVector Vector
         {
             get
             {

@@ -40,6 +40,7 @@ namespace Brain
 
             buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
             buffer.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            buffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         }
         
         public virtual void show()
@@ -47,12 +48,6 @@ namespace Brain
             resize();
             timer.Start();
             Visible = true;
-        }
-
-        public virtual void show(Control parent)
-        {
-            parent.Controls.Add(this);
-            show();
         }
 
         public virtual void hide()

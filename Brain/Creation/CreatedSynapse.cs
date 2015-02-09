@@ -10,7 +10,6 @@ namespace Brain
     class CreatedSynapse
     {
         AnimatedSynapse synapse;
-        static Graphics graphics;
 
         public CreatedSynapse(AnimatedSynapse synapse)
         {
@@ -40,6 +39,8 @@ namespace Brain
                 synapse.getState(true).Change += cd.Step;
         }
 
+        #region właściwości
+
         public AnimatedSynapse Synapse
         {
             get
@@ -48,12 +49,6 @@ namespace Brain
             }
         }
 
-        public static Graphics Graphics
-        {
-            set
-            {
-                graphics = value;
-            }
-        }
+        #endregion;
     }
 }

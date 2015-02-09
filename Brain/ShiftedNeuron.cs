@@ -33,8 +33,8 @@ namespace Brain
 
         public void move(float x, float y)
         {
-            shift.X = x - click.X;
-            shift.Y = y - click.Y;
+            shift.X = (x - click.X) / AnimatedElement.Factor;
+            shift.Y = (y - click.Y) / AnimatedElement.Factor;
 
             neuron.Position = new PointF(original.X + shift.X, original.Y + shift.Y);
             neuron.checkCollision(neurons);

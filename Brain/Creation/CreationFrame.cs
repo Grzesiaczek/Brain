@@ -8,6 +8,8 @@ namespace Brain
 {
     class CreationFrame
     {
+        #region deklaracje
+
         SequenceNeuron neuron;
 
         List<Synapse> created;
@@ -16,16 +18,23 @@ namespace Brain
         static Dictionary<Neuron, CreatedNeuron> neurons;
         static Dictionary<Synapse, CreatedSynapse> synapses;
 
+        int frame;
         int count;
         int phase;
+
         static int interval;
 
-        public CreationFrame(Neuron neuron)
+        public event EventHandler finish;
+
+        #endregion
+
+        public CreationFrame(Neuron neuron, int frame)
         {
             this.neuron = new SequenceNeuron(neuron);
             created = new List<Synapse>();
             data = new List<CreationData>();
 
+            this.frame = frame;
             count = 0;
             phase = 1;
         }
@@ -38,30 +47,40 @@ namespace Brain
 
         public void create(List<CreatedNeuron> lcn, List<CreatedSynapse> lcs)
         {
-            if (!neurons[neuron.Neuron].Created)
+            CreatedNeuron cn = neurons[neuron.Neuron];
+
+            if (!cn.Created)
             {
-                CreatedNeuron cn = neurons[neuron.Neuron];
+                cn.Frame = frame;
                 cn.create();
                 lcn.Add(cn);
             }
 
             foreach (Synapse s in created)
+                lcs.Add(synapses[s]);
+        }
+
+        public void undo(List<CreatedNeuron> lcn, List<CreatedSynapse> lcs)
+        {
+            CreatedNeuron cn = neurons[neuron.Neuron];
+
+            if(neurons[neuron.Neuron].Frame == frame)
             {
-                CreatedSynapse cs = synapses[s];
-                lcs.Add(cs);
+                cn.delete();
+                lcn.Remove(cn);
             }
+
+            foreach (Synapse s in created)
+                lcs.Remove(synapses[s]);
+
+            foreach (CreationData cd in data)
+                synapses[cd.Synapse].Synapse.undo(cd);
         }
 
         public void create()
         {
             foreach (CreationData cd in data)
                 synapses[cd.Synapse].Synapse.create(cd);
-        }
-
-        public void change()
-        {
-            foreach (CreationData cd in data)
-                synapses[cd.Synapse].Synapse.change(cd);
         }
 
         public void tick()
@@ -102,8 +121,10 @@ namespace Brain
                         if (synapses.Count == 0)
                             phase++;
 
-                        neurons[neuron.Neuron].create();
-                        finish(neurons[neuron.Neuron], null);
+                        CreatedNeuron cn = neurons[neuron.Neuron];
+                        cn.create();
+                        cn.Frame = frame;
+                        finish(cn, null);
                         break;
                     case 2:
                         finish(created, null);
@@ -142,11 +163,21 @@ namespace Brain
             created.Add(synapse);
         }
 
+        #region właściwości
+
         public SequenceNeuron Neuron
         {
             get
             {
                 return neuron;
+            }
+        }
+
+        public int Frame
+        {
+            get
+            {
+                return frame;
             }
         }
 
@@ -158,6 +189,6 @@ namespace Brain
             }
         }
 
-        public event EventHandler finish;
+        #endregion
     }
 }
