@@ -411,7 +411,6 @@
             this.Text = "AAS Simulation Tool";
             this.Shown += new System.EventHandler(this.Simulation_Load);
             this.ResizeEnd += new System.EventHandler(this.resizeEnd);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyDown);
             this.Resize += new System.EventHandler(this.resize);
             this.rightPanel.ResumeLayout(false);
             this.rightPanel.PerformLayout();

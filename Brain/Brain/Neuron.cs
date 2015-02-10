@@ -8,6 +8,8 @@ namespace Brain
 {
     class Neuron : Element
     {
+        #region deklaracje
+
         List<Receptor> sensin;
         List<Synapse> input;
         List<Synapse> output;
@@ -17,7 +19,6 @@ namespace Brain
 
         int id;
         int count;
-        int length;
 
         bool active;
 
@@ -28,6 +29,10 @@ namespace Brain
         double treshold;
         double original;
         double value;
+
+        #endregion
+
+        #region konstruktory
 
         public Neuron(String word, float alpha, float beta)
         {
@@ -42,52 +47,43 @@ namespace Brain
             initiate();
         }
 
-        public Neuron(List<NeuronData> data)
-        {
-            activity = data;
-            initiate();
-        }
-
         void initiate()
         {
             treshold = 1.0;
             impulse = 0;
         }
 
+        #endregion
+
+        #region sterowanie
+
         public void tick()
         {
             double initial = value;
             double relaxation = 0;
 
-            if (word.Equals("planet"))
-            {
-                int k = 4;
-                int t = 6;
-                k = t;
-            }
-
             if (active)
             {
                 impulse -= beta * treshold + value;
                 value += impulse;
-                activity.Add(new NeuronData(false, initial, impulse, 0, value));
             }
+
+            relaxation = (alpha - 1) * value;
+
+            if (value < 0)
+                relaxation += ((1 - alpha) * beta * (value * value)) / treshold;
             else
-            {
-                relaxation = (alpha - 1) * value;
+                relaxation += ((alpha - 1) * beta * (value * value)) / treshold;
 
-                if (value < 0)
-                    relaxation += ((1 - alpha) * beta * (value * value)) / treshold;
-                else
-                    relaxation += ((alpha - 1) * beta * (value * value)) / treshold;
+            if (!active)
+                value += impulse;
+            
+            value += relaxation;
 
-                value += impulse + relaxation;
-
-                if (value < treshold)
-                    activity.Add(new NeuronData(false, initial, impulse, relaxation, value));
-                else
-                    activity.Add(new NeuronData(true, initial, impulse, relaxation, value));
-            }
+            if (value < treshold)
+                activity.Add(new NeuronData(false, initial, impulse, relaxation, value));
+            else
+                activity.Add(new NeuronData(true, initial, impulse, relaxation, value));
 
             if (value < treshold)
                 active = false;
@@ -152,23 +148,9 @@ namespace Brain
             this.impulse += impulse;
         }
 
-        public void setLength(int length)
-        {
-            this.length = length;
-            activity.Capacity = length;
-        }
+        #endregion
 
-        public List<Receptor> Sensin
-        {
-            get
-            {
-                return sensin;
-            }
-            set
-            {
-                sensin = value;
-            }
-        }
+        #region właściwości
 
         public List<Synapse> Input
         {
@@ -242,18 +224,6 @@ namespace Brain
             }
         }
 
-        public int Length
-        {
-            get
-            {
-                return length;
-            }
-            set
-            {
-                length = value;
-            }
-        }
-
         public String Name
         {
             get
@@ -261,5 +231,7 @@ namespace Brain
                 return word;
             }
         }
+
+        #endregion
     }
 }

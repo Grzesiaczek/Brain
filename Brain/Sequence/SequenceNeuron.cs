@@ -24,7 +24,7 @@ namespace Brain
             changeType(SequenceElementType.Normal);
         }
 
-        protected override void tick(object sender, EventArgs e)
+        /*protected override void tick(object sender, EventArgs e)
         {
             if (fade)
                 changeType(SequenceElementType.Activated);
@@ -36,7 +36,7 @@ namespace Brain
             }
 
             base.tick(sender, e);
-        }
+        }*/
 
         public void disappear(int value)
         {

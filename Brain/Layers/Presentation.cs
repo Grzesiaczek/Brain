@@ -12,8 +12,8 @@ namespace Brain
     {
         #region deklaracje
 
-        protected ShiftedNeuron shift;
         protected Display display;
+        protected ShiftedNeuron shift;
 
         protected static Brain brain;
         protected static Size size;
@@ -139,14 +139,15 @@ namespace Brain
 
         public virtual void changePace(int pace) { }
 
-        public virtual void add(int key) { }
+        public virtual void add(char key) { }
 
         public virtual void erase() { }
 
-        public virtual void confirm() { }
+        public virtual void enter() { }
 
         public virtual void space() { }
 
+        public virtual void delete() { }
 
         #endregion
 

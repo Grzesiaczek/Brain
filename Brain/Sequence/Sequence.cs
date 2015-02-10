@@ -11,6 +11,8 @@ namespace Brain
     class Sequence : Layer
     {
         protected List<SequenceElement> sequence;
+        protected BuiltElement builder;
+        protected int position = 10;
 
         public Sequence()
         {
@@ -23,7 +25,6 @@ namespace Brain
         public void add(SequenceElement element)
         {
             sequence.Add(element);
-            Controls.Add(element);
         }
 
         public virtual void clear()
@@ -46,6 +47,37 @@ namespace Brain
 
         #endregion
 
+        #region budowa
+
+        public void add(char key)
+        {
+            if (builder == null)
+            {
+                builder = new BuiltElement("");
+                builder.Left = position;
+                builder.Top = 8;
+            }
+
+            builder.add(key);
+        }
+
+        public bool erase()
+        {
+            if (!builder.erase())
+                return false;
+
+            if (sequence.Count == 0)
+                return true;
+
+            SequenceElement last = sequence.Last<SequenceElement>();
+            builder = new BuiltElement(last);
+            sequence.Remove(last);
+
+            return false;
+        }
+
+        #endregion
+
         #region funkcje klasy bazowej
 
         public override void resize()
@@ -53,19 +85,25 @@ namespace Brain
             Height = 50;
             Width = Parent.Width - margin.Horizontal + 30;
             initializeGraphics();
-            graphics.Clear(BackColor);
         }
 
-        public override void hide()
+        public override void show()
         {
-            Parent.Controls.Remove(this);
-            base.hide();
+            base.show();
+            SequenceElement.Graphics = buffer.Graphics;
         }
 
         protected override void tick(object sender, EventArgs e)
         {
+            buffer.Graphics.Clear(BackColor);
+
             foreach (SequenceElement element in sequence)
                 element.draw();
+
+            if (builder != null)
+                builder.draw();
+
+            buffer.Render(graphics);
         }
 
         #endregion

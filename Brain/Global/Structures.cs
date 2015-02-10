@@ -9,18 +9,28 @@ using System.Xml;
 
 namespace Brain
 {
+    #region enumeratory
+
     enum Mode { Chart, Creation, Manual, Query }
     enum SequenceElementType { Normal, Built, Active, Activated, Receptor, ActiveReceptor}
     enum StateBarPhase { Idle, Activation, BalanceNormal, BalanceExtra}
 
+    #endregion
+
     class NeuronData
     {
+        #region deklaracje
+
         bool active;
         double initial;
         double impulse;
         double relaxation;
         double original;
         double value;
+
+        #endregion
+
+        #region konstruktory
 
         public NeuronData(bool active, double initial, double impulse, double relaxation, double value)
         {
@@ -32,15 +42,6 @@ namespace Brain
             original = value;
         }
 
-        public NeuronData(BinaryReader reader)
-        {
-            active = reader.ReadBoolean();
-            initial = reader.ReadDouble();
-            impulse = reader.ReadDouble();
-            relaxation = reader.ReadDouble();
-            value = reader.ReadDouble();
-        }
-
         public NeuronData()
         {
             active = false;
@@ -50,14 +51,9 @@ namespace Brain
             value = 0;
         }
 
-        public void save(BinaryWriter writer)
-        {
-            writer.Write(active);
-            writer.Write(initial);
-            writer.Write(impulse);
-            writer.Write(relaxation);
-            writer.Write(value);
-        }
+        #endregion
+
+        #region właściwości
 
         public bool Active
         {
@@ -130,5 +126,7 @@ namespace Brain
                 this.value = value;
             }
         }
+
+        #endregion
     }
 }

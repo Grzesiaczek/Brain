@@ -18,14 +18,18 @@ namespace Brain
 
         float start;
         float finish;
+        float change;
         float step;
 
         #endregion
 
-        public CreationData(Synapse synapse, CreationFrame frame, float start, float finish)
+        #region logika
+
+        public CreationData(Synapse synapse, CreationFrame frame, float change, float start, float finish)
         {
             this.synapse = synapse;
             this.frame = frame;
+            this.change = change;
             this.start = start;
             this.finish = finish;
 
@@ -81,6 +85,8 @@ namespace Brain
             background = SystemColors.Control;
         }
 
+        #endregion
+
         #region właściwości
 
         public Synapse Synapse
@@ -88,6 +94,22 @@ namespace Brain
             get
             {
                 return synapse;
+            }
+        }
+
+        public float Change
+        {
+            get
+            {
+                return change;
+            }
+        }
+
+        public int Frame
+        {
+            get
+            {
+                return frame.Frame;
             }
         }
 
@@ -109,6 +131,10 @@ namespace Brain
             {
                 return start;
             }
+            set
+            {
+                start = value;
+            }
         }
 
         public float Weight
@@ -116,6 +142,10 @@ namespace Brain
             get
             {
                 return finish;
+            }
+            set
+            {
+                finish = value;
             }
         }
 

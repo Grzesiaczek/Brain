@@ -56,8 +56,8 @@ namespace Brain
                 lcn.Add(cn);
             }
 
-            foreach (Synapse s in created)
-                lcs.Add(synapses[s]);
+            foreach (Synapse synapse in created)
+                lcs.Add(synapses[synapse]);
         }
 
         public void undo(List<CreatedNeuron> lcn, List<CreatedSynapse> lcs)
@@ -75,6 +75,12 @@ namespace Brain
 
             foreach (CreationData cd in data)
                 synapses[cd.Synapse].Synapse.undo(cd);
+        }
+
+        public void change()
+        {
+            foreach (CreationData cd in data)
+                synapses[cd.Synapse].Synapse.change(cd);
         }
 
         public void create()
@@ -130,9 +136,7 @@ namespace Brain
                         finish(created, null);
                         break;
                     case 3:
-                        foreach (CreationData cd in data)
-                            synapses[cd.Synapse].Synapse.create(cd);
-
+                        create();
                         finish(this, null);
                         break;
                 }
@@ -173,11 +177,23 @@ namespace Brain
             }
         }
 
+        public List<CreationData> Data
+        {
+            get
+            {
+                return data;
+            }
+        }
+
         public int Frame
         {
             get
             {
                 return frame;
+            }
+            set
+            {
+                frame = value;
             }
         }
 

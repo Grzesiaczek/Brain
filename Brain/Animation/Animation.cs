@@ -54,7 +54,6 @@ namespace Brain
             query = new QuerySequence();
 
             display.add(this);
-            display.show(query);
 
             MouseClick += new MouseEventHandler(mouseClick);
             MouseDoubleClick += new MouseEventHandler(mouseClick);
@@ -84,30 +83,23 @@ namespace Brain
             AnimatedElement.Size = size;
             BalancedElement.Size = size;
 
-            foreach (Neuron n in brain.Neurons)
+            foreach (Neuron neuron in brain.Neurons)
             {
                 PointF position = randomPoint(random);
-                AnimatedNeuron an = new AnimatedNeuron(n, position);
-                neurons.Add(an);
+                neurons.Add(new AnimatedNeuron(neuron, position));
             }
 
-            foreach (AnimatedNeuron start in neurons)
-                foreach (Synapse s in start.Neuron.Output)
-                    foreach (AnimatedNeuron n in neurons)
-                        if (n.Neuron == s.Post)
+            foreach (AnimatedNeuron pre in neurons)
+                foreach (Synapse synapse in pre.Neuron.Output)
+                    foreach (AnimatedNeuron post in neurons)
+                        if (post.Neuron == synapse.Post)
                         {
-                            bool single = true;
+                            AnimatedSynapse syn = synapses.Find(k => pre == k.Pre && post == k.Post);
 
-                            foreach (AnimatedSynapse syn in synapses)
-                                if (syn.Pre == n && syn.Post == start)
-                                {
-                                    syn.setDuplex(s);
-                                    single = false;
-                                    break;
-                                }
-
-                            if (single)
-                                synapses.Add(new AnimatedSynapse(start, n, s));
+                            if (syn == null)
+                                synapses.Add(new AnimatedSynapse(pre, post, synapse));
+                            else
+                                syn.setDuplex(synapse);
 
                             break;
                         }
@@ -117,13 +109,64 @@ namespace Brain
             queryAccepted(query, null);
         }
 
+        public Dictionary<object, object> loadFrame(CreationFrame frame, int index)
+        {
+            Dictionary<object, object> result = new Dictionary<object, object>();
+            Random random = new Random();
+            bool added = false;
+
+            Neuron neuron = frame.Neuron.Neuron;
+
+            if (neurons.Find(k => k.Neuron == neuron) == null)
+            {
+                PointF position = randomPoint(random);
+                AnimatedNeuron an = new AnimatedNeuron(neuron, position);
+                CreatedNeuron cn = new CreatedNeuron(an);
+
+                neurons.Add(an);
+                result.Add(neuron, cn);
+                added = true;
+            }
+            else
+                result.Add(neuron, true);
+
+            foreach(CreationData data in frame.Data)
+                if(data.Synapse.Changes.First<CreationData>() == data)
+                {
+                    AnimatedNeuron pre = neurons.Find(k => data.Synapse.Pre == k.Neuron);
+                    AnimatedNeuron post = neurons.Find(k => data.Synapse.Post == k.Neuron);
+
+                    AnimatedSynapse synapse = synapses.Find(k => pre == k.Pre && post == k.Post);
+
+                    if (synapse == null)
+                    {
+                        AnimatedSynapse syn = new AnimatedSynapse(pre, post, data.Synapse);
+                        CreatedSynapse cs = new CreatedSynapse(syn);
+
+                        synapses.Add(syn);
+                        result.Add(syn.Synapse, cs);
+
+                        if (syn.isDuplex())
+                            result.Add(syn.Duplex, cs);
+                    }
+                    else
+                        synapse.setDuplex(data.Synapse);
+
+                }
+
+            if (added)
+                balance();
+
+            return result;
+        }
+
         public void create()
         {
-            foreach (AnimatedNeuron an in neurons)
-                an.create();
+            foreach (AnimatedNeuron neuron in neurons)
+                neuron.create();
 
-            foreach (AnimatedSynapse s in synapses)
-                s.create();
+            foreach (AnimatedSynapse synapse in synapses)
+                synapse.create();
         }
 
         public void create(Creation creation)
@@ -147,7 +190,7 @@ namespace Brain
 
         #endregion
 
-        #region obsługa grafiki
+        #region grafika
 
         void animate()
         {
@@ -323,12 +366,9 @@ namespace Brain
 
         public void balance()
         {
+            stopBalance();
             stateBar.Phase = StateBarPhase.BalanceNormal;
-
-            if(Visible)
-                balancing.animate(neurons, synapses, receptors, 80);
-            else
-                balancing.animate(neurons, synapses, receptors, 120);
+            balancing.animate(neurons, synapses, receptors, 80);
         }
 
         public void stopBalance()
@@ -421,7 +461,6 @@ namespace Brain
         public override void resize()
         {
             base.resize();
-            query.resize();
             balance();
         }
 
@@ -550,20 +589,15 @@ namespace Brain
 
         public override void show()
         {
+            display.show(query);
             create();
-            query.show();
+
             base.show();
 
             framesChanged(length, null);
             frameChanged(frame, null);
 
             AnimatedElement.Graphics = buffer.Graphics;
-        }
-
-        public override void hide()
-        {
-            query.hide();
-            base.hide();
         }
 
         public override void save()

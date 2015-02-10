@@ -39,6 +39,7 @@ namespace Brain
 
             position = pos;
             circle = new Circle(calculatePosition(), Constant.Radius);
+            checkDrawable();
 
             input = new List<AnimatedSynapse>();
             output = new List<AnimatedSynapse>();
@@ -130,7 +131,7 @@ namespace Brain
             double delta = factor * data.Relaxation;
 
             if (data.Impulse < 0)
-                delta += factor * data.Impulse;
+                delta += data.Impulse;
             else if (factor > 0.75)
             {
                 factor = 4 * (factor - 0.75);

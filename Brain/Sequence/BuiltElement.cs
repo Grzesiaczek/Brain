@@ -28,16 +28,16 @@ namespace Brain
 
         #region logika
 
-        public void add(int key)
+        public void add(char key)
         {
             built.Append(key);
-            name = built.ToString();
+            rename();
         }
 
         public bool erase()
         {
             built.Remove(built.Length - 1, 1);
-            name = built.ToString();
+            rename();
 
             if (built.Length == 0)
                 return true;
@@ -45,9 +45,23 @@ namespace Brain
             return false;
         }
 
-        public SequenceNeuron getNeuron()
+        void rename()
         {
-            return null;
+            name = built.ToString();
+            width = 16 + (int)(8.5 * name.Length);
+            rect.Width = width;
+        }
+
+        #endregion
+
+        #region właściwości
+
+        public int Length
+        {
+            get
+            {
+                return built.Length;
+            }
         }
 
         #endregion

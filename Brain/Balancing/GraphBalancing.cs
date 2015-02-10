@@ -23,6 +23,7 @@ namespace Brain
         float beta;
         float delta;
         float step;
+        float treshold;
 
         int interval;
         int steps;
@@ -78,7 +79,7 @@ namespace Brain
                 calculate();
                 update();
 
-                if (Math.Abs(delta) < 1)
+                if (Math.Abs(delta) < treshold)
                     break;
 
                 balanceState(delta, null);
@@ -96,7 +97,7 @@ namespace Brain
                 foreach (AnimatedSynapse s in synapses)
                     s.changePosition();
 
-                if (Math.Abs(delta) < 1)
+                if (Math.Abs(delta) < treshold)
                     break;
 
                 balanceState(delta, null);
@@ -109,6 +110,7 @@ namespace Brain
         void initialize(List<AnimatedNeuron> neurons, List<AnimatedSynapse> synapses, List<AnimatedReceptor> receptors)
         {
             action = true;
+            treshold = 1;
 
             this.neurons = new List<BalancedNeuron>();
             this.receptors = new List<BalancedReceptor>();
@@ -146,7 +148,7 @@ namespace Brain
                 update();
             }
 
-            if (Math.Abs(delta) < 1)
+            if (Math.Abs(delta) < treshold)
             {
                 if (extra)
                 {
@@ -226,10 +228,13 @@ namespace Brain
                 delta += br.update(step);
         }
 
-        public void stop()
+        public bool stop()
         {
-            timer.Stop();
-            action = false;
+            if (!action)
+                return false;
+
+            treshold = 100000;
+            return true;
         }
     }
 }

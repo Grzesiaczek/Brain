@@ -8,17 +8,23 @@ namespace Brain
 {
     class Display : Layer
     {
+        #region deklaracje
+
         Animation animation;
         Creation creation;
 
         Sequence sequence;
         Sequence background;
 
+        #endregion
+
         public Display()
         {
             background = new Sequence();
-            sequence = background;
+            clear();
         }
+
+        #region sterowanie
 
         public void add(Animation animation)
         {
@@ -44,12 +50,12 @@ namespace Brain
 
         public void clear()
         {
-            Controls.Remove(sequence);
-            Controls.Add(background);
-
-            sequence = background;
-            background.show();
+            show(background);
         }
+
+        #endregion
+
+        #region dostęp do animation
 
         public void balance()
         {
@@ -70,6 +76,13 @@ namespace Brain
         {
             animation.changeSize(factor);
         }
+
+        public Dictionary<object, object> loadFrame(CreationFrame frame, int index)
+        {
+            return animation.loadFrame(frame, index);
+        }
+
+        #endregion
 
         public override void resize()
         {

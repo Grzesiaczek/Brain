@@ -100,7 +100,10 @@ namespace Brain
 
         public void drawState()
         {
-            drawState(0);
+            synapse.draw();
+
+            if (duplex != null)
+                duplex.draw();
         }
 
         public void drawState(int frame)
@@ -110,6 +113,7 @@ namespace Brain
             if (duplex != null)
                 duplex.draw(frame);
         }
+
         #endregion
 
         #region sterowanie
@@ -247,7 +251,6 @@ namespace Brain
             }
             set
             {
-
             }
         }
 

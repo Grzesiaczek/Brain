@@ -103,6 +103,13 @@ namespace Brain
             display.setMargin(margin);
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.Selectable, false);
+
+            trackBarDensity.KeyDown += keySuppress;
+            trackBarFrame.KeyDown += keySuppress;
+            trackBarLength.KeyDown += keySuppress;
+            trackBarPace.KeyDown += keySuppress;
+            trackBarScale.KeyDown += keySuppress;
 
             rightPanel.Controls.Add(stateBar);
             stateBar.show();
@@ -256,10 +263,11 @@ namespace Brain
 
         #endregion
 
-        //obsługa klawiszy
-        private void keyDown(object sender, KeyEventArgs e)
+        #region obsługa klawiatury
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            switch(e.KeyCode)
+            switch (keyData)
             {
                 case Keys.F1:
                     visible.save();
@@ -278,10 +286,10 @@ namespace Brain
                     break;
                 case Keys.Add:
                     //if (e.Modifiers == Keys.Control)
-                        
+
                     break;
                 case Keys.Subtract:
-                    break;  
+                    break;
 
                 case Keys.Space:
                     presentation.space();
@@ -290,21 +298,29 @@ namespace Brain
                     presentation.erase();
                     break;
                 case Keys.Enter:
-                    presentation.confirm();
+                    presentation.enter();
                     break;
                 default:
-                    if(e.KeyValue > 64 && e.KeyValue < 91)
+                    int code = msg.WParam.ToInt32();
+
+                    if (code > 64 && code < 91)
                     {
-                        int key = e.KeyValue;
+                        if((keyData & Keys.Shift) != Keys.Shift)
+                            code += 32;
 
-                        if (e.Modifiers != Keys.Control)
-                            key += 32;
-
-                        presentation.add(key);
+                        presentation.add((char)code);
                     }
                     break;
             }
+            return false;
         }
+
+        void keySuppress(object sender, KeyEventArgs e)
+        {
+            e.SuppressKeyPress = true;
+        }
+
+        #endregion
 
         #region obsługa zmian rozmiaru
 

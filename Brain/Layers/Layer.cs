@@ -32,6 +32,9 @@ namespace Brain
 
         protected virtual void initializeGraphics()
         {
+            Graphics graphics;
+            BufferedGraphics buffer;
+
             graphics = CreateGraphics();
             graphics.FillRectangle(SystemBrushes.Control, graphics.VisibleClipBounds);
 
@@ -41,6 +44,9 @@ namespace Brain
             buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
             buffer.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             buffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+            this.graphics = graphics;
+            this.buffer = buffer;
         }
         
         public virtual void show()

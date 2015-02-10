@@ -14,10 +14,11 @@ namespace Brain
         Element pre;
         Element post;
 
+        float change;
         float factor;
         float weight;
 
-        List<CreationFrame> changes;
+        List<CreationData> changes;
         List<bool> activity;
 
         #endregion
@@ -41,7 +42,8 @@ namespace Brain
         void initialize()
         {
             activity = new List<bool>();
-            changes = new List<CreationFrame>();
+            changes = new List<CreationData>();
+            change = 0;
         }
 
         #endregion
@@ -127,11 +129,23 @@ namespace Brain
             }
         }
 
-        public List<CreationFrame> t
+        public List<CreationData> Changes
         {
             get
             {
                 return changes;
+            }
+        }
+
+        public float Change
+        {
+            get
+            {
+                return change;
+            }
+            set
+            {
+                change = value;
             }
         }
 

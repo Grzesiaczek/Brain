@@ -8,38 +8,46 @@ using System.Windows.Forms;
 
 namespace Brain
 {
-    abstract class SequenceElement : Layer
+    abstract class SequenceElement
     {
         #region deklaracje
 
-        Rectangle rect;
-        Color background;
+        static Graphics graphics;
+
+        Brush background;
         Brush fontColor;
         Pen border;
 
         protected Font font;
         protected String name;
         protected StringFormat format;
+        protected Rectangle rect;
+
+        protected int width;
+        protected int height;
+        int code = 0;
 
         #endregion
 
         public SequenceElement(String name)
         {
-            Width = 16 + 8 * name.Length;
-            Height = 32;
+            width = 16 + (int)(8.5 * name.Length);
+            height = 32;
 
             this.name = name;
-            rect = new Rectangle(0, 0, Width, Height);
-
-            Visible = true;
-            initializeGraphics();
+            rect = new Rectangle(0, 0, width, height);
 
             fontColor = Brushes.Indigo;
             font = new Font("Calibri", 12, FontStyle.Bold);
             format = new StringFormat();
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;
+
+            Random random = new Random();
+            code = random.Next(1000);
         }
+
+        #region grafika
 
         public void changeType(SequenceElementType type)
         {
@@ -50,28 +58,28 @@ namespace Brain
                     break;
 
                 case SequenceElementType.Active:
-                    background = Color.LightSkyBlue;
-                    border = Pens.Thistle;
+                    background = Brushes.LightSkyBlue;
+                    border = Pens.IndianRed;
                     break;
 
                 case SequenceElementType.Built:
-                    background = Color.GreenYellow;
+                    background = Brushes.GreenYellow;
                     border = Pens.Purple;
                     break;
 
                 case SequenceElementType.Normal:
-                    background = Color.GreenYellow;
+                    background = Brushes.LightYellow;
                     border = Pens.Thistle;
                     break;
 
                 case SequenceElementType.Receptor:
-                    background = Color.LightCyan;
+                    background = Brushes.LightCyan;
                     fontColor = Brushes.DarkSlateGray;
                     border = Pens.Purple;
                     break;
 
                 case SequenceElementType.ActiveReceptor:
-                    background = Color.PaleVioletRed;
+                    background = Brushes.PaleVioletRed;
                     fontColor = Brushes.DarkSlateBlue;
                     border = Pens.Purple;
                     break;
@@ -80,13 +88,59 @@ namespace Brain
 
         public virtual void draw()
         {
-            Graphics g = buffer.Graphics;
-            g.Clear(background);
-            g.DrawRectangle(border, rect);
-            g.DrawString(name, font, fontColor, rect, format);
-            buffer.Render(graphics);
+            graphics.FillRectangle(background, rect);
+            graphics.DrawRectangle(border, rect);
+            graphics.DrawString(name, font, fontColor, rect, format);
         }
 
-        protected override void tick(object sender, EventArgs e){ }
+        #endregion
+
+        #region właściwości
+
+        public static Graphics Graphics
+        {
+            set
+            {
+                graphics = value;
+            }
+        }
+
+        public String Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+
+        public int Left
+        {
+            get
+            {
+                return rect.X;
+            }
+            set
+            {
+                rect.X = value;
+            }
+        }
+
+        public int Top
+        {
+            set
+            {
+                rect.Y = value;
+            }
+        }
+
+        public int Right
+        {
+            get
+            {
+                return rect.Right;
+            }
+        }
+
+        #endregion
     }
 }

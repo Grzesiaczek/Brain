@@ -86,11 +86,6 @@ namespace Brain
 
         public void draw(int frame)
         {
-            draw(graphics, frame);
-        }
-
-        public void draw(Graphics g, int frame)
-        {
             Brush brush = Brushes.LightYellow;
             Pen pen = new Pen(Brushes.DarkSlateGray, 2);
 
@@ -98,34 +93,35 @@ namespace Brain
                 brush = Brushes.Red;
 
             control.draw(graphics, brush, pen);
-            state.draw(g, synapse.Weight, pen);
+            state.draw(graphics, synapse.Weight, pen);
         }
 
-        public void draw(Graphics g)
+        public void draw()
         {
             Pen pen = new Pen(Brushes.DarkSlateGray, 2);
 
             if (change == 0)
             {
                 if (activated)
-                    control.draw(g, Brushes.LightSkyBlue, pen);
+                    control.draw(graphics, Brushes.LightSkyBlue, pen);
                 else
-                    control.draw(g, Brushes.LightYellow, pen);
+                    control.draw(graphics, Brushes.LightYellow, pen);
 
-                state.draw(g, Weight, pen);
+                state.draw(graphics, Weight, pen);
             }
             else
             {
                 if (activated)
-                    control.draw(g, Brushes.SkyBlue, pen);
+                    control.draw(graphics, Brushes.SkyBlue, pen);
                 else if(change > 0)
-                    control.draw(g, Brushes.DarkOliveGreen, pen);
+                    control.draw(graphics, Brushes.DarkOliveGreen, pen);
                 else
-                    control.draw(g, Brushes.Violet, pen);
+                    control.draw(graphics, Brushes.Violet, pen);
 
-                state.draw(g, weight, change, pen);
+                state.draw(graphics, weight, change, pen);
             }
         }
+
         #endregion
 
         #region właściwości
